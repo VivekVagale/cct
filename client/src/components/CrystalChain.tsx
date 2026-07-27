@@ -101,6 +101,12 @@ function ChainScene() {
   const linkBOffset = new THREE.Vector3(LINK_RADIUS * 0.85, 0, 0.1);
   const linkBWorld = useRef(new THREE.Vector3());
 
+  // Chain rests anchored toward the right edge of the full-bleed screen,
+  // then travels toward center as the camera zooms into the glass.
+  const GROUP_X_HOME = 2.7;
+  const GROUP_X_PUSH = 1.3;
+  const GROUP_X_INSIDE = 0;
+
   useFrame(({ clock }, delta) => {
     const camera = cameraRef.current;
     const drift = driftRef.current;
@@ -111,28 +117,37 @@ function ChainScene() {
     mouseDamped.current.x = THREE.MathUtils.damp(mouseDamped.current.x, mouseTarget.current.x, 2.2, delta);
     mouseDamped.current.y = THREE.MathUtils.damp(mouseDamped.current.y, mouseTarget.current.y, 2.2, delta);
 
+    // --- Cycle windows, computed first since the group's horizontal
+    // travel (right -> center) depends on them, seamlessly looped. ---
+    const cycle = (t % CYCLE_SECONDS) / CYCLE_SECONDS;
+    const wPush = smoothWindow(cycle, 0.0, 0.55);
+    const wInside = smoothWindow(cycle, 0.55, 0.8);
+    const wReturn = smoothWindow(cycle, 0.8, 1.0);
+
     // Shared vertical drift: slow, heavy "floating underwater" breath,
     // biased downward, easing back up rather than resetting/jumping.
     drift.position.y = -0.3 + Math.sin(t * 0.055) * 0.5;
     drift.rotation.z = -0.38 + Math.sin(t * 0.05) * 0.03; // diagonal composition
 
+    // Right-anchored at rest -> drifts toward center as it zooms in ->
+    // eases back out to the right for a seamless loop. One continuous,
+    // fluid horizontal + rotational + zoom motion.
+    let groupX = GROUP_X_HOME;
+    groupX = THREE.MathUtils.lerp(groupX, GROUP_X_PUSH, wPush);
+    groupX = THREE.MathUtils.lerp(groupX, GROUP_X_INSIDE, wInside);
+    groupX = THREE.MathUtils.lerp(groupX, GROUP_X_HOME, wReturn);
+    drift.position.x = groupX;
+
     linkBWorld.current.copy(linkBOffset).applyEuler(drift.rotation).add(drift.position);
 
     // --- Camera arc, looped seamlessly over CYCLE_SECONDS ---
-    const cycle = (t % CYCLE_SECONDS) / CYCLE_SECONDS;
-
-    // Tighter, more macro-photography framing than a plain wide hero shot.
-    const homePos = new THREE.Vector3(0.1, 0.15, 4.4);
-    const homeFov = 34;
-    const cinematicShift = Math.sin(t * 0.07) * 0.4;
-    const pushPos = new THREE.Vector3(cinematicShift, 0.1, 2.6);
-    const pushFov = 32;
+    const homePos = new THREE.Vector3(0, 0.15, 5.2);
+    const homeFov = 36;
+    const cinematicShift = Math.sin(t * 0.07) * 0.3;
+    const pushPos = new THREE.Vector3(cinematicShift, 0.1, 3.0);
+    const pushFov = 34;
     const insidePos = linkBWorld.current.clone().add(new THREE.Vector3(0, 0, 0.16));
-    const insideFov = 68;
-
-    const wPush = smoothWindow(cycle, 0.0, 0.55);
-    const wInside = smoothWindow(cycle, 0.55, 0.8);
-    const wReturn = smoothWindow(cycle, 0.8, 1.0);
+    const insideFov = 72;
 
     const pos = new THREE.Vector3().copy(homePos).lerp(pushPos, wPush);
     pos.lerp(insidePos, wInside);
@@ -142,7 +157,10 @@ function ChainScene() {
     fov = THREE.MathUtils.lerp(fov, insideFov, wInside);
     fov = THREE.MathUtils.lerp(fov, homeFov, wReturn);
 
-    const lookAt = new THREE.Vector3(0, drift.position.y * 0.3, 0).lerp(linkBWorld.current, wInside);
+    // At rest, look slightly toward the right-anchored chain; as it zooms
+    // in, the look target eases onto the glass surface it's traveling into.
+    const restLookAt = new THREE.Vector3(GROUP_X_HOME * 0.35, drift.position.y * 0.3, 0);
+    const lookAt = restLookAt.lerp(linkBWorld.current, wInside + wPush * 0.3);
 
     const parallaxStrength = 0.3 * (1 - wInside);
     pos.x += mouseDamped.current.x * parallaxStrength;
@@ -158,7 +176,7 @@ function ChainScene() {
 
   return (
     <>
-      <PerspectiveCamera ref={cameraRef} makeDefault position={[0.1, 0.15, 4.4]} fov={34} near={0.01} far={50} />
+      <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 0.15, 5.2]} fov={36} near={0.01} far={50} />
 
       {/* Key + rim lighting */}
       <directionalLight position={[4, 5, 4]} intensity={1.6} castShadow />

@@ -31,7 +31,14 @@ const itemVariants = {
 export function HeroSection() {
   return (
     <section className="relative w-full min-h-screen bg-gradient-to-b from-[#05070A] to-[#0D1117] overflow-hidden pt-20">
-      <div className="flex flex-col lg:flex-row h-full lg:h-screen">
+      {/* Full-bleed crystal chain — anchors on the right at rest, then
+          zooms/rotates until its glass surface fills the whole screen */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <CrystalChain />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05070A] via-[#05070A]/40 to-transparent pointer-events-none" />
+      </div>
+
+      <div className="relative z-10 flex flex-col lg:flex-row h-full lg:h-screen">
         {/* LEFT */}
         <motion.div
           className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-16 z-10 py-12 lg:py-0"
@@ -88,19 +95,6 @@ export function HeroSection() {
             </CrystalButton>
           </motion.div>
         </motion.div>
-
-        {/* Desktop Chain */}
-        <div className="hidden lg:flex w-full lg:w-1/2 h-96 lg:h-full relative">
-          <CrystalChain />
-
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[#05070A]/40 pointer-events-none" />
-        </div>
-
-        {/* Mobile Chain */}
-        <div className="lg:hidden w-full h-80 relative mt-8">
-          <CrystalChain />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#05070A] via-transparent to-transparent pointer-events-none" />
-        </div>
       </div>
 
       {/* Floating Particles */}
