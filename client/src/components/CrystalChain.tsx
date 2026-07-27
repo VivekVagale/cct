@@ -1,23 +1,21 @@
 import { useEffect, useRef, useState, useMemo, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { PerspectiveCamera, Environment, Lightformer } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
 /**
  * Crystal Chain Hero Animation (right half only)
  *
- * Two large, interlocked crystal-glass torus links.
- * - Independent slow rotation per link + shared gentle downward drift.
- * - Camera slowly pushes in, drifts for cinematic parallax, then travels
- *   through one link's glass body before settling back to the hero view.
- * - Subtle mouse parallax only (no orbit/drag controls).
- * - Rendering pauses when the tab is hidden.
+ * Macro-jewelry-photography look: a diagonal run of thick, chunky glass
+ * links, two of them large and in sharp focus, with the chain cropped
+ * and softly defocused at both ends (shallow depth of field). Colorful
+ * streaky reflections come from a "light stage" of colored panels, plus
+ * a few tight point lights for sharp starburst sparkle highlights.
  */
 
-const BG = '#05070A';
-const LINK_RADIUS = 1.15;
-const LINK_TUBE = 0.34;
+const LINK_RADIUS = 0.95;
+const LINK_TUBE = 0.4; // chunky profile, closer to the reference photo
 
 // One full push-in / travel-through-glass / settle-back cycle, in seconds.
 const CYCLE_SECONDS = 32;
@@ -28,14 +26,33 @@ function smoothWindow(t: number, start: number, end: number) {
   return THREE.MathUtils.smootherstep(t, start, end);
 }
 
+const GLASS_PROPS = {
+  color: '#f4f8ff',
+  transmission: 1,
+  thickness: 1.6,
+  roughness: 0.02,
+  metalness: 0,
+  ior: 1.5,
+  clearcoat: 1,
+  clearcoatRoughness: 0.02,
+  iridescence: 0.7,
+  iridescenceIOR: 1.25,
+  iridescenceThicknessRange: [100, 500] as [number, number],
+  attenuationColor: '#d9ecff',
+  attenuationDistance: 1.1,
+  envMapIntensity: 2.2,
+  side: THREE.DoubleSide,
+};
+
 interface ChainLinkProps {
   position: [number, number, number];
   rotation: [number, number, number];
   spinSpeed: number;
   spinAxis: 'x' | 'y';
+  scale?: number;
 }
 
-function ChainLink({ position, rotation, spinSpeed, spinAxis }: ChainLinkProps) {
+function ChainLink({ position, rotation, spinSpeed, spinAxis, scale = 1 }: ChainLinkProps) {
   const groupRef = useRef<THREE.Group>(null);
   const phase = useMemo(() => Math.random() * Math.PI * 2, []);
 
@@ -44,7 +61,6 @@ function ChainLink({ position, rotation, spinSpeed, spinAxis }: ChainLinkProps) 
     if (!g) return;
     const t = clock.getElapsedTime();
 
-    // Independent, very slow rotation around the link's own axis.
     if (spinAxis === 'x') {
       g.rotation.x = rotation[0] + t * spinSpeed;
     } else {
@@ -57,26 +73,10 @@ function ChainLink({ position, rotation, spinSpeed, spinAxis }: ChainLinkProps) 
   });
 
   return (
-    <group ref={groupRef} position={position} rotation={rotation}>
+    <group ref={groupRef} position={position} rotation={rotation} scale={scale}>
       <mesh castShadow receiveShadow>
         <torusGeometry args={[LINK_RADIUS, LINK_TUBE, 64, 160]} />
-        <meshPhysicalMaterial
-          color="#eaf3ff"
-          transmission={1}
-          thickness={1.3}
-          roughness={0.045}
-          metalness={0}
-          ior={1.55}
-          clearcoat={1}
-          clearcoatRoughness={0.06}
-          iridescence={0.55}
-          iridescenceIOR={1.3}
-          iridescenceThicknessRange={[120, 420]}
-          attenuationColor="#bfe0ff"
-          attenuationDistance={1.4}
-          envMapIntensity={1.6}
-          side={THREE.DoubleSide}
-        />
+        <meshPhysicalMaterial {...GLASS_PROPS} />
       </mesh>
     </group>
   );
@@ -86,7 +86,6 @@ function ChainScene() {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   const driftRef = useRef<THREE.Group>(null);
 
-  // Mouse target, damped toward smoothly (never snaps).
   const mouseTarget = useRef({ x: 0, y: 0 });
   const mouseDamped = useRef({ x: 0, y: 0 });
 
@@ -99,8 +98,7 @@ function ChainScene() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // World position of link B's center, updated each frame as the group drifts.
-  const linkBOffset = new THREE.Vector3(LINK_RADIUS * 0.9, 0, 0.1);
+  const linkBOffset = new THREE.Vector3(LINK_RADIUS * 0.85, 0, 0.1);
   const linkBWorld = useRef(new THREE.Vector3());
 
   useFrame(({ clock }, delta) => {
@@ -110,31 +108,27 @@ function ChainScene() {
 
     const t = clock.getElapsedTime();
 
-    // Damp the mouse value so parallax is smooth, never sudden.
     mouseDamped.current.x = THREE.MathUtils.damp(mouseDamped.current.x, mouseTarget.current.x, 2.2, delta);
     mouseDamped.current.y = THREE.MathUtils.damp(mouseDamped.current.y, mouseTarget.current.y, 2.2, delta);
 
-    // Shared vertical drift: a slow, heavy "floating underwater" breath,
-    // biased downward, that eases back up rather than resetting/jumping.
-    drift.position.y = -0.35 + Math.sin(t * 0.055) * 0.55;
-    drift.rotation.z = Math.sin(t * 0.05) * 0.04;
+    // Shared vertical drift: slow, heavy "floating underwater" breath,
+    // biased downward, easing back up rather than resetting/jumping.
+    drift.position.y = -0.3 + Math.sin(t * 0.055) * 0.5;
+    drift.rotation.z = -0.38 + Math.sin(t * 0.05) * 0.03; // diagonal composition
 
-    linkBWorld.current.copy(linkBOffset).add(drift.position);
+    linkBWorld.current.copy(linkBOffset).applyEuler(drift.rotation).add(drift.position);
 
     // --- Camera arc, looped seamlessly over CYCLE_SECONDS ---
-    const cycle = (t % CYCLE_SECONDS) / CYCLE_SECONDS; // 0..1
+    const cycle = (t % CYCLE_SECONDS) / CYCLE_SECONDS;
 
-    // Base hero framing.
-    const homePos = new THREE.Vector3(0, 0.3, 6.4);
-    const homeFov = 42;
-    // Mid push-in, with occasional cinematic left/right shift baked into
-    // the keyframe via a slow independent sine (not user-driven).
-    const cinematicShift = Math.sin(t * 0.07) * 0.5;
-    const pushPos = new THREE.Vector3(cinematicShift, 0.15, 3.5);
-    const pushFov = 40;
-    // Deep inside link B's glass body.
-    const insidePos = linkBWorld.current.clone().add(new THREE.Vector3(0, 0, 0.18));
-    const insideFov = 72;
+    // Tighter, more macro-photography framing than a plain wide hero shot.
+    const homePos = new THREE.Vector3(0.1, 0.15, 4.4);
+    const homeFov = 34;
+    const cinematicShift = Math.sin(t * 0.07) * 0.4;
+    const pushPos = new THREE.Vector3(cinematicShift, 0.1, 2.6);
+    const pushFov = 32;
+    const insidePos = linkBWorld.current.clone().add(new THREE.Vector3(0, 0, 0.16));
+    const insideFov = 68;
 
     const wPush = smoothWindow(cycle, 0.0, 0.55);
     const wInside = smoothWindow(cycle, 0.55, 0.8);
@@ -150,15 +144,11 @@ function ChainScene() {
 
     const lookAt = new THREE.Vector3(0, drift.position.y * 0.3, 0).lerp(linkBWorld.current, wInside);
 
-    // Subtle mouse parallax, faded out while traveling through the glass
-    // so the "inside crystal" moment stays calm and centered.
-    const parallaxStrength = 0.35 * (1 - wInside);
+    const parallaxStrength = 0.3 * (1 - wInside);
     pos.x += mouseDamped.current.x * parallaxStrength;
     pos.y += mouseDamped.current.y * parallaxStrength * 0.6;
 
-    // Links themselves react a hair to the cursor too.
-    drift.rotation.x = mouseDamped.current.y * 0.03;
-    drift.rotation.y += (mouseDamped.current.x * 0.02 - drift.rotation.y) * 0.02;
+    drift.rotation.x = mouseDamped.current.y * 0.025;
 
     camera.position.copy(pos);
     camera.fov = fov;
@@ -168,43 +158,58 @@ function ChainScene() {
 
   return (
     <>
-      <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 0.3, 6.4]} fov={42} near={0.01} far={50} />
+      <PerspectiveCamera ref={cameraRef} makeDefault position={[0.1, 0.15, 4.4]} fov={34} near={0.01} far={50} />
 
-      {/* Key light */}
-      <directionalLight position={[5, 6, 5]} intensity={1.4} castShadow />
-      {/* Cool blue fill / rim */}
-      <directionalLight position={[-6, 2, -4]} intensity={0.8} color="#7FDBFF" />
-      <directionalLight position={[0, -3, -5]} intensity={0.5} color="#dfe9ff" />
-      <ambientLight intensity={0.18} />
+      {/* Key + rim lighting */}
+      <directionalLight position={[4, 5, 4]} intensity={1.6} castShadow />
+      <directionalLight position={[-5, 2, -3]} intensity={0.9} color="#7FDBFF" />
+      <directionalLight position={[0, -3, -4]} intensity={0.5} color="#e9d9ff" />
+      <ambientLight intensity={0.12} />
 
-      {/* Studio reflections for realistic glass refraction/highlights */}
+      {/* Tight, very bright points for sharp starburst sparkle highlights */}
+      <pointLight position={[1.1, 1.4, 2.2]} intensity={12} distance={4} color="#ffffff" />
+      <pointLight position={[-1.3, -0.6, 1.8]} intensity={8} distance={4} color="#bfe4ff" />
+
+      {/* Colored "light stage" panels — gives the glass streaky, multi-hue
+          reflections instead of a flat single-tone highlight */}
       <Environment preset="studio" />
+      <Lightformer intensity={2} position={[3, 2, 2]} scale={[3, 1, 1]} color="#ff8a3d" />
+      <Lightformer intensity={2} position={[-3, 1, 1]} scale={[3, 1, 1]} color="#2fd0ff" />
+      <Lightformer intensity={1.6} position={[0, -2.5, 2]} scale={[4, 1, 1]} color="#ff3df0" />
+      <Lightformer intensity={1.4} position={[1, 3, -2]} scale={[5, 1.2, 1]} color="#9fffb0" />
       <Lightformer
-        intensity={0.6}
+        intensity={0.7}
         rotation-x={Math.PI / 2}
         position={[0, 5, -8]}
         scale={[10, 10, 1]}
         color="#7FDBFF"
       />
-      <Lightformer
-        intensity={0.35}
-        position={[4, -2, 3]}
-        scale={[4, 4, 1]}
-        color="#ffe9d6"
-      />
 
       <group ref={driftRef}>
+        {/* Main two interlocked links — sharp focus, hero of the shot */}
+        <ChainLink position={[0, 0, 0]} rotation={[0, 0, 0]} spinSpeed={0.045} spinAxis="y" />
         <ChainLink
-          position={[0, 0, 0]}
-          rotation={[0, 0, 0]}
-          spinSpeed={0.045}
-          spinAxis="y"
-        />
-        <ChainLink
-          position={[LINK_RADIUS * 0.9, 0, 0.1]}
+          position={[LINK_RADIUS * 0.85, 0, 0.1]}
           rotation={[0, Math.PI / 2, 0]}
           spinSpeed={-0.035}
           spinAxis="x"
+        />
+
+        {/* Chain continuing out of frame, softly defocused — reads as an
+            ongoing chain rather than two links floating in isolation */}
+        <ChainLink
+          position={[-1.55, 1.9, -1.3]}
+          rotation={[0, Math.PI / 2, 0]}
+          spinSpeed={0.03}
+          spinAxis="y"
+          scale={0.85}
+        />
+        <ChainLink
+          position={[1.5, -2.0, -1.4]}
+          rotation={[0, 0, 0]}
+          spinSpeed={-0.04}
+          spinAxis="x"
+          scale={0.8}
         />
       </group>
     </>
@@ -214,7 +219,6 @@ function ChainScene() {
 export function CrystalChain() {
   const [active, setActive] = useState(!document.hidden);
 
-  // Pause rendering entirely when the tab isn't visible.
   useEffect(() => {
     const handleVisibility = () => setActive(!document.hidden);
     document.addEventListener('visibilitychange', handleVisibility);
@@ -239,12 +243,8 @@ export function CrystalChain() {
         >
           <ChainScene />
           <EffectComposer>
-            <Bloom
-              luminanceThreshold={0.25}
-              luminanceSmoothing={0.9}
-              intensity={0.55}
-              mipmapBlur
-            />
+            <DepthOfField focusDistance={0.015} focalLength={0.04} bokehScale={4} height={480} />
+            <Bloom luminanceThreshold={0.15} luminanceSmoothing={0.85} intensity={0.85} mipmapBlur />
           </EffectComposer>
         </Canvas>
       </Suspense>
