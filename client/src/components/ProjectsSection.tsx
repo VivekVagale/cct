@@ -6,7 +6,7 @@ import { projects } from '@/data/projects';
  */
 export function ProjectsSection() {
   return (
-    <section id="projects" className="w-full py-24 lg:py-32 bg-[#05070A]">
+    <section id="projects" className="w-full py-24 lg:py-32 bg-[#05070A]/70 relative z-10">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="mb-16">
           <span className="text-xs font-medium tracking-[0.2em] text-[#B8C4D6] mb-4 block">
