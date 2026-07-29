@@ -9,10 +9,10 @@ import { StaticButton } from '@/components/ui/StaticButton';
 
 export function HeroSection() {
   return (
-    <section className="relative w-full min-h-screen pt-16 md:pt-[72px]">
+    <section className="relative w-full min-h-screen pt-16 md:pt-[72px] pointer-events-none">
       <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row min-h-[calc(100vh-72px)]">
         {/* LEFT — content */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-16 py-16 lg:py-0">
+        <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-16 py-16 lg:py-0 pointer-events-auto">
           <span className="text-xs font-medium tracking-[0.2em] text-[#B8C4D6] mb-6">
             COLD CHAIN THEORY
           </span>
