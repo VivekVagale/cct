@@ -16,7 +16,7 @@ const initialFormData: BookingFormData = {
 };
 
 const inputClasses =
-  'w-full px-4 py-3 bg-[#0D1117] border border-white/[0.08] rounded-lg text-[#F5F7FA] placeholder-[#B8C4D6]/50 focus:outline-none focus:border-[#7FDBFF]/50';
+  'w-full px-4 py-3 bg-[#0D1117] border border-white/[0.08] rounded-lg text-[#F5F7FA] placeholder-[#B8C4D6]/50 focus:outline-none focus:border-[#FFFFFF]/50';
 
 const labelClasses = 'block text-sm font-medium text-[#B8C4D6] mb-2';
 
@@ -142,7 +142,7 @@ export function BookingSection() {
           </div>
 
           {status === 'success' && (
-            <div className="p-4 bg-[#7FDBFF]/10 border border-[#7FDBFF]/40 rounded-lg text-[#7FDBFF] text-sm">
+            <div className="p-4 bg-[#FFFFFF]/10 border border-[#FFFFFF]/40 rounded-lg text-[#FFFFFF] text-sm">
               Thank you! We'll be in touch soon.
             </div>
           )}

@@ -53,7 +53,7 @@ export function Navigation() {
         {/* Book Project CTA (desktop) */}
         <a
           href="#contact"
-          className="hidden md:inline-block px-5 py-2 bg-[#7FDBFF] text-[#05070A] text-sm font-semibold rounded-md hover:bg-[#9FE4FF]"
+          className="hidden md:inline-block px-5 py-2 bg-[#FFFFFF] text-[#05070A] text-sm font-semibold rounded-md hover:bg-[#E5E5E5]"
         >
           Book Project
         </a>
@@ -90,7 +90,7 @@ export function Navigation() {
           ))}
           <a
             href="#contact"
-            className="inline-block text-center px-5 py-3 bg-[#7FDBFF] text-[#05070A] text-sm font-semibold rounded-md"
+            className="inline-block text-center px-5 py-3 bg-[#FFFFFF] text-[#05070A] text-sm font-semibold rounded-md"
             onClick={() => setMobileOpen(false)}
           >
             Book Project

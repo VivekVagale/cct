@@ -1,4 +1,5 @@
 import { StaticButton } from '@/components/ui/StaticButton';
+import Galaxy from '@/components/ui/Galaxy';
 
 /**
  * Hero Section
@@ -42,8 +43,19 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* RIGHT — reserved, intentionally empty for the future hero animation */}
-        <div className="hidden lg:block w-1/2" />
+        {/* RIGHT — reserved zone, now filled with the Galaxy background */}
+        <div className="hidden lg:block w-1/2 relative">
+          <Galaxy
+            density={0.8}
+            glowIntensity={0.4}
+            saturation={0}
+            hueShift={140}
+            mouseInteraction
+            mouseRepulsion
+            twinkleIntensity={0.35}
+            rotationSpeed={0.05}
+          />
+        </div>
       </div>
     </section>
   );

@@ -17,7 +17,7 @@ export function VehicleCard({ id, name, selected, onSelect }: VehicleCardProps) 
       aria-checked={selected}
       onClick={() => onSelect(id)}
       className={`flex flex-col rounded-lg border overflow-hidden text-left ${
-        selected ? 'border-[#7FDBFF]' : 'border-white/[0.08] hover:border-white/[0.2]'
+        selected ? 'border-[#FFFFFF]' : 'border-white/[0.08] hover:border-white/[0.2]'
       }`}
     >
       {/* Reserved image slot — intentionally empty */}

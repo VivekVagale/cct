@@ -34,12 +34,12 @@ export function Footer() {
 
           {/* Instagram / Email */}
           <div className="flex gap-6">
-            <a href="#" className="text-[#B8C4D6] hover:text-[#7FDBFF] text-sm font-medium">
+            <a href="#" className="text-[#B8C4D6] hover:text-[#FFFFFF] text-sm font-medium">
               Instagram
             </a>
             <a
               href="mailto:coldchaintheory@gmail.com"
-              className="text-[#B8C4D6] hover:text-[#7FDBFF] text-sm font-medium"
+              className="text-[#B8C4D6] hover:text-[#FFFFFF] text-sm font-medium"
             >
               Email
             </a>

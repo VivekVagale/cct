@@ -12,7 +12,7 @@ const base =
   'inline-flex items-center justify-center px-7 py-3 rounded-md text-sm font-semibold';
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-[#7FDBFF] text-[#05070A] hover:bg-[#9FE4FF]',
+  primary: 'bg-[#FFFFFF] text-[#05070A] hover:bg-[#E5E5E5]',
   secondary: 'border border-white/[0.16] text-[#F5F7FA] hover:bg-white/[0.04]',
 };
 
