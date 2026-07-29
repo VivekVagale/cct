@@ -27,7 +27,7 @@ export function Navigation() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 ${
+      className={`fixed top-0 left-0 right-0 z-50 pointer-events-auto ${
         scrolled ? 'bg-[#0D1117] border-b border-white/[0.08]' : 'bg-transparent border-b border-transparent'
       }`}
     >

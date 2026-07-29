@@ -31,7 +31,7 @@ function App() {
               />
             </div>
 
-            <div className="relative z-10">
+            <div className="relative z-10 pointer-events-none">
               <Navigation />
               <HeroSection />
               <ProjectsSection />
