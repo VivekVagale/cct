@@ -15,7 +15,7 @@ export function CreativeProcess() {
               Creative Process
             </h2>
           </div>
-          <Mascot pose="thinking" size="sm" className="hidden md:block" />
+          <Mascot pose="thinking" size="md" className="hidden md:block" />
         </div>
 
         <div className="border-t border-white/[0.08]">

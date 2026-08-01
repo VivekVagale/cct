@@ -14,7 +14,7 @@ export function FeaturedProjects() {
             Featured Projects
           </h2>
         </div>
-        <Mascot pose="pointing" size="sm" className="hidden md:block" />
+        <Mascot pose="pointing" size="md" className="hidden md:block" />
       </div>
 
       <div className="relative">

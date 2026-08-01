@@ -4,11 +4,11 @@
  * (breathing, floating, parallax) by the Mascot component.
  */
 export const MASCOT_POSES = {
-  neutral: "/mascot/neutral.jpg",
-  pointing: "/mascot/pointing.jpg",
-  armsCrossed: "/mascot/arms-crossed.jpg",
-  thinking: "/mascot/thinking.jpg",
-  fistPump: "/mascot/fist-pump.jpg",
+  neutral: "/mascot/neutral.png",
+  pointing: "/mascot/pointing.png",
+  armsCrossed: "/mascot/arms-crossed.png",
+  thinking: "/mascot/thinking.png",
+  fistPump: "/mascot/fist-pump.png",
 } as const;
 
 export type MascotPose = keyof typeof MASCOT_POSES;

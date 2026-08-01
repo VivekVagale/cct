@@ -113,6 +113,13 @@ export function ChromaKeyVideo({ src, className }: ChromaKeyVideoProps) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
+    video.muted = true;
+    video.playsInline = true;
+    video.play().catch(() => {
+      // Autoplay can be blocked before user interaction on some browsers;
+      // the draw loop will simply wait until playback starts.
+    });
+
     let cancelled = false;
 
     const resize = () => {
@@ -159,7 +166,13 @@ export function ChromaKeyVideo({ src, className }: ChromaKeyVideoProps) {
         autoPlay
         playsInline
         preload="auto"
-        style={{ display: 'none' }}
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: 'none',
+        }}
       />
       <canvas
         ref={canvasRef}

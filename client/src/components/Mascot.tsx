@@ -12,10 +12,10 @@ interface MascotProps {
 }
 
 const sizes: Record<NonNullable<MascotProps["size"]>, string> = {
-  sm: "w-28 sm:w-36",
-  md: "w-40 sm:w-52",
-  lg: "w-56 sm:w-72",
-  xl: "w-72 sm:w-[26rem]",
+  sm: "w-48 sm:w-64",
+  md: "w-64 sm:w-80",
+  lg: "w-80 sm:w-[26rem]",
+  xl: "w-96 sm:w-[34rem]",
 };
 
 /**

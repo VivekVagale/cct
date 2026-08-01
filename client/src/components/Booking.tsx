@@ -32,7 +32,7 @@ export function Booking() {
     return (
       <section id="booking" className="relative pointer-events-auto py-32 sm:py-40">
         <div className="max-w-2xl mx-auto px-6 text-center flex flex-col items-center">
-          <Mascot pose="fistPump" size="lg" />
+          <Mascot pose="fistPump" size="xl" />
           <h2 className="font-display text-3xl sm:text-4xl text-[#F5F7FA] mt-8 mb-4">
             Request received.
           </h2>
@@ -58,7 +58,7 @@ export function Booking() {
             Tell us about the vehicle and the story you want it to tell. We'll
             follow up to scope the shot list together.
           </p>
-          <Mascot pose="pointing" size="md" className="hidden lg:block" />
+          <Mascot pose="pointing" size="lg" className="hidden lg:block" />
         </div>
 
         <form

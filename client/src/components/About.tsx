@@ -42,7 +42,7 @@ export function About() {
           </motion.p>
         </div>
         <div className="lg:col-span-4 flex justify-center lg:justify-end">
-          <Mascot pose="armsCrossed" size="lg" parallax />
+          <Mascot pose="armsCrossed" size="xl" parallax />
         </div>
       </div>
     </section>
