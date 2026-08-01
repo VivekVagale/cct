@@ -2,11 +2,16 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Navigation } from "./components/Navigation";
-import { HeroSection } from "./components/HeroSection";
-import { ProjectsSection } from "./components/ProjectsSection";
-import { ProcessSection } from "./components/ProcessSection";
-import { BookingSection } from "./components/BookingSection";
+import { Hero } from "./components/Hero";
+import { FeaturedProjects } from "./components/FeaturedProjects";
+import { About } from "./components/About";
+import { CreativeProcess } from "./components/CreativeProcess";
+import { CGIExperiences } from "./components/CGIExperiences";
+import { Booking } from "./components/Booking";
+import { Testimonials } from "./components/Testimonials";
+import { FAQ } from "./components/FAQ";
 import { Footer } from "./components/Footer";
+import { CinematicLine } from "./components/CinematicLine";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
 
@@ -33,10 +38,20 @@ function App() {
 
             <div className="relative z-10 pointer-events-none">
               <Navigation />
-              <HeroSection />
-              <ProjectsSection />
-              <ProcessSection />
-              <BookingSection />
+              <Hero />
+              <FeaturedProjects />
+
+              <CinematicLine text="EVERY FRAME TELLS A STORY" />
+
+              <About />
+              <CreativeProcess />
+              <CGIExperiences />
+
+              <CinematicLine text="READY TO TURN YOUR MACHINE INTO CINEMA" />
+
+              <Booking />
+              <Testimonials />
+              <FAQ />
               <Footer />
             </div>
           </div>

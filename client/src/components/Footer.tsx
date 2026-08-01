@@ -1,56 +1,38 @@
-/**
- * Footer — minimal, static. Logo, nav links, Instagram/Email,
- * copyright. No animation library, no icons/emoji, no gradients.
- */
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="w-full relative z-10 pointer-events-none border-t border-white/[0.08]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 pointer-events-auto">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10 mb-10">
-          {/* Logo + tagline */}
-          <div>
-            <span className="text-[#F5F7FA] font-semibold text-lg tracking-tight">
-              Cold Chain Theory
-            </span>
-            <p className="text-[#B8C4D6] text-sm mt-2 max-w-xs">
-              Premium cinematic CGI for cars and motorcycles.
-            </p>
-          </div>
-
-          {/* Nav links */}
-          <div className="flex gap-6">
-            {['Projects', 'Process', 'Contact'].map((link) => (
-              <a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                className="text-[#B8C4D6] hover:text-[#F5F7FA] text-sm font-medium"
-              >
-                {link}
-              </a>
-            ))}
-          </div>
-
-          {/* Instagram / Email */}
-          <div className="flex gap-6">
-            <a href="#" className="text-[#B8C4D6] hover:text-[#FFFFFF] text-sm font-medium">
-              Instagram
-            </a>
-            <a
-              href="mailto:coldchaintheory@gmail.com"
-              className="text-[#B8C4D6] hover:text-[#FFFFFF] text-sm font-medium"
-            >
-              Email
-            </a>
-          </div>
+    <footer className="relative pointer-events-auto border-t border-white/[0.08] py-16">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-10">
+        <div>
+          <p className="text-sm tracking-[0.22em] uppercase text-[#F5F7FA] mb-4">
+            Cold Chain Theory
+          </p>
+          <a
+            href="mailto:coldchaintheory@gmail.com"
+            className="text-[#B8C4D6] hover:text-[#F5F7FA] transition-colors duration-300 text-sm"
+          >
+            coldchaintheory@gmail.com
+          </a>
         </div>
 
-        <div className="h-px bg-white/[0.08] mb-8" />
-
-        <p className="text-center text-[#B8C4D6]/70 text-xs">
-          &copy; {currentYear} Cold Chain Theory. All rights reserved.
-        </p>
+        <div className="flex flex-col sm:items-end gap-4">
+          <div className="flex items-center gap-6 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+            <a href="#projects" className="hover:text-[#F5F7FA] transition-colors duration-300">
+              Work
+            </a>
+            <a href="#about" className="hover:text-[#F5F7FA] transition-colors duration-300">
+              About
+            </a>
+            <a href="#booking" className="hover:text-[#F5F7FA] transition-colors duration-300">
+              Book
+            </a>
+            <a href="#" className="hover:text-[#F5F7FA] transition-colors duration-300">
+              Instagram
+            </a>
+          </div>
+          <p className="text-xs text-[#B8C4D6]/60">
+            © {new Date().getFullYear()} Cold Chain Theory. All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );
