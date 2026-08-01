@@ -66,6 +66,7 @@ export function Hero() {
             <ChromaKeyVideo
               src="/video/hero-mascot.mp4"
               className="w-full h-full mx-auto max-w-[520px]"
+              scrollProgress={scrollYProgress}
             />
           </motion.div>
         </div>
