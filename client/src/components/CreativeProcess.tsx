@@ -28,7 +28,10 @@ export function CreativeProcess() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: i * 0.05 }}
               className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-8 py-10 sm:py-14 border-b border-white/[0.08] items-baseline"
             >
-              <span className="sm:col-span-2 font-display text-2xl text-[#B8C4D6]">
+              <span
+                className="sm:col-span-2 font-display font-black text-[#F5F7FA]/90 leading-none"
+                style={{ fontSize: "clamp(2.5rem, 7vw, 6rem)" }}
+              >
                 {stage.index}
               </span>
               <h3 className="sm:col-span-3 font-display text-2xl sm:text-3xl text-[#F5F7FA]">

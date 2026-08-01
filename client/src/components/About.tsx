@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Mascot } from "@/components/Mascot";
+import { AnimatedText } from "@/components/AnimatedText";
 
 export function About() {
   return (
@@ -27,19 +28,10 @@ export function About() {
           >
             We don't render cars. We build the world a machine deserves.
           </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
+          <AnimatedText
+            text="Cold Chain Theory is a small studio built around one idea: precision is what makes a machine feel cinematic. We take fewer projects and hold each one to the standard of a real production — every panel gap, every reflection, every frame of motion considered before it's rendered. Craftsmanship over volume, always."
             className="text-base sm:text-lg text-[#B8C4D6] leading-relaxed max-w-2xl"
-          >
-            Cold Chain Theory is a small studio built around one idea: precision is
-            what makes a machine feel cinematic. We take fewer projects and hold
-            each one to the standard of a real production — every panel gap, every
-            reflection, every frame of motion considered before it's rendered.
-            Craftsmanship over volume, always.
-          </motion.p>
+          />
         </div>
         <div className="lg:col-span-4 flex justify-center lg:justify-end">
           <Mascot pose="armsCrossed" size="xl" parallax />

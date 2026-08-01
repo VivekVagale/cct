@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { Mascot } from "@/components/Mascot";
+import { Magnet } from "@/components/Magnet";
 import { experiences } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
 
@@ -128,13 +129,15 @@ export function Booking() {
           </label>
 
           <div className="sm:col-span-2 flex items-center gap-6 mt-4">
-            <button
-              type="submit"
-              disabled={status === "submitting"}
-              className="text-xs tracking-[0.14em] uppercase bg-white text-[#05070A] px-8 py-4 hover:bg-[#E5E5E5] transition-colors duration-300 disabled:opacity-50"
-            >
-              {status === "submitting" ? "Sending..." : "Submit Request"}
-            </button>
+            <Magnet padding={40} strength={5}>
+              <button
+                type="submit"
+                disabled={status === "submitting"}
+                className="text-xs tracking-[0.14em] uppercase bg-white text-[#05070A] px-8 py-4 hover:bg-[#E5E5E5] transition-colors duration-300 disabled:opacity-50"
+              >
+                {status === "submitting" ? "Sending..." : "Submit Request"}
+              </button>
+            </Magnet>
             {status === "error" && (
               <span className="text-xs text-[#FF4444]">
                 Something went wrong — please email us directly.

@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { ChromaKeyVideo } from "@/components/ui/ChromaKeyVideo";
+import { Magnet } from "@/components/Magnet";
 
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,12 +40,14 @@ export function Hero() {
             frame by frame until it no longer looks rendered at all.
           </p>
           <div className="flex flex-wrap items-center gap-6">
-            <a
-              href="#booking"
-              className="text-xs tracking-[0.14em] uppercase bg-white text-[#05070A] px-7 py-4 hover:bg-[#E5E5E5] transition-colors duration-300"
-            >
-              Start a Project
-            </a>
+            <Magnet padding={40} strength={5}>
+              <a
+                href="#booking"
+                className="text-xs tracking-[0.14em] uppercase bg-white text-[#05070A] px-7 py-4 hover:bg-[#E5E5E5] transition-colors duration-300 inline-block"
+              >
+                Start a Project
+              </a>
+            </Magnet>
             <a
               href="#projects"
               className="text-xs tracking-[0.14em] uppercase text-[#F5F7FA] border-b border-white/30 pb-1 hover:border-white transition-colors duration-300"
