@@ -3,7 +3,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
-import { FeaturedProjects } from "./components/FeaturedProjects";
 import { Marquee } from "./components/Marquee";
 import { About } from "./components/About";
 import { CreativeProcess } from "./components/CreativeProcess";
@@ -41,7 +40,6 @@ function App() {
               <Navigation />
               <Hero />
               <Marquee />
-              <FeaturedProjects />
 
               <CinematicLine text="EVERY FRAME TELLS A STORY" />
 

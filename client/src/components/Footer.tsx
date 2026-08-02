@@ -16,7 +16,7 @@ export function Footer() {
 
         <div className="flex flex-col sm:items-end gap-4">
           <div className="flex items-center gap-6 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            <a href="#projects" className="hover:text-[#F5F7FA] transition-colors duration-300">
+            <a href="#experiences" className="hover:text-[#F5F7FA] transition-colors duration-300">
               Work
             </a>
             <a href="#about" className="hover:text-[#F5F7FA] transition-colors duration-300">
