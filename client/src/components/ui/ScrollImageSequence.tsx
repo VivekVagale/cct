@@ -20,6 +20,12 @@ interface ScrollImageSequenceProps {
   onReady?: () => void;
   /** Decode priority window, in frames, around the current position. */
   eager?: number;
+  /**
+   * How the frame fills the canvas. "cover" crops to fill, which is what
+   * opaque frames need — "contain" would letterbox and expose the frame's
+   * own edges against the page.
+   */
+  fit?: "contain" | "cover";
 }
 
 /**
@@ -44,6 +50,7 @@ export function ScrollImageSequence({
   className,
   onReady,
   eager = 24,
+  fit = "contain",
 }: ScrollImageSequenceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const framesRef = useRef<(ImageBitmap | null)[]>([]);
@@ -68,8 +75,21 @@ export function ScrollImageSequence({
     framesRef.current = new Array(count).fill(null);
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
+    const sizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      const w = fit === "cover" && rect.width ? rect.width : width;
+      const h = fit === "cover" && rect.height ? rect.height : height;
+      const nextW = Math.round(w * dpr);
+      const nextH = Math.round(h * dpr);
+      if (canvas.width !== nextW || canvas.height !== nextH) {
+        canvas.width = nextW;
+        canvas.height = nextH;
+        drawnRef.current = -1;
+        return true;
+      }
+      return false;
+    };
+    sizeCanvas();
 
     /** Nearest already-decoded frame, so scrubbing never shows a blank. */
     const resolve = (i: number) => {
@@ -92,9 +112,12 @@ export function ScrollImageSequence({
       drawnRef.current = i;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Preserve the frame's aspect ratio inside whatever box the canvas
-      // occupies, rather than stretching to fill it.
-      const scale = Math.min(canvas.width / bitmap.width, canvas.height / bitmap.height);
+      // Preserve the frame's aspect ratio rather than stretching it: "contain"
+      // fits it inside the canvas, "cover" fills the canvas and crops.
+      const scale =
+        fit === "cover"
+          ? Math.max(canvas.width / bitmap.width, canvas.height / bitmap.height)
+          : Math.min(canvas.width / bitmap.width, canvas.height / bitmap.height);
       const w = bitmap.width * scale;
       const h = bitmap.height * scale;
       ctx.drawImage(bitmap, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
@@ -105,6 +128,11 @@ export function ScrollImageSequence({
     };
 
     const unsubscribe = progress.on("change", schedule);
+
+    const onResize = () => {
+      if (sizeCanvas()) schedule();
+    };
+    window.addEventListener("resize", onResize);
 
     // Decode order: the frames nearest the start first, so the hero is
     // scrubbable almost immediately, then everything else fills in behind.
@@ -156,11 +184,12 @@ export function ScrollImageSequence({
     return () => {
       cancelled = true;
       unsubscribe();
+      window.removeEventListener("resize", onResize);
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current);
       framesRef.current.forEach((f) => f?.close());
       framesRef.current = [];
     };
-  }, [count, srcFor, progress, width, height, eager]);
+  }, [count, srcFor, progress, width, height, eager, fit]);
 
   return <canvas ref={canvasRef} className={className} style={{ width: "100%", height: "100%" }} />;
 }

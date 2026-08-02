@@ -6,6 +6,7 @@ import {
   useSpring,
   useMotionValue,
   useMotionValueEvent,
+  type MotionValue,
 } from "framer-motion";
 import { ScrollImageSequence } from "@/components/ui/ScrollImageSequence";
 import { Magnet } from "@/components/Magnet";
@@ -24,6 +25,13 @@ const ALIVE_AT = 0.8;
  * while the extra height is consumed scrubbing the sequence. When that budget
  * runs out the next section scrolls up and covers it naturally.
  *
+ * The frames ship with their original backdrop rather than keyed transparent.
+ * The character's black clothing meets that backdrop with no edge between them,
+ * so any matte there is guesswork — it left fringing and a visible frame
+ * rectangle over the starfield. Keeping the backdrop and fading the starfield
+ * up once the assembly finishes sidesteps the problem instead of approximating
+ * a solution to it.
+ *
  * There is deliberately no swap to a separate "live mascot" image at the end.
  * The final frame of the sequence already is the assembled character, and the
  * static poses are a different render — different head angle, rim light and
@@ -31,7 +39,7 @@ const ALIVE_AT = 0.8;
  * itself starts breathing once the assembly completes, which makes the
  * transition invisible by never making one.
  */
-export function Hero() {
+export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [alive, setAlive] = useState(false);
@@ -74,26 +82,31 @@ export function Hero() {
   const copyY = useTransform(scrollYProgress, [0, 0.46], ["0vh", "-6vh"]);
   const ctaOpacity = useTransform(scrollYProgress, [ALIVE_AT, 0.92], [0, 1]);
 
-  const stageScale = useSpring(useTransform(scrollYProgress, [0.9, 1], [1, 0.94]), {
-    stiffness: 140,
-    damping: 30,
-  });
+  // The starfield is hidden behind the opaque frames for most of the pin, then
+  // fades up as the assembly finishes so the two backgrounds meet without a cut.
+  // Written straight to a MotionValue the App reads — routing it through state
+  // would re-render the Hero on every scroll tick.
+  const galaxyReveal = useTransform(scrollYProgress, [ALIVE_AT - 0.08, 0.98], [0, 1]);
+  useMotionValueEvent(galaxyReveal, "change", (v) => galaxyOpacity.set(v));
 
   return (
-    <section id="top" ref={wrapperRef} className="relative h-[320vh] pointer-events-auto">
+    <section id="top" ref={wrapperRef} className="relative h-[520vh] pointer-events-auto">
       <div
         onMouseMove={handlePointer}
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
       >
+        {/* Overscanned past the viewport on every side: the frames are opaque,
+            so any parallax or breathing on an exactly-viewport-sized canvas
+            would drag its edge into view. */}
         <motion.div
-          style={{ scale: stageScale, x: parallaxX, y: parallaxY }}
-          className="absolute inset-0"
+          style={{ x: parallaxX, y: parallaxY }}
+          className="absolute -inset-[5%]"
         >
-          {/* Once assembled, the same canvas breathes and floats in place —
-              no image swap, so there is nothing to pop. */}
+          {/* Once assembled, the same canvas breathes in place — no image swap,
+              so there is nothing to pop. Scale only, for the same reason. */}
           <motion.div
             className="absolute inset-0"
-            animate={alive ? { y: [0, -10, 0], scale: [1, 1.012, 1] } : { y: 0, scale: 1 }}
+            animate={alive ? { scale: [1, 1.015, 1] } : { scale: 1 }}
             transition={
               alive
                 ? { duration: 6, repeat: Infinity, ease: "easeInOut" }
@@ -107,6 +120,7 @@ export function Hero() {
               width={HERO_SEQUENCE.width}
               height={HERO_SEQUENCE.height}
               onReady={() => setReady(true)}
+              fit="cover"
               className="w-full h-full"
             />
           </motion.div>

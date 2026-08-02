@@ -102,6 +102,14 @@ def main():
     # the frames are resampled anyway, and 150 of them at 1280 came to 11 MB.
     ap.add_argument("--width", type=int, default=960)
     ap.add_argument("--quality", type=int, default=80)
+    ap.add_argument("--keep-background", action="store_true",
+                    help="ship the frames opaque, backdrop and all, instead of "
+                         "keying it out. The character's black clothing meets "
+                         "the backdrop with no edge between them, so any matte "
+                         "there is guesswork and leaves fringing and a visible "
+                         "frame rectangle. Keeping the backdrop and fading the "
+                         "page's starfield in afterwards avoids the problem "
+                         "rather than approximating a solution to it.")
     args = ap.parse_args()
 
     paths = sorted(glob.glob(args.frames))
@@ -112,20 +120,27 @@ def main():
     repair = make_repair(mask)
     print(f"{len(paths)} source frames; watermark at {box}")
 
-    plate = build_plate(paths, repair)
-    print(f"clean plate built, peak luma {plate.max():.1f}")
+    plate = None
+    if args.keep_background:
+        print("keeping the backdrop; no matte will be computed")
+    else:
+        plate = build_plate(paths, repair)
+        print(f"clean plate built, peak luma {plate.max():.1f}")
 
     os.makedirs(args.out, exist_ok=True)
     kept = paths[::args.step]
     total = 0
     for i, p in enumerate(kept):
         rgb = repair(np.asarray(Image.open(p).convert("RGB")).astype(np.float32))
-        a = matte(rgb, plate)
-        # Undo the darkening that partial-coverage pixels picked up from being
-        # composited over black, so no grey halo forms over the galaxy.
-        rgba = np.dstack([np.clip(rgb / np.maximum(a, 1e-3)[..., None], 0, 255),
-                          a * 255.0]).astype(np.uint8)
-        im = Image.fromarray(rgba, "RGBA")
+        if plate is None:
+            im = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB")
+        else:
+            a = matte(rgb, plate)
+            # Undo the darkening that partial-coverage pixels picked up from
+            # being composited over black, so no grey halo forms.
+            rgba = np.dstack([np.clip(rgb / np.maximum(a, 1e-3)[..., None], 0, 255),
+                              a * 255.0]).astype(np.uint8)
+            im = Image.fromarray(rgba, "RGBA")
         if args.width != im.width:
             im = im.resize((args.width, round(im.height * args.width / im.width)), Image.LANCZOS)
         f = os.path.join(args.out, f"f_{i:04d}.webp")
