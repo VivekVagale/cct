@@ -9,6 +9,12 @@ interface MascotProps {
   /** Enable cursor parallax within the mascot's own bounding area. */
   parallax?: boolean;
   size?: "sm" | "md" | "lg" | "xl";
+  /**
+   * Scroll-triggered fade/rise on entry. The Hero disables this: it hands off
+   * from the final frame of the image sequence, and the transition only reads
+   * as invisible if the mascot is already at rest when it appears.
+   */
+  animateIn?: boolean;
 }
 
 const sizes: Record<NonNullable<MascotProps["size"]>, string> = {
@@ -24,7 +30,13 @@ const sizes: Record<NonNullable<MascotProps["size"]>, string> = {
  * breathing scale, a slow float, and (optionally) subtle cursor
  * parallax so it reads as present rather than decorative.
  */
-export function Mascot({ pose, className, parallax = false, size = "md" }: MascotProps) {
+export function Mascot({
+  pose,
+  className,
+  parallax = false,
+  size = "md",
+  animateIn = true,
+}: MascotProps) {
   const ref = useRef<HTMLDivElement>(null);
   const mvX = useMotionValue(0);
   const mvY = useMotionValue(0);
@@ -61,8 +73,8 @@ export function Mascot({ pose, className, parallax = false, size = "md" }: Masco
       ref={ref}
       className={cn("relative select-none", sizes[size], className)}
       style={parallax ? { x, y } : undefined}
-      initial={{ opacity: 0, y: 24 }}
-      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      initial={animateIn ? { opacity: 0, y: 24 } : false}
+      animate={animateIn && !inView ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
       <motion.img
