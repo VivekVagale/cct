@@ -169,7 +169,8 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
               <Mascot
                 pose="neutral"
                 animateIn={false}
-                className="absolute left-[49.9%] top-[54.7%] -translate-x-1/2 -translate-y-1/2 w-auto h-[90.6%] [&>img]:h-full [&>img]:w-auto"
+                sizing="height"
+                className="absolute left-[49.9%] top-[54.7%] -translate-x-1/2 -translate-y-1/2 h-[90.6%]"
               />
             </div>
           </motion.div>

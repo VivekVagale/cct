@@ -781,7 +781,22 @@ class InfiniteGridMenu {
         if (!img) return;
         const x = (i % this.atlasSize) * cellSize;
         const y = Math.floor(i / this.atlasSize) * cellSize;
-        ctx.drawImage(img, x, y, cellSize, cellSize);
+        // Crop a centred square out of the source rather than squeezing the
+        // whole image into the square cell. The shader samples each cell as a
+        // unit square, so anything non-square written in flat would render
+        // stretched on the disc — a 16:9 photo squashed to 1:1.
+        const side = Math.min(img.width, img.height);
+        ctx.drawImage(
+          img,
+          (img.width - side) / 2,
+          (img.height - side) / 2,
+          side,
+          side,
+          x,
+          y,
+          cellSize,
+          cellSize,
+        );
       });
 
       if (this.disposed) return;

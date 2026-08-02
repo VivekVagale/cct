@@ -95,7 +95,8 @@ function Stage({
           pose={stage.pose}
           animateIn={false}
           parallax
-          className="w-auto h-[52vh] sm:h-[58vh] [&>img]:h-full [&>img]:w-auto"
+          sizing="height"
+        className="h-[52vh] sm:h-[58vh]"
         />
       </motion.div>
 

@@ -15,6 +15,16 @@ interface MascotProps {
    * as invisible if the mascot is already at rest when it appears.
    */
   animateIn?: boolean;
+  /**
+   * Which axis drives the mascot's size. The other follows from the image's own
+   * proportions, so the pose is never stretched.
+   *
+   * This is a prop rather than something call sites override with classes: the
+   * image needs `w-full h-auto` in one mode and `h-full w-auto` in the other,
+   * and passing the opposite pair through `className` leaves both on the
+   * element, which renders as `object-fit: fill` and squashes the pose.
+   */
+  sizing?: "width" | "height";
 }
 
 const sizes: Record<NonNullable<MascotProps["size"]>, string> = {
@@ -36,6 +46,7 @@ export function Mascot({
   parallax = false,
   size = "md",
   animateIn = true,
+  sizing = "width",
 }: MascotProps) {
   const ref = useRef<HTMLDivElement>(null);
   const mvX = useMotionValue(0);
@@ -71,7 +82,11 @@ export function Mascot({
   return (
     <motion.div
       ref={ref}
-      className={cn("relative select-none", sizes[size], className)}
+      className={cn(
+        "relative select-none",
+        sizing === "width" ? sizes[size] : "w-fit",
+        className,
+      )}
       style={parallax ? { x, y } : undefined}
       initial={animateIn ? { opacity: 0, y: 24 } : false}
       animate={animateIn && !inView ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
@@ -80,7 +95,12 @@ export function Mascot({
       <motion.img
         src={MASCOT_POSES[pose]}
         alt="Cold Chain Theory mascot"
-        className="w-full h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.55)]"
+        className={cn(
+          "block drop-shadow-[0_20px_60px_rgba(0,0,0,0.55)]",
+          // Exactly one axis is constrained; the other is intrinsic, so the
+          // rendered aspect always matches the file's.
+          sizing === "width" ? "w-full h-auto" : "h-full w-auto max-w-none",
+        )}
         animate={{
           y: [0, -10, 0],
           scale: [1, 1.015, 1],
