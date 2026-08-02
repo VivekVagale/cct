@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useScroll,
@@ -10,10 +10,18 @@ import {
 } from "framer-motion";
 import { ScrollImageSequence } from "@/components/ui/ScrollImageSequence";
 import { Magnet } from "@/components/Magnet";
+import { Mascot } from "@/components/Mascot";
 import { HERO_SEQUENCE } from "@/data/heroSequence";
 
-/** Scroll position at which the assembly finishes and the mascot comes alive. */
-const ALIVE_AT = 0.8;
+/**
+ * The pin's three phases. The ending plays out while the section is still
+ * pinned, so nothing slides upward: by the time the sticky releases, the frames
+ * are already gone and what remains is the mascot over the same starfield the
+ * next section sits on, leaving nothing visible to scroll away.
+ */
+const ASSEMBLY_END = 0.78; // frames finish scrubbing; mascot starts breathing
+const DISSOLVE_END = 0.9; // frames gone, starfield up, static pose in
+const HOLD_UNTIL = 1; // mascot breathing over stars, nothing moving
 
 /**
  * The mascot is the Hero — not an image beside the copy. The sequence is
@@ -28,16 +36,17 @@ const ALIVE_AT = 0.8;
  * The frames ship with their original backdrop rather than keyed transparent.
  * The character's black clothing meets that backdrop with no edge between them,
  * so any matte there is guesswork — it left fringing and a visible frame
- * rectangle over the starfield. Keeping the backdrop and fading the starfield
- * up once the assembly finishes sidesteps the problem instead of approximating
- * a solution to it.
+ * rectangle over the starfield.
  *
- * There is deliberately no swap to a separate "live mascot" image at the end.
- * The final frame of the sequence already is the assembled character, and the
- * static poses are a different render — different head angle, rim light and
- * framing — so crossfading to one would read as a pop. Instead the canvas
- * itself starts breathing once the assembly completes, which makes the
- * transition invisible by never making one.
+ * That makes the ending a dissolve rather than a reveal. Fading the starfield up
+ * behind opaque frames shows nothing: it would reach full opacity while still
+ * hidden and appear all at once when the pin released. So the frames fade out as
+ * the starfield rises and a transparent pose fades in over it, all while the
+ * section is still pinned — the backdrop melts into stars and nothing slides.
+ *
+ * The pose is a different render from the final frame (wider framing, smaller
+ * chain, darker blue), so the handover is perceptible by design: a long overlap
+ * makes it read as the character settling rather than as a cut.
  */
 export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -50,12 +59,12 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   });
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const next = v >= ALIVE_AT;
+    const next = v >= ASSEMBLY_END;
     setAlive((prev) => (prev === next ? prev : next));
   });
 
   // The sequence consumes most of the pin; the tail is the exit.
-  const rawSeq = useTransform(scrollYProgress, [0, ALIVE_AT], [0, 1]);
+  const rawSeq = useTransform(scrollYProgress, [0, ASSEMBLY_END], [0, 1]);
   // A light spring smooths the scroll input without lag you can feel. It only
   // shapes which frame gets chosen — nothing seeks, so unlike the old video
   // scrub there is no decode cost to smoothing here.
@@ -80,14 +89,35 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
 
   const copyOpacity = useTransform(scrollYProgress, [0, 0.06, 0.34, 0.46], [0, 1, 1, 0]);
   const copyY = useTransform(scrollYProgress, [0, 0.46], ["0vh", "-6vh"]);
-  const ctaOpacity = useTransform(scrollYProgress, [ALIVE_AT, 0.92], [0, 1]);
+  // Reaches 1 and holds, so the section ends on a call to action over the stars.
+  const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, DISSOLVE_END], [0, 1]);
 
-  // The starfield is hidden behind the opaque frames for most of the pin, then
-  // fades up as the assembly finishes so the two backgrounds meet without a cut.
+  // Handing off to the starfield.
+  //
+  // The frames are opaque and cover the viewport, so simply fading the
+  // starfield up behind them shows nothing: it would reach full opacity while
+  // still hidden, and the stars would appear all at once the moment the pin
+  // released. The stage has to dissolve as the starfield rises, so the two
+  // cross over on screen and the black backdrop melts into stars.
+  const framesOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, DISSOLVE_END], [1, 0]);
+  const galaxyReveal = useTransform(scrollYProgress, [ASSEMBLY_END, DISSOLVE_END], [0, 1]);
+  // The static pose arrives slightly behind the frames leaving, so the two
+  // overlap and the swap reads as a settle rather than a cut. It is a different
+  // render from the final frame — wider framing, smaller chain — so the overlap
+  // is doing real work here.
+  const poseOpacity = useTransform(
+    scrollYProgress,
+    [ASSEMBLY_END + 0.03, DISSOLVE_END, HOLD_UNTIL],
+    [0, 1, 1],
+  );
+
   // Written straight to a MotionValue the App reads — routing it through state
-  // would re-render the Hero on every scroll tick.
-  const galaxyReveal = useTransform(scrollYProgress, [ALIVE_AT - 0.08, 0.98], [0, 1]);
-  useMotionValueEvent(galaxyReveal, "change", (v) => galaxyOpacity.set(v));
+  // would re-render the Hero on every scroll tick. Seeded on mount as well as
+  // on change, so landing deep in the page starts with the right value.
+  useEffect(() => {
+    galaxyOpacity.set(galaxyReveal.get());
+    return galaxyReveal.on("change", (v) => galaxyOpacity.set(v));
+  }, [galaxyReveal, galaxyOpacity]);
 
   return (
     <section id="top" ref={wrapperRef} className="relative h-[520vh] pointer-events-auto">
@@ -98,31 +128,48 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
         {/* Overscanned past the viewport on every side: the frames are opaque,
             so any parallax or breathing on an exactly-viewport-sized canvas
             would drag its edge into view. */}
-        <motion.div
-          style={{ x: parallaxX, y: parallaxY }}
-          className="absolute -inset-[5%]"
-        >
-          {/* Once assembled, the same canvas breathes in place — no image swap,
-              so there is nothing to pop. Scale only, for the same reason. */}
+        <motion.div style={{ x: parallaxX, y: parallaxY }} className="absolute -inset-[5%]">
+          <motion.div style={{ opacity: framesOpacity }} className="absolute inset-0">
+            {/* Once assembled, the canvas breathes in place. Scale only: the
+                frames are opaque, so translating one would drag its edge in. */}
+            <motion.div
+              className="absolute inset-0"
+              animate={alive ? { scale: [1, 1.015, 1] } : { scale: 1 }}
+              transition={
+                alive
+                  ? { duration: 6, repeat: Infinity, ease: "easeInOut" }
+                  : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+              }
+            >
+              <ScrollImageSequence
+                count={HERO_SEQUENCE.count}
+                srcFor={HERO_SEQUENCE.srcFor}
+                progress={sequenceProgress}
+                width={HERO_SEQUENCE.width}
+                height={HERO_SEQUENCE.height}
+                onReady={() => setReady(true)}
+                fit="cover"
+                className="w-full h-full"
+              />
+            </motion.div>
+          </motion.div>
+
+          {/* The transparent pose that takes over, so the mascot survives the
+              dissolve and sits on the starfield. The aspect box reproduces the
+              canvas' cover geometry, and the pose is placed at the fractions the
+              character occupies in the final frame, so the two line up at any
+              viewport rather than only at the aspect this was tuned on. */}
           <motion.div
-            className="absolute inset-0"
-            animate={alive ? { scale: [1, 1.015, 1] } : { scale: 1 }}
-            transition={
-              alive
-                ? { duration: 6, repeat: Infinity, ease: "easeInOut" }
-                : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-            }
+            style={{ opacity: poseOpacity }}
+            className="absolute inset-0 flex items-center justify-center overflow-hidden"
           >
-            <ScrollImageSequence
-              count={HERO_SEQUENCE.count}
-              srcFor={HERO_SEQUENCE.srcFor}
-              progress={sequenceProgress}
-              width={HERO_SEQUENCE.width}
-              height={HERO_SEQUENCE.height}
-              onReady={() => setReady(true)}
-              fit="cover"
-              className="w-full h-full"
-            />
+            <div className="relative aspect-[16/9] min-w-full min-h-full">
+              <Mascot
+                pose="neutral"
+                animateIn={false}
+                className="absolute left-[50.5%] top-[53.4%] -translate-x-1/2 -translate-y-1/2 w-auto h-[93.2%] [&>img]:h-full [&>img]:w-auto"
+              />
+            </div>
           </motion.div>
         </motion.div>
 
