@@ -9,7 +9,7 @@ export const MASCOT_POSES = {
   neutral: "/mascot/neutral.png",
   pointing: "/mascot/pointing.png",
   armsCrossed: "/mascot/arms-crossed.png",
-  thinking: "/mascot/thinking.png",
+  sideCloseUp: "/mascot/side-close-up.png",
   fistPump: "/mascot/fist-pump.png",
   clapperboard: "/mascot/clapperboard.png",
   laptop: "/mascot/laptop.png",

@@ -12,7 +12,7 @@ export const processStages: ProcessStage[] = [
   {
     index: "01",
     title: "Discovery",
-    pose: "thinking",
+    pose: "sideCloseUp",
     description:
       "We start with the machine, not the brief — reference photography, spec sheets, and a conversation about the story you want it to tell.",
   },
