@@ -1,37 +1,46 @@
+import type { MascotPose } from "@/data/mascot";
+
 export interface ProcessStage {
   index: string;
   title: string;
   description: string;
+  /** The mascot personally guides the visitor through each stage. */
+  pose: MascotPose;
 }
 
 export const processStages: ProcessStage[] = [
   {
     index: "01",
     title: "Discovery",
+    pose: "thinking",
     description:
       "We start with the machine, not the brief — reference photography, spec sheets, and a conversation about the story you want it to tell.",
   },
   {
     index: "02",
     title: "Planning",
+    pose: "pointing",
     description:
       "Shot list, lighting philosophy, and environment design locked before a single render begins. Nothing is improvised in production.",
   },
   {
     index: "03",
     title: "Production",
+    pose: "clapperboard",
     description:
       "Full CAD-accurate modeling and scene build. Every material, every surface imperfection, considered against real-world reference.",
   },
   {
     index: "04",
     title: "Rendering",
+    pose: "laptop",
     description:
       "Physically based lighting and simulation, rendered in layers so every frame can be graded with the precision of a color session.",
   },
   {
     index: "05",
     title: "Delivery",
+    pose: "thumbsUp",
     description:
       "Final color, final grade, delivered in the formats your platform needs — from a single hero frame to a full cinematic sequence.",
   },
