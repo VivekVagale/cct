@@ -1,8 +1,8 @@
 {
-  "count": 150,
-  "width": 1280,
-  "height": 720,
+  "count": 298,
+  "width": 1920,
+  "height": 1080,
   "pattern": "f_{i}.webp",
-  "sourceFrames": 300,
-  "step": 2
+  "sourceFrames": 298,
+  "step": 1
 }

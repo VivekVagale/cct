@@ -157,8 +157,10 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
           {/* The transparent pose that takes over, so the mascot survives the
               dissolve and sits on the starfield. The aspect box reproduces the
               canvas' cover geometry, and the pose is placed at the fractions the
-              character occupies in the final frame, so the two line up at any
-              viewport rather than only at the aspect this was tuned on. */}
+              character occupies in the final frame (measured: 90.6% of the
+              frame's height, centred at 49.9% / 54.7%), so the two line up at
+              any viewport rather than only at the aspect this was tuned on.
+              Re-measure these if the source clip's framing ever changes. */}
           <motion.div
             style={{ opacity: poseOpacity }}
             className="absolute inset-0 flex items-center justify-center overflow-hidden"
@@ -167,7 +169,7 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
               <Mascot
                 pose="neutral"
                 animateIn={false}
-                className="absolute left-[50.5%] top-[53.4%] -translate-x-1/2 -translate-y-1/2 w-auto h-[93.2%] [&>img]:h-full [&>img]:w-auto"
+                className="absolute left-[49.9%] top-[54.7%] -translate-x-1/2 -translate-y-1/2 w-auto h-[90.6%] [&>img]:h-full [&>img]:w-auto"
               />
             </div>
           </motion.div>

@@ -110,15 +110,24 @@ def main():
                          "frame rectangle. Keeping the backdrop and fading the "
                          "page's starfield in afterwards avoids the problem "
                          "rather than approximating a solution to it.")
+    ap.add_argument("--no-watermark", action="store_true",
+                    help="source has no watermark. The detector looks for what "
+                         "is bright in every frame, which on a clean export can "
+                         "latch onto legitimate content that happens to persist "
+                         "-- a highlight on the helmet, say -- and smear it.")
     args = ap.parse_args()
 
     paths = sorted(glob.glob(args.frames))
     if not paths:
         raise SystemExit(f"no frames matched {args.frames}")
 
-    mask, box = watermark_mask(paths)
-    repair = make_repair(mask)
-    print(f"{len(paths)} source frames; watermark at {box}")
+    if args.no_watermark:
+        repair = lambda rgb: rgb  # noqa: E731
+        print(f"{len(paths)} source frames; no watermark to remove")
+    else:
+        mask, box = watermark_mask(paths)
+        repair = make_repair(mask)
+        print(f"{len(paths)} source frames; watermark at {box}")
 
     plate = None
     if args.keep_background:
