@@ -16,8 +16,7 @@ const ALIVE_AT = 0.8;
 
 /**
  * The mascot is the Hero — not an image beside the copy. The sequence is
- * absolutely positioned across the whole pinned stage, the backdrop wordmark
- * sits behind it in independently-parallaxed layers, and the copy floats over
+ * absolutely positioned across the whole pinned stage and the copy floats over
  * the top. Nothing sits in a card, a column, or a wrapper that would constrain
  * the composition.
  *
@@ -59,8 +58,8 @@ export function Hero() {
     restDelta: 0.0005,
   });
 
-  // Cursor parallax, applied to the whole stage so the character drifts
-  // against the backdrop type rather than sliding around inside a box.
+  // Cursor parallax, applied to the whole stage so the character drifts as one
+  // rather than sliding around inside a box.
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
   const parallaxX = useSpring(pointerX, { stiffness: 60, damping: 20, mass: 0.6 });
@@ -70,13 +69,6 @@ export function Hero() {
     pointerX.set((e.clientX / window.innerWidth - 0.5) * 22);
     pointerY.set((e.clientY / window.innerHeight - 0.5) * 14);
   };
-
-  // Backdrop wordmark: three layers, each drifting at its own rate so the type
-  // reads as architecture the mascot stands inside rather than as a label.
-  const coldY = useTransform(scrollYProgress, [0, 1], ["0vh", "-14vh"]);
-  const chainY = useTransform(scrollYProgress, [0, 1], ["0vh", "-6vh"]);
-  const theoryY = useTransform(scrollYProgress, [0, 1], ["0vh", "-20vh"]);
-  const wordmarkOpacity = useTransform(scrollYProgress, [0.02, 0.22, 0.9, 1], [0, 1, 1, 0]);
 
   const copyOpacity = useTransform(scrollYProgress, [0, 0.06, 0.34, 0.46], [0, 1, 1, 0]);
   const copyY = useTransform(scrollYProgress, [0, 0.46], ["0vh", "-6vh"]);
@@ -93,27 +85,6 @@ export function Hero() {
         onMouseMove={handlePointer}
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
       >
-        <motion.div style={{ opacity: wordmarkOpacity }} className="absolute inset-0 select-none">
-          <motion.span
-            style={{ y: coldY }}
-            className="absolute left-1/2 top-[14%] -translate-x-1/2 font-display text-[26vw] leading-[0.8] tracking-tighter text-white/[0.055] blur-[2px] whitespace-nowrap"
-          >
-            COLD
-          </motion.span>
-          <motion.span
-            style={{ y: chainY }}
-            className="absolute left-1/2 top-[40%] -translate-x-1/2 font-display text-[30vw] leading-[0.8] tracking-tighter text-white/[0.035] blur-[5px] whitespace-nowrap"
-          >
-            CHAIN
-          </motion.span>
-          <motion.span
-            style={{ y: theoryY }}
-            className="absolute left-1/2 bottom-[6%] -translate-x-1/2 font-display text-[22vw] leading-[0.8] tracking-tighter text-white/[0.07] blur-[1px] whitespace-nowrap"
-          >
-            THEORY
-          </motion.span>
-        </motion.div>
-
         <motion.div
           style={{ scale: stageScale, x: parallaxX, y: parallaxY }}
           className="absolute inset-0"

@@ -98,8 +98,10 @@ def main():
     ap.add_argument("--frames", required=True, help="glob for source frames")
     ap.add_argument("--out", required=True)
     ap.add_argument("--step", type=int, default=2, help="keep every Nth frame")
-    ap.add_argument("--width", type=int, default=1280)
-    ap.add_argument("--quality", type=int, default=82)
+    # 960 rather than the source's 1280: the hero is a full-bleed canvas, so
+    # the frames are resampled anyway, and 150 of them at 1280 came to 11 MB.
+    ap.add_argument("--width", type=int, default=960)
+    ap.add_argument("--quality", type=int, default=80)
     args = ap.parse_args()
 
     paths = sorted(glob.glob(args.frames))

@@ -69,6 +69,10 @@ def main():
     ap.add_argument("inputs", nargs="+")
     ap.add_argument("--out", required=True)
     ap.add_argument("--max-size", type=int, default=1200)
+    ap.add_argument("--format", choices=["png", "webp"], default="webp",
+                    help="webp with alpha is several times smaller than png "
+                         "for the same cutout, which matters at ten poses")
+    ap.add_argument("--quality", type=int, default=84)
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -87,8 +91,11 @@ def main():
             s = args.max_size / max(im.size)
             im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
 
-        out = os.path.join(args.out, slugify(os.path.basename(p)) + ".png")
-        im.save(out, optimize=True)
+        out = os.path.join(args.out, slugify(os.path.basename(p)) + "." + args.format)
+        if args.format == "webp":
+            im.save(out, "WEBP", quality=args.quality, method=6)
+        else:
+            im.save(out, optimize=True)
         flag = f"  <-- touches border ({contact*100:.1f}%)" if contact > 0.02 else ""
         print(f"{os.path.basename(p):24} -> {os.path.basename(out):20} "
               f"{im.size[0]}x{im.size[1]}  {os.path.getsize(out)/1024:.0f} KB{flag}")

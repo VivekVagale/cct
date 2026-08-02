@@ -3,7 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
-import { Marquee } from "./components/Marquee";
+import { WorkShowcase } from "./components/WorkShowcase";
 import { About } from "./components/About";
 import { CreativeProcess } from "./components/CreativeProcess";
 import { CGIExperiences } from "./components/CGIExperiences";
@@ -39,7 +39,7 @@ function App() {
             <div className="relative z-10 pointer-events-none">
               <Navigation />
               <Hero />
-              <Marquee />
+              <WorkShowcase />
 
               <CinematicLine text="EVERY FRAME TELLS A STORY" />
 
