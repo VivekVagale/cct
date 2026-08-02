@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react";
 import type { MotionValue } from "framer-motion";
 
+/** Parallel frame fetches. Enough to saturate the connection, few enough
+ *  not to starve the eager window at the front of the sequence. */
+const CONCURRENCY = 8;
+
 interface ScrollImageSequenceProps {
   /** Number of frames in the sequence. */
   count: number;
@@ -45,6 +49,13 @@ export function ScrollImageSequence({
   const framesRef = useRef<(ImageBitmap | null)[]>([]);
   const drawnRef = useRef(-1);
   const rafRef = useRef<number | undefined>(undefined);
+
+  // Held in a ref, deliberately. If the callback were a dependency of the
+  // effect below, every parent re-render would pass a new closure, tear the
+  // sequence down and re-download all of it — which is exactly what happens
+  // while scrolling, since the parent re-renders as its own state changes.
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -103,26 +114,40 @@ export function ScrollImageSequence({
         ...Array.from({ length: count }, (_, i) => i).slice(eager),
       ];
 
+      // Fetched by a pool rather than one at a time. Awaiting each frame
+      // before starting the next means 150 sequential round-trips, which is
+      // slow enough that scrubbing outruns the download and the character
+      // stops part-way through assembling.
+      let cursor = 0;
+      let loaded = 0;
       let readyFired = false;
-      for (const i of order) {
-        if (cancelled) return;
-        try {
-          const res = await fetch(srcFor(i));
-          const bitmap = await createImageBitmap(await res.blob());
-          if (cancelled) {
-            bitmap.close();
-            return;
+
+      const worker = async () => {
+        while (!cancelled) {
+          const slot = cursor++;
+          if (slot >= order.length) return;
+          const i = order[slot];
+          try {
+            const res = await fetch(srcFor(i));
+            const bitmap = await createImageBitmap(await res.blob());
+            if (cancelled) {
+              bitmap.close();
+              return;
+            }
+            framesRef.current[i] = bitmap;
+          } catch {
+            // A dropped frame degrades to the nearest neighbour via resolve().
           }
-          framesRef.current[i] = bitmap;
-        } catch {
-          // A dropped frame degrades to the nearest neighbour via resolve().
+          loaded++;
+          schedule();
+          if (!readyFired && loaded >= Math.min(eager, count)) {
+            readyFired = true;
+            onReadyRef.current?.();
+          }
         }
-        if (i === 0) schedule();
-        if (!readyFired && i >= Math.min(eager, count) - 1) {
-          readyFired = true;
-          onReady?.();
-        }
-      }
+      };
+
+      await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     };
     void load();
 
@@ -135,7 +160,7 @@ export function ScrollImageSequence({
       framesRef.current.forEach((f) => f?.close());
       framesRef.current = [];
     };
-  }, [count, srcFor, progress, width, height, onReady, eager]);
+  }, [count, srcFor, progress, width, height, eager]);
 
   return <canvas ref={canvasRef} className={className} style={{ width: "100%", height: "100%" }} />;
 }
