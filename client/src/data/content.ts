@@ -42,6 +42,7 @@ export interface Experience {
   title: string;
   description: string;
   image: string;
+  comingSoon?: boolean;
 }
 
 export const experiences: Experience[] = [
@@ -65,6 +66,7 @@ export const experiences: Experience[] = [
     description: "The instant of contact, held a beat past real time.",
     image:
       "https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=1200&auto=format&fit=crop",
+    comingSoon: true,
   },
   {
     id: "space-ride",
@@ -72,6 +74,7 @@ export const experiences: Experience[] = [
     description: "Zero gravity, full detail — a machine off-world.",
     image:
       "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
+    comingSoon: true,
   },
   {
     id: "firestorm",
@@ -79,6 +82,7 @@ export const experiences: Experience[] = [
     description: "Volumetric heat and light, simulated frame by frame.",
     image:
       "https://images.unsplash.com/photo-1495954380655-01ec3939a26f?q=80&w=1200&auto=format&fit=crop",
+    comingSoon: true,
   },
   {
     id: "drone-chase",
@@ -86,6 +90,7 @@ export const experiences: Experience[] = [
     description: "A pursuit shot with no crew, no rig, no limit.",
     image:
       "https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=1200&auto=format&fit=crop",
+    comingSoon: true,
   },
   {
     id: "custom-cgi",

@@ -1,6 +1,6 @@
-import { useRef, type MouseEvent } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import type { Vehicle } from "@/data/vehicles";
+import { useTilt } from "@/hooks/useTilt";
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -9,41 +9,16 @@ interface VehicleCardProps {
 }
 
 export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
-  const ref = useRef<HTMLButtonElement>(null);
-
-  const mvX = useMotionValue(0.5);
-  const mvY = useMotionValue(0.5);
-  const rotateX = useSpring(useTransform(mvY, [0, 1], [12, -12]), {
-    stiffness: 220,
-    damping: 20,
-  });
-  const rotateY = useSpring(useTransform(mvX, [0, 1], [-12, 12]), {
-    stiffness: 220,
-    damping: 20,
-  });
-  const glowX = useTransform(mvX, [0, 1], ["0%", "100%"]);
-  const glowY = useTransform(mvY, [0, 1], ["0%", "100%"]);
-
-  const handleMouseMove = (e: MouseEvent<HTMLButtonElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    mvX.set((e.clientX - rect.left) / rect.width);
-    mvY.set((e.clientY - rect.top) / rect.height);
-  };
-
-  const handleMouseLeave = () => {
-    mvX.set(0.5);
-    mvY.set(0.5);
-  };
+  const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
+    useTilt<HTMLButtonElement>();
 
   return (
     <motion.button
       ref={ref}
       type="button"
       onClick={onSelect}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
       whileTap={{ scale: 0.97 }}
       style={{ rotateX, rotateY, transformPerspective: 900 }}
       className={`group relative text-left overflow-hidden rounded-sm border transition-colors duration-300 ${
@@ -56,12 +31,7 @@ export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
       <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{
-          background: useTransform([glowX, glowY], (latest) => {
-            const [gx, gy] = latest as [string, string];
-            return `radial-gradient(280px circle at ${gx} ${gy}, rgba(255,255,255,0.14), transparent 65%)`;
-          }),
-        }}
+        style={{ background: glowBackground }}
       />
 
       <div className="relative aspect-[4/3] overflow-hidden">

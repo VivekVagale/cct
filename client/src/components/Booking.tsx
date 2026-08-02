@@ -121,14 +121,18 @@ export function Booking() {
                 <button
                   type="button"
                   key={exp.id}
+                  disabled={exp.comingSoon}
                   onClick={() => setExperience(exp.title)}
                   className={`text-xs tracking-[0.1em] uppercase px-4 py-2.5 border transition-colors duration-300 normal-case ${
-                    experience === exp.title
-                      ? "bg-white text-[#05070A] border-white"
-                      : "border-white/20 text-[#B8C4D6] hover:border-white/50"
+                    exp.comingSoon
+                      ? "border-white/10 text-[#B8C4D6]/40 cursor-not-allowed"
+                      : experience === exp.title
+                        ? "bg-white text-[#05070A] border-white"
+                        : "border-white/20 text-[#B8C4D6] hover:border-white/50"
                   }`}
                 >
                   {exp.title}
+                  {exp.comingSoon && <span className="ml-1.5 opacity-70">— Soon</span>}
                 </button>
               ))}
             </div>
