@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { motion } from "framer-motion";
 import { Mascot } from "@/components/Mascot";
 import { Magnet } from "@/components/Magnet";
+import { VehicleConfigurator } from "@/components/VehicleConfigurator";
+import { vehicles } from "@/data/vehicles";
 import { experiences } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
 
@@ -10,6 +11,13 @@ type Status = "idle" | "submitting" | "success" | "error";
 export function Booking() {
   const [status, setStatus] = useState<Status>("idle");
   const [experience, setExperience] = useState(experiences[0].title);
+  const [vehicleId, setVehicleId] = useState<string | null>(null);
+  const [colorId, setColorId] = useState<string | null>(null);
+
+  function handleSelectVehicle(id: string) {
+    setVehicleId(id);
+    setColorId(null); // changing the vehicle clears the color selection
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -17,12 +25,18 @@ export function Booking() {
     const form = e.currentTarget;
     const data = new FormData(form);
 
+    const vehicle = vehicles.find((v) => v.id === vehicleId);
+    const color = vehicle?.colors.find((c) => c.id === colorId);
+    const vehicleLabel = vehicle
+      ? `${vehicle.manufacturer} ${vehicle.name}${color ? ` — ${color.name}` : ""}`
+      : "";
+
     const ok = await submitBookingForm({
       fullName: String(data.get("fullName") || ""),
       email: String(data.get("email") || ""),
       instagram: String(data.get("instagram") || ""),
       projectType: experience,
-      vehicle: String(data.get("vehicle") || ""),
+      vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
     }).catch(() => false);
 
@@ -48,7 +62,7 @@ export function Booking() {
   return (
     <section id="booking" className="relative pointer-events-auto py-32 sm:py-40">
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-4">
           <p className="text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-5">
             Start a Project
           </p>
@@ -56,7 +70,7 @@ export function Booking() {
             Ready to turn your machine into cinema.
           </h2>
           <p className="text-[#B8C4D6] leading-relaxed max-w-sm mb-10">
-            Tell us about the vehicle and the story you want it to tell. We'll
+            Configure the vehicle, tell us the story you want it to tell. We'll
             follow up to scope the shot list together.
           </p>
           <Mascot pose="pointing" size="lg" className="hidden lg:block" />
@@ -64,42 +78,43 @@ export function Booking() {
 
         <form
           onSubmit={handleSubmit}
-          className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6"
+          className="lg:col-span-8 flex flex-col gap-10"
         >
-          <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            Full Name
-            <input
-              name="fullName"
-              required
-              className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
-            />
-          </label>
-          <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            Email
-            <input
-              name="email"
-              type="email"
-              required
-              className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
-            />
-          </label>
-          <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            Instagram
-            <input
-              name="instagram"
-              className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
-            />
-          </label>
-          <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            Vehicle
-            <input
-              name="vehicle"
-              placeholder="Make, model, year"
-              className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
-            />
-          </label>
+          <VehicleConfigurator
+            selectedVehicleId={vehicleId}
+            selectedColorId={colorId}
+            onSelectVehicle={handleSelectVehicle}
+            onSelectColor={setColorId}
+          />
 
-          <label className="sm:col-span-2 flex flex-col gap-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+              Full Name
+              <input
+                name="fullName"
+                required
+                className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+              Email
+              <input
+                name="email"
+                type="email"
+                required
+                className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+              Instagram
+              <input
+                name="instagram"
+                className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
+              />
+            </label>
+          </div>
+
+          <label className="flex flex-col gap-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
             Experience
             <div className="flex flex-wrap gap-2">
               {experiences.map((exp) => (
@@ -119,7 +134,7 @@ export function Booking() {
             </div>
           </label>
 
-          <label className="sm:col-span-2 flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+          <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
             Project Description
             <textarea
               name="description"
@@ -128,7 +143,7 @@ export function Booking() {
             />
           </label>
 
-          <div className="sm:col-span-2 flex items-center gap-6 mt-4">
+          <div className="flex items-center gap-6">
             <Magnet padding={40} strength={5}>
               <button
                 type="submit"
