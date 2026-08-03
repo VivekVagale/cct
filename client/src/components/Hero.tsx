@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import { ScrollImageSequence } from "@/components/ui/ScrollImageSequence";
 import { Magnet } from "@/components/Magnet";
+import { GlowButton } from "@/components/GlowButton";
 import { HERO_SEQUENCE } from "@/data/heroSequence";
 
 /**
@@ -162,10 +163,20 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
         style={{ opacity: stageOpacity }}
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
       >
-        {/* Overscanned past the viewport on every side, so the parallax and the
-            breathing have room to move without pulling the canvas' own edge
-            into frame. */}
-        <motion.div style={{ x: parallaxX, y: parallaxY }} className="absolute -inset-[5%]">
+        {/* Overscanned just enough for the parallax to move without pulling the
+            canvas' own edge into frame.
+
+            16px, not the 5% this used to be. The overscan magnifies whatever it
+            adds — at 5% on a 1440px viewport that was 72px a side, and since the
+            canvas fits with "cover", the extra was spent cropping the frame
+            rather than showing it. It only ever needed to cover the parallax
+            drift, which tops out at 11px across and 7px down. A fixed 16px
+            clears that at any viewport, where a percentage did not: on a phone
+            5% is only ~10px, narrower than the drift it was supposed to hide.
+
+            The breathing needs no allowance at all — it only ever scales up
+            from 1, so it cannot expose an edge. */}
+        <motion.div style={{ x: parallaxX, y: parallaxY }} className="absolute -inset-[16px]">
           {/* Once assembled, the canvas breathes in place. */}
           <motion.div
             className="absolute inset-0"
@@ -204,12 +215,9 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
           className="absolute inset-x-0 bottom-[10%] flex flex-wrap items-center justify-center gap-6 px-6"
         >
           <Magnet padding={40} strength={5}>
-            <a
-              href="#booking"
-              className="text-xs tracking-[0.14em] uppercase bg-white text-[#05070A] px-7 py-4 hover:bg-[#E5E5E5] transition-colors duration-300 inline-block"
-            >
+            <GlowButton href="#booking" className="text-xs tracking-[0.14em] uppercase px-7 py-4">
               Start a Project
-            </a>
+            </GlowButton>
           </Magnet>
           <a
             href="#experiences"

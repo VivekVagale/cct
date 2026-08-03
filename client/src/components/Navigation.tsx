@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { GlowButton } from "@/components/GlowButton";
 
 const LINKS = [
   { label: "About", href: "#about" },
@@ -48,15 +49,13 @@ export function Navigation() {
             </li>
           ))}
         </ul>
-        {/* The button keeps its border: it is a control, and its edge is a few
-            hundred px wide rather than spanning the viewport. The halo is
-            dropped on hover, where the fill inverts to dark-on-white. */}
-        <a
-          href="#booking"
-          className={`text-xs tracking-[0.14em] uppercase border border-white/20 px-5 py-2.5 text-[#F5F7FA] hover:bg-white hover:text-[#05070A] transition-colors duration-300 ${HALO} hover:[text-shadow:none]`}
-        >
+        {/* The button carries its own edge, which is fine here: it is a control
+            a few hundred px wide, not a line spanning the viewport. It needs no
+            halo either — the face is opaque, so the type already has its own
+            background to sit on. */}
+        <GlowButton href="#booking" className="text-xs tracking-[0.14em] uppercase px-5 py-2.5">
           Start a Project
-        </a>
+        </GlowButton>
       </nav>
     </motion.header>
   );
