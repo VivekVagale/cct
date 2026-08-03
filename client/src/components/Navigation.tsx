@@ -31,11 +31,31 @@ export function Navigation() {
       className="fixed top-0 inset-x-0 z-50 pointer-events-auto"
     >
       <nav className="max-w-[1600px] mx-auto px-6 sm:px-10 h-20 flex items-center justify-between">
+        {/* The wordmark carries its own lit face, so it needs no halo — that
+            is for type sitting directly on the hero. The bloom is painted into
+            the background rather than added as a separate glow layer, so the
+            anchor creates no stacking context of its own. */}
         <a
           href="#top"
-          className={`text-sm tracking-[0.22em] uppercase text-[#F5F7FA] font-medium ${HALO}`}
+          aria-label="Cold Chain Theory — back to top"
+          className="group relative inline-flex items-center rounded-[14px] px-4 py-2 sm:px-5 sm:py-2.5 transition-transform duration-300 ease-out hover:scale-[1.03]"
+          style={{
+            background: [
+              // Bottom-centre bloom: the bright core of the badge.
+              "radial-gradient(115% 95% at 50% 118%, #ffe6fc 0%, #f6b8ff 16%, #c079f2 40%, rgba(150,90,235,0) 72%)",
+              // The violet body it sits in.
+              "radial-gradient(120% 130% at 50% -20%, #a274f5 0%, #7a44e0 55%, #6c34d8 100%)",
+            ].join(","),
+            boxShadow: [
+              "inset 0 1px 0 rgba(255,255,255,0.75)",
+              "inset 0 0 0 1px rgba(226,203,255,0.5)",
+              "0 6px 26px rgba(138,74,235,0.5)",
+            ].join(","),
+          }}
         >
-          Cold Chain Theory
+          <span className="font-logo font-semibold lowercase text-sm sm:text-base tracking-[-0.01em] text-[#0b0a14]">
+            @coldchaintheory
+          </span>
         </a>
         <ul className="hidden md:flex items-center gap-10">
           {LINKS.map((link) => (
