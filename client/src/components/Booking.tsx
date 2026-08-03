@@ -4,6 +4,7 @@ import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ExperienceOptionCard } from "@/components/ExperienceOptionCard";
 import Cubes from "@/components/ui/Cubes";
+import { SparkleButton } from "@/components/SparkleButton";
 import { vehicles } from "@/data/vehicles";
 import { experiences } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
@@ -169,13 +170,9 @@ export function Booking() {
 
           <div className="flex items-center gap-6">
             <Magnet padding={40} strength={5}>
-              <button
-                type="submit"
-                disabled={status === "submitting"}
-                className="text-xs tracking-[0.14em] uppercase bg-white text-[#05070A] px-8 py-4 hover:bg-[#E5E5E5] transition-colors duration-300 disabled:opacity-50"
-              >
+              <SparkleButton type="submit" disabled={status === "submitting"}>
                 {status === "submitting" ? "Sending..." : "Submit Request"}
-              </button>
+              </SparkleButton>
             </Magnet>
             {status === "error" && (
               <span className="text-xs text-[#FF4444]">
