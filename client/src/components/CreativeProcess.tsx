@@ -9,9 +9,13 @@ import { Mascot } from "@/components/Mascot";
  *
  * Stages overlap deliberately — the outgoing mascot is still fading as the
  * incoming one arrives — so there is never a frame where the stage is empty
- * and never a hard cut between them. The mascot is the composition here, not
- * an illustration beside the text: it is absolutely positioned, scaled to
- * roughly half the viewport, and the type sits over it.
+ * and never a hard cut between them.
+ *
+ * Each stage is split rather than stacked: copy on the left, mascot on the
+ * right, both filling their half. The type used to sit over a centred mascot,
+ * which capped how large either could go — the mascot had to stay clear of the
+ * words and the words had to stay legible over it. Side by side, neither is
+ * competing for the same pixels, so both are much bigger.
  *
  * Note this deliberately avoids a progress rail with stage dots down the edge;
  * that pattern was built once before and rejected.
@@ -86,32 +90,39 @@ function Stage({
   const scale = useTransform(progress, [at - span, at, at + span], [0.95, 1, 1.03]);
 
   return (
-    <motion.div style={{ opacity }} className="absolute inset-0 flex items-center justify-center">
-      <motion.div
-        style={{ y, scale }}
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-      >
-        <Mascot
-          pose={stage.pose}
-          animateIn={false}
-          parallax
-          sizing="height"
-        className="h-[52vh] sm:h-[58vh]"
-        />
-      </motion.div>
+    <motion.div style={{ opacity }} className="absolute inset-0">
+      {/* Two columns from md up: copy left, mascot right. Below that there is
+          not enough width to sit them side by side, so they stack — mascot
+          above, copy beneath — and both centre. */}
+      <div className="relative h-full w-full max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col items-center justify-end gap-6 pb-[8%] md:flex-row md:items-center md:justify-between md:gap-10 md:pb-0">
+        <motion.div
+          style={{ y }}
+          className="order-2 md:order-1 md:w-[46%] flex flex-col items-center text-center md:items-start md:text-left gap-2 md:gap-4 pointer-events-none"
+        >
+          <span className="font-display font-black text-[#F5F7FA]/20 leading-none text-6xl sm:text-8xl md:text-[10rem] lg:text-[13rem]">
+            {stage.index}
+          </span>
+          <h3 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05]">
+            {stage.title}
+          </h3>
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#B8C4D6] leading-relaxed max-w-lg md:max-w-xl">
+            {stage.description}
+          </p>
+        </motion.div>
 
-      <motion.div
-        style={{ y }}
-        className="absolute inset-x-0 bottom-[8%] flex flex-col items-center text-center gap-2 px-6 pointer-events-none"
-      >
-        <span className="font-display font-black text-[#F5F7FA]/20 leading-none text-6xl sm:text-8xl">
-          {stage.index}
-        </span>
-        <h3 className="font-display text-3xl sm:text-5xl text-[#F5F7FA]">{stage.title}</h3>
-        <p className="text-sm sm:text-base text-[#B8C4D6] leading-relaxed max-w-lg">
-          {stage.description}
-        </p>
-      </motion.div>
+        <motion.div
+          style={{ y, scale }}
+          className="order-1 md:order-2 md:w-[50%] flex justify-center md:justify-end pointer-events-none"
+        >
+          <Mascot
+            pose={stage.pose}
+            animateIn={false}
+            parallax
+            sizing="height"
+            className="h-[42vh] sm:h-[46vh] md:h-[74vh] lg:h-[82vh]"
+          />
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
