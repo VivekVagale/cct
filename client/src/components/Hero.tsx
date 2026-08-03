@@ -10,18 +10,17 @@ import {
 } from "framer-motion";
 import { ScrollImageSequence } from "@/components/ui/ScrollImageSequence";
 import { Magnet } from "@/components/Magnet";
-import { Mascot } from "@/components/Mascot";
 import { HERO_SEQUENCE } from "@/data/heroSequence";
 
 /**
  * The pin's three phases. The ending plays out while the section is still
- * pinned, so nothing slides upward: by the time the sticky releases, the frames
- * are already gone and what remains is the mascot over the same starfield the
- * next section sits on, leaving nothing visible to scroll away.
+ * pinned, so nothing slides upward: by the time the sticky releases, the
+ * starfield is already up behind the final frame, leaving nothing visible to
+ * scroll away.
  */
 const ASSEMBLY_END = 0.78; // frames finish scrubbing; mascot starts breathing
-const DISSOLVE_END = 0.9; // frames gone, starfield up, static pose in
-const HOLD_UNTIL = 1; // mascot breathing over stars, nothing moving
+const REVEAL_END = 0.9; // starfield up behind the frames, copy and CTA in
+const HOLD_UNTIL = 1; // final frame breathing over stars, nothing moving
 
 /**
  * The mascot is the Hero — not an image beside the copy. The sequence is
@@ -33,20 +32,17 @@ const HOLD_UNTIL = 1; // mascot breathing over stars, nothing moving
  * while the extra height is consumed scrubbing the sequence. When that budget
  * runs out the next section scrolls up and covers it naturally.
  *
- * The frames ship with their original backdrop rather than keyed transparent.
- * The character's black clothing meets that backdrop with no edge between them,
- * so any matte there is guesswork — it left fringing and a visible frame
- * rectangle over the starfield.
+ * The frames carry their own alpha — the black backdrop is keyed out by
+ * tools/key_hero_frames.py, which finds it as the black connected to the frame
+ * border, so the character's equally-black clothing stays solid. That is what
+ * lets the section simply end on its final frame: there is no backdrop left to
+ * hide the starfield, so the stars come up behind the mascot and the frame
+ * stays put.
  *
- * That makes the ending a dissolve rather than a reveal. Fading the starfield up
- * behind opaque frames shows nothing: it would reach full opacity while still
- * hidden and appear all at once when the pin released. So the frames fade out as
- * the starfield rises and a transparent pose fades in over it, all while the
- * section is still pinned — the backdrop melts into stars and nothing slides.
- *
- * The pose is a different render from the final frame (wider framing, smaller
- * chain, darker blue), so the handover is perceptible by design: a long overlap
- * makes it read as the character settling rather than as a cut.
+ * Nothing is swapped in at the end. An earlier cut dissolved the frames out and
+ * faded a separate static pose in, because opaque frames left no way to reveal
+ * the starfield — that pose is gone, and with it the visible handover between
+ * two different renders.
  */
 export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -87,29 +83,14 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
     pointerY.set((e.clientY / window.innerHeight - 0.5) * 14);
   };
 
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.06, 0.34, 0.46], [0, 1, 1, 0]);
-  const copyY = useTransform(scrollYProgress, [0, 0.46], ["0vh", "-6vh"]);
-  // Reaches 1 and holds, so the section ends on a call to action over the stars.
-  const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, DISSOLVE_END], [0, 1]);
+  // Reaches 1 and holds, so the section ends on a call to action over the
+  // stars. Nothing overlays the assembly before it — the sequence plays clean.
+  const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
-  // Handing off to the starfield.
-  //
-  // The frames are opaque and cover the viewport, so simply fading the
-  // starfield up behind them shows nothing: it would reach full opacity while
-  // still hidden, and the stars would appear all at once the moment the pin
-  // released. The stage has to dissolve as the starfield rises, so the two
-  // cross over on screen and the black backdrop melts into stars.
-  const framesOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, DISSOLVE_END], [1, 0]);
-  const galaxyReveal = useTransform(scrollYProgress, [ASSEMBLY_END, DISSOLVE_END], [0, 1]);
-  // The static pose arrives slightly behind the frames leaving, so the two
-  // overlap and the swap reads as a settle rather than a cut. It is a different
-  // render from the final frame — wider framing, smaller chain — so the overlap
-  // is doing real work here.
-  const poseOpacity = useTransform(
-    scrollYProgress,
-    [ASSEMBLY_END + 0.03, DISSOLVE_END, HOLD_UNTIL],
-    [0, 1, 1],
-  );
+  // The starfield rises behind the frames rather than replacing them. The
+  // frames are keyed, so their backdrop is already clear — the stars appear
+  // through it and the final frame stays exactly where it is.
+  const galaxyReveal = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
   // Written straight to a MotionValue the App reads — routing it through state
   // would re-render the Hero on every scroll tick. Seeded on mount as well as
@@ -125,70 +106,42 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
         onMouseMove={handlePointer}
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
       >
-        {/* Overscanned past the viewport on every side: the frames are opaque,
-            so any parallax or breathing on an exactly-viewport-sized canvas
-            would drag its edge into view. */}
+        {/* Overscanned past the viewport on every side, so the parallax and the
+            breathing have room to move without pulling the canvas' own edge
+            into frame. */}
         <motion.div style={{ x: parallaxX, y: parallaxY }} className="absolute -inset-[5%]">
-          <motion.div style={{ opacity: framesOpacity }} className="absolute inset-0">
-            {/* Once assembled, the canvas breathes in place. Scale only: the
-                frames are opaque, so translating one would drag its edge in. */}
-            <motion.div
-              className="absolute inset-0"
-              animate={alive ? { scale: [1, 1.015, 1] } : { scale: 1 }}
-              transition={
-                alive
-                  ? { duration: 6, repeat: Infinity, ease: "easeInOut" }
-                  : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-              }
-            >
-              <ScrollImageSequence
-                count={HERO_SEQUENCE.count}
-                srcFor={HERO_SEQUENCE.srcFor}
-                progress={sequenceProgress}
-                width={HERO_SEQUENCE.width}
-                height={HERO_SEQUENCE.height}
-                onReady={() => setReady(true)}
-                fit="cover"
-                className="w-full h-full"
-              />
-            </motion.div>
-          </motion.div>
-
-          {/* The transparent pose that takes over, so the mascot survives the
-              dissolve and sits on the starfield. The aspect box reproduces the
-              canvas' cover geometry, and the pose is placed at the fractions the
-              character occupies in the final frame (measured: 90.6% of the
-              frame's height, centred at 49.9% / 54.7%), so the two line up at
-              any viewport rather than only at the aspect this was tuned on.
-              Re-measure these if the source clip's framing ever changes. */}
+          {/* Once assembled, the canvas breathes in place. */}
           <motion.div
-            style={{ opacity: poseOpacity }}
-            className="absolute inset-0 flex items-center justify-center overflow-hidden"
+            className="absolute inset-0"
+            animate={alive ? { scale: [1, 1.015, 1] } : { scale: 1 }}
+            transition={
+              alive
+                ? { duration: 6, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+            }
           >
-            <div className="relative aspect-[16/9] min-w-full min-h-full">
-              <Mascot
-                pose="neutral"
-                animateIn={false}
-                sizing="height"
-                className="absolute left-[49.9%] top-[54.7%] -translate-x-1/2 -translate-y-1/2 h-[90.6%]"
-              />
-            </div>
+            <ScrollImageSequence
+              count={HERO_SEQUENCE.count}
+              srcFor={HERO_SEQUENCE.srcFor}
+              progress={sequenceProgress}
+              width={HERO_SEQUENCE.width}
+              height={HERO_SEQUENCE.height}
+              onReady={() => setReady(true)}
+              fit="cover"
+              className="w-full h-full"
+            />
           </motion.div>
         </motion.div>
 
-        <motion.div
-          style={{ opacity: copyOpacity, y: copyY }}
-          className="absolute inset-x-0 top-[12%] flex flex-col items-center text-center gap-5 px-6 pointer-events-none"
-        >
-          <p className="text-xs tracking-[0.24em] uppercase text-[#B8C4D6]">
-            Cinematic Automotive CGI Studio
-          </p>
-          <h1 className="font-display font-normal text-4xl sm:text-6xl md:text-7xl leading-[1.02] text-[#F5F7FA]">
-            Every frame
-            <br />
-            <span className="italic text-[#B8C4D6]">tells a story.</span>
-          </h1>
-        </motion.div>
+        {/* The hero carries no visible copy: the assembly plays clean from the
+            first frame, and by the time it finishes the character fills the
+            viewport, leaving nowhere for a headline that would not sit across
+            the helmet. The page still needs its one h1, so the wording stays
+            here for the document outline and for screen readers. The same line
+            is set visibly further down the page, in the CinematicLine band. */}
+        <h1 className="sr-only">
+          Cold Chain Theory — cinematic automotive CGI studio. Every frame tells a story.
+        </h1>
 
         <motion.div
           style={{ opacity: ctaOpacity }}
