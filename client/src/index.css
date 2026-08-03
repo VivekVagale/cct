@@ -191,3 +191,11 @@
     background: #5FC8FF;
   }
 }
+
+/* Cubes ships at 50% of its parent, which suits the full-width demo it comes
+   with. The booking column is already narrow, so halving it again leaves a
+   211px grid in a 421px column. Overridden here rather than in Cubes.css,
+   which is kept exactly as vendored. */
+.cubes-fill .default-animation {
+  width: 100%;
+}

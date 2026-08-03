@@ -1,295 +1,322 @@
-import { useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import './Cubes.css';
 
-/**
- * An isometric grid of cubes that tilt away from the cursor, with ripples that
- * travel outward from a cell.
- *
- * The published version of this component drives its transforms with GSAP.
- * Nothing else here needs GSAP, and a tween engine is a large dependency to add
- * for one decorative grid, so the same behaviour is done with a rAF loop and
- * direct style writes.
- *
- * Nothing is routed through React state. At the default grid size this is 64
- * cubes reacting to every pointer move — as state that is 64 re-renders a
- * frame. Transforms are written straight to the nodes through refs instead, and
- * the component re-renders only when the grid itself changes shape.
- */
+interface Gap {
+  row: number;
+  col: number;
+}
+interface Duration {
+  enter: number;
+  leave: number;
+}
+
 export interface CubesProps {
   gridSize?: number;
+  cubeSize?: number;
   maxAngle?: number;
-  /** Cell radius the cursor's influence reaches. */
   radius?: number;
+  easing?: gsap.EaseString;
+  duration?: Duration;
+  cellGap?: number | Gap;
   borderStyle?: string;
   faceColor?: string;
-  rippleColor?: string;
-  /** Multiplier: higher travels outward faster. */
-  rippleSpeed?: number;
+  shadow?: boolean | string;
   autoAnimate?: boolean;
   rippleOnClick?: boolean;
-  className?: string;
+  rippleColor?: string;
+  rippleSpeed?: number;
 }
 
-/** Per-cell delay of a ripple front at speed 1, in ms. */
-const RIPPLE_STEP_MS = 110;
-/** How long a cube holds the ripple colour once the front reaches it. */
-const RIPPLE_HOLD_MS = 260;
-/** Gap between automatic ripples. */
-const AUTO_RIPPLE_MS = 2600;
-/**
- * Turning the plane 45° puts its diagonal across the box, so the grid needs
- * √2 ≈ 1.41x the width it is given. Scaling the rotated result back down keeps
- * it inside its container instead of bleeding out of the column; the extra
- * headroom is for the cubes' own depth, which hangs below the plane.
- */
-const FIT_SCALE = 0.64;
-
-export default function Cubes({
-  gridSize = 8,
+const Cubes: React.FC<CubesProps> = ({
+  gridSize = 10,
+  cubeSize,
   maxAngle = 45,
   radius = 3,
-  borderStyle = "1px solid rgba(255,255,255,0.2)",
-  faceColor = "#1a1a2e",
-  rippleColor = "#ff6b6b",
-  rippleSpeed = 1.5,
+  easing = 'power3.out',
+  duration = { enter: 0.3, leave: 0.6 },
+  cellGap,
+  borderStyle = '1px solid #fff',
+  faceColor = '#120F17',
+  shadow = false,
   autoAnimate = true,
   rippleOnClick = true,
-  className,
-}: CubesProps) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const cubeRefs = useRef<(HTMLDivElement | null)[]>([]);
-  // Pointer position in cell coordinates. Held in a ref so a move does not
-  // re-render; null means the pointer is not over the grid.
-  const pointer = useRef<{ row: number; col: number } | null>(null);
-  const rippleTimers = useRef<number[]>([]);
+  rippleColor = '#fff',
+  rippleSpeed = 2
+}) => {
+  const sceneRef = useRef<HTMLDivElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const userActiveRef = useRef(false);
+  const simPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const simTargetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const simRAFRef = useRef<number | null>(null);
 
-  const cells = useMemo(
-    () =>
-      Array.from({ length: gridSize * gridSize }, (_, i) => ({
-        row: Math.floor(i / gridSize),
-        col: i % gridSize,
-      })),
-    [gridSize],
+  const colGap =
+    typeof cellGap === 'number'
+      ? `${cellGap}px`
+      : (cellGap as Gap)?.col !== undefined
+        ? `${(cellGap as Gap).col}px`
+        : '5%';
+  const rowGap =
+    typeof cellGap === 'number'
+      ? `${cellGap}px`
+      : (cellGap as Gap)?.row !== undefined
+        ? `${(cellGap as Gap).row}px`
+        : '5%';
+
+  const enterDur = duration.enter;
+  const leaveDur = duration.leave;
+
+  const tiltAt = useCallback(
+    (rowCenter: number, colCenter: number) => {
+      if (!sceneRef.current) return;
+      sceneRef.current.querySelectorAll<HTMLDivElement>('.cube').forEach(cube => {
+        const r = +cube.dataset.row!;
+        const c = +cube.dataset.col!;
+        const dist = Math.hypot(r - rowCenter, c - colCenter);
+        if (dist <= radius) {
+          const pct = 1 - dist / radius;
+          const angle = pct * maxAngle;
+          gsap.to(cube, {
+            duration: enterDur,
+            ease: easing,
+            overwrite: true,
+            rotateX: -angle,
+            rotateY: angle
+          });
+        } else {
+          gsap.to(cube, {
+            duration: leaveDur,
+            ease: 'power3.out',
+            overwrite: true,
+            rotateX: 0,
+            rotateY: 0
+          });
+        }
+      });
+    },
+    [radius, maxAngle, enterDur, leaveDur, easing]
   );
 
-  // Tilt. One loop for the whole grid rather than a listener per cube, and it
-  // only runs while there is something to settle.
+  const onPointerMove = useCallback(
+    (e: PointerEvent) => {
+      userActiveRef.current = true;
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+
+      const rect = sceneRef.current!.getBoundingClientRect();
+      const cellW = rect.width / gridSize;
+      const cellH = rect.height / gridSize;
+      const colCenter = (e.clientX - rect.left) / cellW;
+      const rowCenter = (e.clientY - rect.top) / cellH;
+
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => tiltAt(rowCenter, colCenter));
+
+      idleTimerRef.current = setTimeout(() => {
+        userActiveRef.current = false;
+      }, 3000);
+    },
+    [gridSize, tiltAt]
+  );
+
+  const resetAll = useCallback(() => {
+    if (!sceneRef.current) return;
+    sceneRef.current.querySelectorAll<HTMLDivElement>('.cube').forEach(cube =>
+      gsap.to(cube, {
+        duration: leaveDur,
+        rotateX: 0,
+        rotateY: 0,
+        ease: 'power3.out'
+      })
+    );
+  }, [leaveDur]);
+
+  const onTouchMove = useCallback(
+    (e: TouchEvent) => {
+      e.preventDefault();
+      userActiveRef.current = true;
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+
+      const rect = sceneRef.current!.getBoundingClientRect();
+      const cellW = rect.width / gridSize;
+      const cellH = rect.height / gridSize;
+
+      const touch = e.touches[0];
+      const colCenter = (touch.clientX - rect.left) / cellW;
+      const rowCenter = (touch.clientY - rect.top) / cellH;
+
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => tiltAt(rowCenter, colCenter));
+
+      idleTimerRef.current = setTimeout(() => {
+        userActiveRef.current = false;
+      }, 3000);
+    },
+    [gridSize, tiltAt]
+  );
+
+  const onTouchStart = useCallback(() => {
+    userActiveRef.current = true;
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!sceneRef.current) return;
+    resetAll();
+  }, [resetAll]);
+
+  const onClick = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!rippleOnClick || !sceneRef.current) return;
+      const rect = sceneRef.current.getBoundingClientRect();
+      const cellW = rect.width / gridSize;
+      const cellH = rect.height / gridSize;
+
+      const clientX = (e as MouseEvent).clientX || ((e as TouchEvent).touches && (e as TouchEvent).touches[0].clientX);
+      const clientY = (e as MouseEvent).clientY || ((e as TouchEvent).touches && (e as TouchEvent).touches[0].clientY);
+
+      const colHit = Math.floor((clientX - rect.left) / cellW);
+      const rowHit = Math.floor((clientY - rect.top) / cellH);
+
+      const baseRingDelay = 0.15;
+      const baseAnimDur = 0.3;
+      const baseHold = 0.6;
+
+      const spreadDelay = baseRingDelay / rippleSpeed;
+      const animDuration = baseAnimDur / rippleSpeed;
+      const holdTime = baseHold / rippleSpeed;
+
+      const rings: Record<number, HTMLDivElement[]> = {};
+      sceneRef.current.querySelectorAll<HTMLDivElement>('.cube').forEach(cube => {
+        const r = +cube.dataset.row!;
+        const c = +cube.dataset.col!;
+        const dist = Math.hypot(r - rowHit, c - colHit);
+        const ring = Math.round(dist);
+        if (!rings[ring]) rings[ring] = [];
+        rings[ring].push(cube);
+      });
+
+      Object.keys(rings)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .forEach(ring => {
+          const delay = ring * spreadDelay;
+          const faces = rings[ring].flatMap(cube => Array.from(cube.querySelectorAll<HTMLElement>('.cube-face')));
+
+          gsap.to(faces, {
+            backgroundColor: rippleColor,
+            duration: animDuration,
+            delay,
+            ease: 'power3.out'
+          });
+          gsap.to(faces, {
+            backgroundColor: faceColor,
+            duration: animDuration,
+            delay: delay + animDuration + holdTime,
+            ease: 'power3.out'
+          });
+        });
+    },
+    [rippleOnClick, gridSize, faceColor, rippleColor, rippleSpeed]
+  );
+
   useEffect(() => {
-    let raf = 0;
-    let running = true;
-    // Current angles, eased toward the target so cubes settle rather than snap.
-    const state = cells.map(() => ({ rx: 0, ry: 0, z: 0 }));
-
-    const tick = () => {
-      if (!running) return;
-      const p = pointer.current;
-
-      for (let i = 0; i < cells.length; i++) {
-        const { row, col } = cells[i];
-        let tx = 0;
-        let ty = 0;
-        let tz = 0;
-
-        if (p) {
-          const dr = row - p.row;
-          const dc = col - p.col;
-          const dist = Math.hypot(dr, dc);
-          if (dist <= radius) {
-            // Falls off to nothing at the radius edge, so there is no ring.
-            const falloff = 1 - dist / radius;
-            const norm = dist || 1;
-            tx = (dr / norm) * maxAngle * falloff;
-            ty = (-dc / norm) * maxAngle * falloff;
-            tz = falloff * 18;
-          }
-        }
-
-        const s = state[i];
-        s.rx += (tx - s.rx) * 0.14;
-        s.ry += (ty - s.ry) * 0.14;
-        s.z += (tz - s.z) * 0.14;
-
-        const node = cubeRefs.current[i];
-        if (node) {
-          node.style.transform = `translateZ(${s.z.toFixed(2)}px) rotateX(${s.rx.toFixed(2)}deg) rotateY(${s.ry.toFixed(2)}deg)`;
+    if (!autoAnimate || !sceneRef.current) return;
+    simPosRef.current = {
+      x: Math.random() * gridSize,
+      y: Math.random() * gridSize
+    };
+    simTargetRef.current = {
+      x: Math.random() * gridSize,
+      y: Math.random() * gridSize
+    };
+    const speed = 0.02;
+    const loop = () => {
+      if (!userActiveRef.current) {
+        const pos = simPosRef.current;
+        const tgt = simTargetRef.current;
+        pos.x += (tgt.x - pos.x) * speed;
+        pos.y += (tgt.y - pos.y) * speed;
+        tiltAt(pos.y, pos.x);
+        if (Math.hypot(pos.x - tgt.x, pos.y - tgt.y) < 0.1) {
+          simTargetRef.current = {
+            x: Math.random() * gridSize,
+            y: Math.random() * gridSize
+          };
         }
       }
-      raf = requestAnimationFrame(tick);
+      simRAFRef.current = requestAnimationFrame(loop);
     };
-
-    raf = requestAnimationFrame(tick);
+    simRAFRef.current = requestAnimationFrame(loop);
     return () => {
-      running = false;
-      cancelAnimationFrame(raf);
-    };
-  }, [cells, maxAngle, radius]);
-
-  // Ripples. Each cube is repainted on its own timer, offset by how long the
-  // front takes to reach it.
-  useEffect(() => {
-    const timers = rippleTimers.current;
-
-    const ripple = (row: number, col: number) => {
-      for (let i = 0; i < cells.length; i++) {
-        const dist = Math.hypot(cells[i].row - row, cells[i].col - col);
-        const delay = (dist * RIPPLE_STEP_MS) / Math.max(rippleSpeed, 0.01);
-        const on = window.setTimeout(() => {
-          const node = cubeRefs.current[i];
-          if (node) node.dataset.rippling = "true";
-          const off = window.setTimeout(() => {
-            const n = cubeRefs.current[i];
-            if (n) delete n.dataset.rippling;
-          }, RIPPLE_HOLD_MS);
-          timers.push(off);
-        }, delay);
-        timers.push(on);
+      if (simRAFRef.current != null) {
+        cancelAnimationFrame(simRAFRef.current);
       }
     };
+  }, [autoAnimate, gridSize, tiltAt]);
 
-    const el = wrapRef.current;
-    const onClick = (e: MouseEvent) => {
-      const p = toCell(e, el, gridSize);
-      if (p) ripple(p.row, p.col);
-    };
-    if (rippleOnClick && el) el.addEventListener("click", onClick);
-
-    let auto = 0;
-    if (autoAnimate) {
-      auto = window.setInterval(() => {
-        ripple(
-          Math.floor(Math.random() * gridSize),
-          Math.floor(Math.random() * gridSize),
-        );
-      }, AUTO_RIPPLE_MS);
-    }
-
-    return () => {
-      if (rippleOnClick && el) el.removeEventListener("click", onClick);
-      if (auto) clearInterval(auto);
-      timers.forEach(clearTimeout);
-      timers.length = 0;
-    };
-  }, [cells, gridSize, rippleOnClick, rippleSpeed, autoAnimate]);
-
-  // Cube depth has to be half a cell in real pixels — the cells themselves are
-  // sized in percentages, which translateZ cannot use.
   useEffect(() => {
-    const el = wrapRef.current;
+    const el = sceneRef.current;
     if (!el) return;
-    const apply = () => {
-      const w = el.getBoundingClientRect().width;
-      el.style.setProperty("--half", `${w / gridSize / 2}px`);
-    };
-    apply();
-    const ro = new ResizeObserver(apply);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [gridSize]);
+    el.addEventListener('pointermove', onPointerMove);
+    el.addEventListener('pointerleave', resetAll);
+    el.addEventListener('click', onClick);
 
-  const pct = 100 / gridSize;
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('pointermove', onPointerMove);
+      el.removeEventListener('pointerleave', resetAll);
+      el.removeEventListener('click', onClick);
+
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+
+      rafRef.current != null && cancelAnimationFrame(rafRef.current);
+      idleTimerRef.current && clearTimeout(idleTimerRef.current);
+    };
+  }, [onPointerMove, resetAll, onClick, onTouchMove, onTouchStart, onTouchEnd]);
+
+  const cells = Array.from({ length: gridSize });
+  const sceneStyle: React.CSSProperties = {
+    gridTemplateColumns: cubeSize ? `repeat(${gridSize}, ${cubeSize}px)` : `repeat(${gridSize}, 1fr)`,
+    gridTemplateRows: cubeSize ? `repeat(${gridSize}, ${cubeSize}px)` : `repeat(${gridSize}, 1fr)`,
+    columnGap: colGap,
+    rowGap: rowGap
+  };
+  const wrapperStyle = {
+    '--cube-face-border': borderStyle,
+    '--cube-face-bg': faceColor,
+    '--cube-face-shadow': shadow === true ? '0 0 6px rgba(0,0,0,.5)' : shadow || 'none',
+    ...(cubeSize
+      ? {
+          width: `${gridSize * cubeSize}px`,
+          height: `${gridSize * cubeSize}px`
+        }
+      : {})
+  } as React.CSSProperties;
 
   return (
-    <div
-      ref={wrapRef}
-      aria-hidden
-      className={className}
-      style={{ perspective: "1200px", width: "100%", height: "100%" }}
-      onPointerMove={(e) => {
-        pointer.current = toCell(e.nativeEvent, wrapRef.current, gridSize);
-      }}
-      onPointerLeave={() => {
-        pointer.current = null;
-      }}
-    >
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100%",
-          transformStyle: "preserve-3d",
-          // Isometric: the grid is a plane laid down and turned 45°. The scale
-          // is listed first so it applies to the rotated result.
-          transform: `scale(${FIT_SCALE}) rotateX(58deg) rotateZ(45deg)`,
-        }}
-      >
-        {cells.map((cell, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: `${cell.col * pct}%`,
-              top: `${cell.row * pct}%`,
-              width: `${pct}%`,
-              height: `${pct}%`,
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <div
-              ref={(n) => {
-                cubeRefs.current[i] = n;
-              }}
-              className="cubes-cube"
-              style={{
-                position: "absolute",
-                inset: 0,
-                transformStyle: "preserve-3d",
-                willChange: "transform",
-              }}
-            >
-              <Face transform="translateZ(var(--half))" border={borderStyle} face={faceColor} ripple={rippleColor} />
-              <Face transform="rotateX(90deg) translateZ(var(--half))" border={borderStyle} face={faceColor} ripple={rippleColor} />
-              <Face transform="rotateY(90deg) translateZ(var(--half))" border={borderStyle} face={faceColor} ripple={rippleColor} />
+    <div className="default-animation" style={wrapperStyle}>
+      <div ref={sceneRef} className="default-animation--scene" style={sceneStyle}>
+        {cells.map((_, r) =>
+          cells.map((__, c) => (
+            <div key={`${r}-${c}`} className="cube" data-row={r} data-col={c}>
+              <div className="cube-face cube-face--top" />
+              <div className="cube-face cube-face--bottom" />
+              <div className="cube-face cube-face--left" />
+              <div className="cube-face cube-face--right" />
+              <div className="cube-face cube-face--front" />
+              <div className="cube-face cube-face--back" />
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
-
-      {/* The ripple colour is swapped by a data attribute the loop sets, so a
-          ripple costs no React work. */}
-      <style>{`
-        .cubes-cube > i { transition: background-color 220ms ease-out; }
-        .cubes-cube[data-rippling="true"] > i { background-color: var(--cubes-ripple) !important; }
-      `}</style>
     </div>
   );
-}
+};
 
-function Face({
-  transform,
-  border,
-  face,
-  ripple,
-}: {
-  transform: string;
-  border: string;
-  face: string;
-  ripple: string;
-}) {
-  return (
-    <i
-      style={
-        {
-          position: "absolute",
-          inset: 0,
-          display: "block",
-          transform,
-          background: face,
-          border,
-          boxSizing: "border-box",
-          "--cubes-ripple": ripple,
-        } as React.CSSProperties
-      }
-    />
-  );
-}
-
-function toCell(e: MouseEvent | PointerEvent, el: HTMLElement | null, gridSize: number) {
-  if (!el) return null;
-  const r = el.getBoundingClientRect();
-  if (!r.width || !r.height) return null;
-  // The grid is rotated for display only; hit-testing stays in its own
-  // untransformed coordinates, which is what the cells are laid out in.
-  const col = Math.floor(((e.clientX - r.left) / r.width) * gridSize);
-  const row = Math.floor(((e.clientY - r.top) / r.height) * gridSize);
-  if (row < 0 || col < 0 || row >= gridSize || col >= gridSize) return null;
-  return { row, col };
-}
+export default Cubes;

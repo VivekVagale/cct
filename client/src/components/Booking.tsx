@@ -77,9 +77,13 @@ export function Booking() {
           </p>
           <Mascot pose="pointing" size="lg" className="hidden lg:block" />
 
-          {/* Square, because the grid is square and a non-square box would
-              shear the isometric projection. */}
-          <div className="hidden lg:block relative mt-12 w-full max-w-[420px] aspect-square">
+          {/* Cubes.css sizes .default-animation at 50% of its parent, which
+              suits the full-width demo it ships with. This column is already
+              narrow, so halving it again leaves a 211px grid — the width is
+              overridden here rather than in the component, and the height comes
+              from the grid's own square aspect instead of a fixed 600px that
+              would leave most of the box empty. */}
+          <div className="hidden lg:block relative mt-12 cubes-fill">
             <Cubes
               gridSize={8}
               maxAngle={45}
