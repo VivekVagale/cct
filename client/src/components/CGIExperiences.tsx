@@ -13,63 +13,66 @@ function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
       ref={ref}
       href={disabled ? undefined : "#booking"}
       aria-disabled={disabled}
-      onMouseMove={disabled ? undefined : onMouseMove}
-      onMouseLeave={disabled ? undefined : onMouseLeave}
-      whileTap={disabled ? undefined : { scale: 0.98 }}
-      style={
-        disabled
-          ? undefined
-          : { rotateX, rotateY, transformPerspective: 900 }
-      }
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      whileTap={disabled ? undefined : { scale: 0.97 }}
+      style={{ rotateX, rotateY, transformPerspective: 900 }}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.7, delay: (index % 3) * 0.08 }}
-      className={`group relative bg-[#05070A] aspect-[4/5] overflow-hidden flex flex-col justify-end p-8 ${
+      transition={{ duration: 0.7, delay: (index % 4) * 0.08 }}
+      className={`group relative overflow-hidden rounded-sm border border-white/[0.1] bg-white/[0.02] transition-colors duration-300 hover:border-white/30 ${
         disabled ? "cursor-default" : "cursor-pointer"
       }`}
     >
-      {!disabled && (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={{ background: glowBackground }}
-        />
-      )}
-
-      <img
-        src={exp.image}
-        alt={exp.title}
-        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
-          disabled
-            ? "opacity-25 grayscale"
-            : "opacity-50 group-hover:opacity-75 group-hover:scale-105"
-        }`}
+      {/* Cursor-follow highlight. Coming-soon cards get it too — they are not
+          clickable, but a card that ignores the pointer entirely reads as
+          broken rather than as unavailable, and four of the seven are
+          coming soon. The badge carries the state instead. */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: glowBackground }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#05070A] via-[#05070A]/30 to-transparent" />
 
-      <div className="relative z-10">
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <img
+          src={exp.image}
+          alt={exp.title}
+          className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+            disabled
+              ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
+              : "opacity-60 group-hover:opacity-85"
+          }`}
+        />
+        {/* Fades the image into the caption. Stops at the image's own bottom
+            edge so the caption below stays clear of it. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
+      </div>
+
+      {/* Transparent caption — no fill of its own, so the page's starfield
+          reads through the bottom of the card. */}
+      <div className="relative z-10 p-4 sm:p-5">
         <h3
-          className={`font-display text-2xl sm:text-3xl mb-2 ${
+          className={`font-display text-lg sm:text-xl mb-1.5 ${
             disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
           }`}
         >
           {exp.title}
         </h3>
 
+        <p className="text-xs text-[#B8C4D6] leading-relaxed mb-3">
+          {exp.description}
+        </p>
+
         {disabled ? (
-          <span className="inline-block text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]/70 border border-white/15 px-3 py-1.5">
+          <span className="inline-block text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]/70 border border-white/15 px-2.5 py-1 transition-colors duration-300 group-hover:border-white/30 group-hover:text-[#B8C4D6]">
             Coming Soon
           </span>
         ) : (
-          <>
-            <p className="text-sm text-[#B8C4D6] leading-relaxed mb-4 max-w-xs opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-500">
-              {exp.description}
-            </p>
-            <span className="text-xs tracking-[0.14em] uppercase text-[#F5F7FA] border-b border-white/30 pb-1 group-hover:border-white transition-colors duration-300">
-              Inquire
-            </span>
-          </>
+          <span className="inline-block text-[10px] tracking-[0.18em] uppercase text-[#F5F7FA] border-b border-white/30 pb-1 group-hover:border-white transition-colors duration-300">
+            Inquire
+          </span>
         )}
       </div>
     </motion.a>
@@ -88,7 +91,11 @@ export function CGIExperiences() {
         </h2>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06]">
+      {/* Separate bordered cards with a real gap, rather than the old
+          gap-px hairline grid — that trick draws its lines with the gap's
+          background showing between opaque tiles, which cannot survive cards
+          that are meant to be see-through. */}
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {experiences.map((exp, i) => (
           <ExperienceCard key={exp.id} exp={exp} index={i} />
         ))}
