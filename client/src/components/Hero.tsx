@@ -42,19 +42,7 @@ const STAGE_VH = 100; // the sticky stage itself
 const SCROLL_VH = ASSEMBLY_VH + REVEAL_VH + HOLD_VH + EXIT_VH;
 const TOTAL_VH = SCROLL_VH + STAGE_VH;
 
-/**
- * How much scroll the "scroll down" cue takes to fade out, in vh.
- *
- * Short on purpose. The cue exists to answer one question — does this move? —
- * and the first notch of the wheel answers it. At the 26vh this started as, it
- * was still sitting over the mascot several notches in, long after it had been
- * obeyed. 8vh is roughly one notch: it is gone as soon as scrolling starts,
- * rather than accompanying the assembly.
- */
-const CUE_VH = 8;
-
 const ASSEMBLY_END = ASSEMBLY_VH / SCROLL_VH;
-const CUE_END = CUE_VH / SCROLL_VH;
 const REVEAL_END = (ASSEMBLY_VH + REVEAL_VH) / SCROLL_VH;
 const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
 
@@ -130,6 +118,9 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [alive, setAlive] = useState(false);
+  // Whether the page has moved at all. Only ever flips false -> true, so this
+  // is one re-render for the life of the section, not one per scroll tick.
+  const [scrolled, setScrolled] = useState(false);
   // Media-query driven, so it follows a rotate. State is safe here for the same
   // reason the old resize measurement was: this changes on orientation, not on
   // every scroll tick.
@@ -164,6 +155,11 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     const next = v >= ASSEMBLY_END;
     setAlive((prev) => (prev === next ? prev : next));
+    // One-way latch for the scroll cue. It is a flag, not a curve: the cue goes
+    // the moment the page moves and never comes back, even if the reader
+    // scrolls back to the top. A threshold this small is any real scroll at all
+    // — about 4px — while still ignoring subpixel noise.
+    if (v > 0.0005) setScrolled((prev) => prev || true);
   });
 
   // The sequence consumes most of the pin; the tail is the exit.
@@ -196,9 +192,6 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // before it: the sequence plays clean.
   const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
-  // The cue's job is done the moment it is obeyed, so it leaves as soon as
-  // scrolling starts rather than riding along with the assembly.
-  const cueOpacity = useTransform(scrollYProgress, [0, CUE_END], [1, 0]);
 
   // The starfield rises behind the frames rather than replacing them. The
   // frames are keyed, so their backdrop is already clear — the stars appear
@@ -281,19 +274,18 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
           Cold Chain Theory — cinematic automotive CGI studio. Every frame tells a story.
         </h1>
 
-        {/* Held back until the frames are ready, so it does not share the
-            screen with the loading line below it. The two opacities are on
-            separate elements because they come from different places — one is
-            scroll-driven, the other is a state transition — and a single
-            element cannot take both. */}
+        {/* Appears once the frames are ready, so it does not share the screen
+            with the loading line below it, and leaves the instant the page
+            moves. It was tied to scroll position before — fading across a span
+            of scroll — which meant it was still on screen while the assembly
+            was already running. It is a prompt to start, so it ends when the
+            reader starts. */}
         <motion.div
-          animate={{ opacity: ready ? 1 : 0 }}
-          transition={{ duration: 0.6 }}
+          animate={{ opacity: ready && !scrolled ? 1 : 0 }}
+          transition={{ duration: scrolled ? 0.25 : 0.6 }}
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
         >
-          <motion.div style={{ opacity: cueOpacity }}>
-            <ScrollCue />
-          </motion.div>
+          <ScrollCue />
         </motion.div>
 
         <motion.div
