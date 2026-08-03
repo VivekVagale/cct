@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { Mascot } from "@/components/Mascot";
 import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
+import { ExperienceOptionCard } from "@/components/ExperienceOptionCard";
+import Cubes from "@/components/ui/Cubes";
 import { vehicles } from "@/data/vehicles";
 import { experiences } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
@@ -74,6 +76,22 @@ export function Booking() {
             follow up to scope the shot list together.
           </p>
           <Mascot pose="pointing" size="lg" className="hidden lg:block" />
+
+          {/* Square, because the grid is square and a non-square box would
+              shear the isometric projection. */}
+          <div className="hidden lg:block relative mt-12 w-full max-w-[420px] aspect-square">
+            <Cubes
+              gridSize={8}
+              maxAngle={45}
+              radius={3}
+              borderStyle="2px dashed #B497CF"
+              faceColor="#1a1a2e"
+              rippleColor="#ff6b6b"
+              rippleSpeed={1.5}
+              autoAnimate
+              rippleOnClick
+            />
+          </div>
         </div>
 
         <form
@@ -114,29 +132,27 @@ export function Booking() {
             </label>
           </div>
 
-          <label className="flex flex-col gap-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            Experience
-            <div className="flex flex-wrap gap-2">
+          {/* A fieldset rather than a label: a label may caption one control,
+              and this is a group of them. */}
+          <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
+            <legend className="text-xs tracking-[0.14em] uppercase text-[#B8C4D6] mb-3">
+              Experience
+            </legend>
+            <div
+              role="radiogroup"
+              aria-label="Experience"
+              className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+            >
               {experiences.map((exp) => (
-                <button
-                  type="button"
+                <ExperienceOptionCard
                   key={exp.id}
-                  disabled={exp.comingSoon}
-                  onClick={() => setExperience(exp.title)}
-                  className={`text-xs tracking-[0.1em] uppercase px-4 py-2.5 border transition-colors duration-300 normal-case ${
-                    exp.comingSoon
-                      ? "border-white/10 text-[#B8C4D6]/40 cursor-not-allowed"
-                      : experience === exp.title
-                        ? "bg-white text-[#05070A] border-white"
-                        : "border-white/20 text-[#B8C4D6] hover:border-white/50"
-                  }`}
-                >
-                  {exp.title}
-                  {exp.comingSoon && <span className="ml-1.5 opacity-70">— Soon</span>}
-                </button>
+                  exp={exp}
+                  selected={experience === exp.title}
+                  onSelect={() => setExperience(exp.title)}
+                />
               ))}
             </div>
-          </label>
+          </fieldset>
 
           <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
             Project Description
