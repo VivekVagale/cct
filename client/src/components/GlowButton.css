@@ -1,0 +1,67 @@
+/*
+ * Gradient-ringed button with a glow that blooms on hover.
+ *
+ * The ring is the wrapper's own background showing through 3px of padding
+ * around an opaque face — cheaper and sharper than a gradient border-image,
+ * which cannot follow a border-radius cleanly.
+ *
+ * The glow is a blurred second copy of that gradient, sitting behind the ring
+ * as a pseudo-element. It has to be a pseudo-element: box-shadow cannot take a
+ * gradient, and a real element would need its own layout.
+ */
+
+.glow-button {
+  position: relative;
+  display: inline-block;
+  padding: 3px;
+  border-radius: 0.9em;
+  background: linear-gradient(90deg, #03a9f4, #f441a5);
+  transition: all 0.4s ease;
+}
+
+/*
+ * Two things here are load-bearing.
+ *
+ * The z-index must stay negative, and .glow-button must NOT become a stacking
+ * context — no transform, opacity or filter on it, ever. A negative-z child
+ * paints beneath its ancestor's background only while that ancestor is not a
+ * stacking context; the moment one is created the glow paints on top of the
+ * ring instead of behind it, and the effect inverts into a smear.
+ *
+ * The blur is animated rather than the opacity because blurring from 0 keeps
+ * the glow the same colour throughout, so it reads as light spreading rather
+ * than as a second shape fading up.
+ */
+.glow-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 0.9em;
+  z-index: -10;
+  filter: blur(0);
+  transition: filter 0.4s ease;
+}
+
+.glow-button:hover::before {
+  background: linear-gradient(90deg, #03a9f4, #f441a5);
+  filter: blur(1.2em);
+}
+
+.glow-button:active::before {
+  filter: blur(0.2em);
+}
+
+/*
+ * The face carries no type scale of its own. Each call site passes its own
+ * size and padding so the button sits at the scale of the section it is in —
+ * the nav bar and the hero want very different sizes out of the same control.
+ */
+.glow-button__face {
+  display: block;
+  border-radius: 0.5em;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 2px 2px 3px #000000b4;
+}
