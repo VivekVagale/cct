@@ -1,168 +1,192 @@
 """
-Build the transparent hero frame sequence used by the scroll-driven Hero.
+Build the hero frame sequence from the 4K master.
 
-Input:  the black-background render frames (branch `hero-src`, frames/*.jpg)
-Output: client/public/hero/f_XXXX.webp + manifest.json
+Input:  the master render (branch `hero-src`, video/*.mp4)
+Output: client/public/hero/f_XXXX.webp + manifest.json + heroSequence.ts
 
 Run:
-    python tools/build_hero_frames.py --frames <dir>/*.jpg --out client/public/hero
+    python tools/build_hero_frames.py --video <path>/master.mp4
+
+Requires a full ffmpeg. The one Playwright ships is a minimal build with no
+H.264 decoder; `pip install imageio-ffmpeg` provides a complete static binary
+and this script will find it automatically.
 
 Why it works the way it does
 ----------------------------
-The render has two things that have to come off: a Gemini watermark in the
-bottom-right corner, and the black backdrop.
+Two earlier versions of this pipeline are worth knowing about, because the
+problems they were built around no longer exist.
 
-The watermark cannot be cleared with a fixed rectangle. Voxel cubes drift
-through that corner on ~9% of frames, so a rectangle would punch holes in
-them and pop visibly in motion. Instead its exact footprint is derived --
-it is the only thing bright in *every* frame, because cubes move and it does
-not -- and those pixels are repaired from their nearest neighbours *before*
-keying. The repair then inherits whatever was behind it: backdrop repairs to
-backdrop and keys out, a cube underneath repairs to cube colour and stays.
+The *first* source was a render with a Gemini watermark and a backdrop that was
+not black: it faded up from black into a static gradient (~8 at top-left, ~50
+at top-right). Keying that needed a reconstructed clean plate and an absolute
+per-pixel difference, because a single luminance threshold either missed most
+of the backdrop or ate the black helmet. Even then the character's black
+clothing was never convincingly separable from the backdrop, so the frames were
+shipped opaque and the page's starfield was faded in over them instead.
 
-The backdrop is not black. It fades up from black over the first ~20% of the
-clip into a static gradient (~8 at top-left, ~50 at top-right). A single
-luminance threshold either misses most of it or eats the black helmet, so
-instead the gradient is reconstructed as a clean plate from the steady-state
-frames, scaled per frame to follow the fade, and matched by *absolute*
-difference. Absolute matters: the helmet reads as foreground by being darker
-than the backdrop, not brighter.
+The *current* source has neither problem. There is no watermark, and the
+backdrop is a true black, which makes a much more direct matte available:
+
+    the backdrop is the black *connected to the frame border*.
+
+Black inside the silhouette -- the helmet, the visor, the clothing -- is not
+reachable from the border, so it stays fully opaque. No threshold is ever drawn
+between character and backdrop, which is why this leaves no fringing and no
+frame-shaped rectangle where the older attempts did.
+
+Everything outside the silhouette is cleared, including the render's faint
+ambient haze. That haze covers about a third of each frame at an alpha of
+0.06-0.16 -- too faint to see over a starfield, too large an area to encode.
+Carrying it cost ~2.4x the frame size against ~1.8x without it, and the two
+composite indistinguishably.
+
+Resolution, and why it is not 1920
+----------------------------------
+The hero canvas is overscanned to 110% of the viewport and sized at
+`rect * devicePixelRatio`, capped at 2. On a 1440px-wide retina laptop that is
+~3170 device pixels filled from the frame, so a 1920-wide sequence is upscaled
+1.65x and reads as soft -- which looks like compression but is not. 2560 brings
+that to 1.24x.
+
+Encoder quality is a separate axis and a much weaker one: the 1920 sequence
+this replaces measured 41.8 dB PSNR against a clean encode of the same frame,
+i.e. very nearly transparent already. Spending the bytes on quality rather than
+resolution would have doubled the payload and fixed nothing you can see.
+
+The matte is computed at the source's full 3840 and downsampled together with
+the colour, so the alpha edge is antialiased by the resample rather than by a
+blur applied after the fact.
 """
 
 import argparse
-import glob
 import json
 import os
+import subprocess
 
 import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-STATIC_BRIGHT = 60   # a pixel bright in every frame is watermark, not content
-PLATE_FROM = 0.25    # ignore the fade-in when building the clean plate
-MATTE_LO = 14        # |frame - plate| below this is backdrop
-MATTE_HI = 32        # and above this is fully foreground
-MIN_BLOB = 40        # drop surviving specks smaller than this
+SRC_W, SRC_H = 3840, 2160
+
+BACKDROP_MAX = 10    # a pixel at or below this is a backdrop candidate
+ALPHA_FLOOR = 0.06   # below this, snap to clear so the empty field compresses
+MIN_BLOB = 160       # drop specks smaller than this (40 at 1920, 4x the pixels)
+FEATHER = 2.4        # px at 3840, so ~1.2px once resampled
+
+# Floor on the unpremultiply divisor.
+#
+# The render is composited over black, so recovering straight alpha means
+# dividing colour by coverage. Unclamped, that amplifies grain in the barely-
+# covered pixels by up to 1/ALPHA_FLOOR -- invisible at those alphas, but
+# exactly what WebP cannot predict, so it costs real bytes. This caps the gain
+# at 4x.
+UNPREMULT_MIN = 0.25
 
 
-def watermark_mask(paths, pad=4):
-    mn = None
-    for p in paths[::5]:
-        l = np.asarray(Image.open(p).convert("RGB")).max(2)
-        mn = l if mn is None else np.minimum(mn, l)
-    ys, xs = np.where(mn > STATIC_BRIGHT)
-    mask = np.zeros(mn.shape, bool)
-    if len(xs):
-        mask[ys.min() - pad:ys.max() + pad + 1, xs.min() - pad:xs.max() + pad + 1] = True
-    return mask, (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())) if len(xs) else None
+def ffmpeg_exe():
+    try:
+        import imageio_ffmpeg
+
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except ImportError:
+        return "ffmpeg"
 
 
-def make_repair(mask):
-    _, (iy, ix) = ndimage.distance_transform_edt(mask, return_indices=True)
-
-    def repair(rgb):
-        rgb = rgb.copy()
-        rgb[mask] = rgb[iy[mask], ix[mask]]
-        return rgb
-
-    return repair
-
-
-def build_plate(paths, repair):
-    acc = None
-    # Every third steady-state frame is plenty: the plate is a per-pixel
-    # minimum, and content has long since moved on three frames later.
-    for p in paths[int(len(paths) * PLATE_FROM)::3]:
-        a = repair(np.asarray(Image.open(p).convert("RGB")).astype(np.float32))
-        acc = a if acc is None else np.minimum(acc, a)
-    return ndimage.gaussian_filter(acc, 3)
+def source_frame_count(video):
+    """Count by decoding rather than trusting container metadata."""
+    probe = subprocess.run(
+        [ffmpeg_exe(), "-v", "error", "-i", video, "-map", "0:v:0",
+         "-f", "rawvideo", "-pix_fmt", "gray", "-vf", "scale=2:2", "-"],
+        capture_output=True,
+    )
+    return len(probe.stdout) // 4
 
 
-def matte(rgb, plate):
-    lit = plate.max(2) > 6
-    scale = min(float(np.median(rgb.max(2)[lit] / np.maximum(plate.max(2)[lit], 1e-3))), 1.0)
-    d = np.abs(rgb - plate * scale).max(2)
+def matte(rgb):
+    """Solid inside the silhouette, feathered at its edge, clear outside."""
+    dark = rgb.max(2) <= BACKDROP_MAX
 
-    a = np.clip((d - MATTE_LO) / float(MATTE_HI - MATTE_LO), 0.0, 1.0)
-    a = np.maximum(a, ndimage.binary_fill_holes(a > 0.5).astype(np.float32))
+    labels, _ = ndimage.label(dark)
+    edge = np.unique(np.concatenate([labels[0, :], labels[-1, :], labels[:, 0], labels[:, -1]]))
+    inside = ndimage.binary_fill_holes(~np.isin(labels, edge[edge != 0]))
 
-    labels, n = ndimage.label(a > 0.15)
+    a = inside.astype(np.float32)
+    labels, n = ndimage.label(a > 0.5)
     if n:
         sizes = np.bincount(labels.ravel())
         a[np.isin(labels, np.where(sizes < MIN_BLOB)[0]) & (labels > 0)] = 0.0
-    return ndimage.gaussian_filter(a, 0.6)
+
+    a = ndimage.gaussian_filter(a, FEATHER)
+    a[a < ALPHA_FLOOR] = 0.0
+    return np.clip(a, 0.0, 1.0)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--frames", required=True, help="glob for source frames")
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--step", type=int, default=2, help="keep every Nth frame")
-    # 960 rather than the source's 1280: the hero is a full-bleed canvas, so
-    # the frames are resampled anyway, and 150 of them at 1280 came to 11 MB.
-    ap.add_argument("--width", type=int, default=960)
-    ap.add_argument("--quality", type=int, default=80)
-    ap.add_argument("--keep-background", action="store_true",
-                    help="ship the frames opaque, backdrop and all, instead of "
-                         "keying it out. The character's black clothing meets "
-                         "the backdrop with no edge between them, so any matte "
-                         "there is guesswork and leaves fringing and a visible "
-                         "frame rectangle. Keeping the backdrop and fading the "
-                         "page's starfield in afterwards avoids the problem "
-                         "rather than approximating a solution to it.")
-    ap.add_argument("--no-watermark", action="store_true",
-                    help="source has no watermark. The detector looks for what "
-                         "is bright in every frame, which on a clean export can "
-                         "latch onto legitimate content that happens to persist "
-                         "-- a highlight on the helmet, say -- and smear it.")
+    ap.add_argument("--video", required=True)
+    ap.add_argument("--out", default="client/public/hero")
+    ap.add_argument("--count", type=int, default=298, help="frames to emit")
+    ap.add_argument("--width", type=int, default=2560)
+    ap.add_argument("--quality", type=int, default=90)
+    # WebP stores alpha losslessly by default, which on a silhouette this size
+    # is the single largest line item in the frame.
+    ap.add_argument("--alpha-quality", type=int, default=80)
     args = ap.parse_args()
 
-    paths = sorted(glob.glob(args.frames))
-    if not paths:
-        raise SystemExit(f"no frames matched {args.frames}")
+    n_src = source_frame_count(args.video)
+    if n_src < args.count:
+        raise SystemExit(f"source has {n_src} frames, fewer than the {args.count} requested")
 
-    if args.no_watermark:
-        repair = lambda rgb: rgb  # noqa: E731
-        print(f"{len(paths)} source frames; no watermark to remove")
-    else:
-        mask, box = watermark_mask(paths)
-        repair = make_repair(mask)
-        print(f"{len(paths)} source frames; watermark at {box}")
-
-    plate = None
-    if args.keep_background:
-        print("keeping the backdrop; no matte will be computed")
-    else:
-        plate = build_plate(paths, repair)
-        print(f"clean plate built, peak luma {plate.max():.1f}")
+    # Even resample across the whole clip rather than a fixed integer step: the
+    # source frame count is not a multiple of the output count.
+    picks = {int(round(i * (n_src - 1) / (args.count - 1))): i for i in range(args.count)}
+    print(f"{n_src} source frames -> {args.count} output frames at {args.width}w", flush=True)
 
     os.makedirs(args.out, exist_ok=True)
-    kept = paths[::args.step]
+    stride = SRC_W * SRC_H * 3
+    proc = subprocess.Popen(
+        [ffmpeg_exe(), "-v", "error", "-i", args.video,
+         "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
+        stdout=subprocess.PIPE, bufsize=stride,
+    )
+
     total = 0
-    for i, p in enumerate(kept):
-        rgb = repair(np.asarray(Image.open(p).convert("RGB")).astype(np.float32))
-        if plate is None:
-            im = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB")
-        else:
-            a = matte(rgb, plate)
-            # Undo the darkening that partial-coverage pixels picked up from
-            # being composited over black, so no grey halo forms.
-            rgba = np.dstack([np.clip(rgb / np.maximum(a, 1e-3)[..., None], 0, 255),
-                              a * 255.0]).astype(np.uint8)
-            im = Image.fromarray(rgba, "RGBA")
-        if args.width != im.width:
-            im = im.resize((args.width, round(im.height * args.width / im.width)), Image.LANCZOS)
-        f = os.path.join(args.out, f"f_{i:04d}.webp")
-        im.save(f, "WEBP", quality=args.quality, method=6)
-        total += os.path.getsize(f)
+    height = None
+    n = 0
+    while True:
+        buf = proc.stdout.read(stride)
+        if len(buf) < stride:
+            break
+        if n in picks:
+            i = picks[n]
+            rgb = np.frombuffer(buf, np.uint8).reshape(SRC_H, SRC_W, 3).astype(np.float32)
+            a = matte(rgb)
+            colour = np.clip(rgb / np.maximum(a, UNPREMULT_MIN)[..., None], 0, 255)
+            # Clear pixels carry no colour anyone can see, so flatten them to
+            # black rather than leaving amplified noise for the encoder.
+            colour[a <= 0.0] = 0.0
+            im = Image.fromarray(np.dstack([colour, a * 255.0]).astype(np.uint8), "RGBA")
+            if args.width != im.width:
+                im = im.resize(
+                    (args.width, round(im.height * args.width / im.width)), Image.LANCZOS)
+            height = im.height
+            path = os.path.join(args.out, f"f_{i:04d}.webp")
+            im.save(path, "WEBP", quality=args.quality, method=6,
+                    alpha_quality=args.alpha_quality)
+            total += os.path.getsize(path)
+            if i % 25 == 0:
+                print(f"  {i}/{args.count}", flush=True)
+        n += 1
+    proc.stdout.close()
+    proc.wait()
 
     manifest = {
-        "count": len(kept),
+        "count": args.count,
         "width": args.width,
-        "height": im.height,
+        "height": height,
         "pattern": "f_{i}.webp",
-        "sourceFrames": len(paths),
-        "step": args.step,
+        "sourceFrames": n_src,
     }
     with open(os.path.join(args.out, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=2)
@@ -175,16 +199,16 @@ def main():
             f.write(
                 "// Generated by tools/build_hero_frames.py — do not edit by hand.\n"
                 "export const HERO_SEQUENCE = {\n"
-                f"  count: {len(kept)},\n"
+                f"  count: {args.count},\n"
                 f"  width: {args.width},\n"
-                f"  height: {im.height},\n"
+                f"  height: {height},\n"
                 '  srcFor: (i: number) => `/hero/f_${String(i).padStart(4, "0")}.webp`,\n'
                 "} as const;\n"
             )
         print(f"wrote {ts}")
 
-    print(f"wrote {len(kept)} frames, {total/1e6:.2f} MB total "
-          f"({total/len(kept)/1024:.1f} KB avg), {args.width}x{im.height}")
+    print(f"wrote {args.count} frames, {total/1e6:.2f} MB total "
+          f"({total/args.count/1024:.1f} KB avg), {args.width}x{height}")
 
 
 if __name__ == "__main__":
