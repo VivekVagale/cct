@@ -42,8 +42,16 @@ const STAGE_VH = 100; // the sticky stage itself
 const SCROLL_VH = ASSEMBLY_VH + REVEAL_VH + HOLD_VH + EXIT_VH;
 const TOTAL_VH = SCROLL_VH + STAGE_VH;
 
-/** How much scroll the "scroll down" cue takes to fade out, in vh. */
-const CUE_VH = 26;
+/**
+ * How much scroll the "scroll down" cue takes to fade out, in vh.
+ *
+ * Short on purpose. The cue exists to answer one question — does this move? —
+ * and the first notch of the wheel answers it. At the 26vh this started as, it
+ * was still sitting over the mascot several notches in, long after it had been
+ * obeyed. 8vh is roughly one notch: it is gone as soon as scrolling starts,
+ * rather than accompanying the assembly.
+ */
+const CUE_VH = 8;
 
 const ASSEMBLY_END = ASSEMBLY_VH / SCROLL_VH;
 const CUE_END = CUE_VH / SCROLL_VH;
@@ -188,9 +196,8 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // before it: the sequence plays clean.
   const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
-  // The scroll cue's job is done the moment it is obeyed, so it leaves over the
-  // first ~26vh — long enough to acknowledge the gesture, short enough that it
-  // is not still sitting over the mascot once the assembly is under way.
+  // The cue's job is done the moment it is obeyed, so it leaves as soon as
+  // scrolling starts rather than riding along with the assembly.
   const cueOpacity = useTransform(scrollYProgress, [0, CUE_END], [1, 0]);
 
   // The starfield rises behind the frames rather than replacing them. The
