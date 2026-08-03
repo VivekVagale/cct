@@ -14,22 +14,21 @@ import { Footer } from "./components/Footer";
 import { CinematicLine } from "./components/CinematicLine";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
-import { motion, useMotionValue } from "framer-motion";
 
 function App() {
-  // The Hero's frames are opaque, so the starfield stays hidden behind them and
-  // is faded up by the Hero as the assembly finishes — the two backgrounds meet
-  // without a cut rather than the starfield being visible around a frame edge.
-  const galaxyOpacity = useMotionValue(0);
-
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
           <div className="relative bg-[#05070A] text-[#F5F7FA]">
-            {/* Fixed, page-wide starfield — sits behind every section */}
-            <motion.div style={{ opacity: galaxyOpacity }} className="fixed inset-0 z-0">
+            {/* Fixed, page-wide starfield — sits behind every section, and is
+                simply on. It used to be faded up by the Hero partway down the
+                page, because the hero frames were opaque and there was no point
+                rendering stars nothing could see through. The frames are keyed
+                now, so the starfield shows through from the very first one and
+                the whole handshake between the two components is gone. */}
+            <div className="fixed inset-0 z-0">
               <Galaxy
                 density={0.8}
                 glowIntensity={0.4}
@@ -40,11 +39,11 @@ function App() {
                 twinkleIntensity={0.35}
                 rotationSpeed={0.05}
               />
-            </motion.div>
+            </div>
 
             <div className="relative z-10 pointer-events-none">
               <Navigation />
-              <Hero galaxyOpacity={galaxyOpacity} />
+              <Hero />
               <WorkShowcase />
 
               <CinematicLine text="EVERY FRAME TELLS A STORY" />

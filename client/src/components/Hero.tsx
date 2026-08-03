@@ -6,12 +6,11 @@ import {
   useSpring,
   useMotionValue,
   useMotionValueEvent,
-  type MotionValue,
 } from "framer-motion";
 import { ScrollImageSequence } from "@/components/ui/ScrollImageSequence";
 import { Magnet } from "@/components/Magnet";
 import { GlowButton } from "@/components/GlowButton";
-import { HERO_SEQUENCE } from "@/data/heroSequence";
+import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
 
 /**
  * The pin's phases, in vh of scroll rather than as fractions of the section.
@@ -46,6 +45,30 @@ const REVEAL_END = (ASSEMBLY_VH + REVEAL_VH) / SCROLL_VH;
 const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
 
 /**
+ * Which sequence a viewport gets.
+ *
+ * Orientation, not width, because orientation is what makes the landscape
+ * sequence wasteful. The canvas fits with "cover", so a portrait viewport keeps
+ * a centre strip about a quarter of the frame's width and discards the rest —
+ * and then still upscales it, because it wants ~1928px of frame height and the
+ * landscape frame only has 1440. Phones were paying full freight for a soft
+ * result. The portrait sequence is that same centre strip, delivered at the
+ * size it is actually drawn at.
+ *
+ * The max-width guard keeps portrait tablets on the landscape sequence, where
+ * the strip would be too narrow to fill them.
+ */
+const PORTRAIT_QUERY = "(orientation: portrait) and (max-width: 900px)";
+
+/**
+ * Decoded-frame ceilings. A phone tab is killed at a small fraction of what a
+ * desktop tolerates, so it gets a much tighter one — which still buys a larger
+ * window in frames, since a portrait frame is 2.6x smaller.
+ */
+const DESKTOP_BUDGET = 500 * 1024 * 1024;
+const MOBILE_BUDGET = 180 * 1024 * 1024;
+
+/**
  * The mascot is the Hero — not an image beside the copy. The sequence is
  * absolutely positioned across the whole pinned stage and the copy floats over
  * the top. Nothing sits in a card, a column, or a wrapper that would constrain
@@ -56,16 +79,18 @@ const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
  * runs out the next section scrolls up and covers it naturally.
  *
  * The frames carry their own alpha — the black backdrop is keyed out by
- * tools/key_hero_frames.py, which finds it as the black connected to the frame
- * border, so the character's equally-black clothing stays solid. That is what
- * lets the section simply end on its final frame: there is no backdrop left to
- * hide the starfield, so the stars come up behind the mascot and the frame
- * stays put.
+ * tools/build_hero_frames.py, which finds it as the black connected to the
+ * frame border, so the character's equally-black clothing stays solid. The
+ * page's starfield therefore shows through the sequence from the first frame,
+ * and this component has nothing to say about it: App simply renders it.
  *
- * Nothing is swapped in at the end. An earlier cut dissolved the frames out and
- * faded a separate static pose in, because opaque frames left no way to reveal
- * the starfield — that pose is gone, and with it the visible handover between
- * two different renders.
+ * It used to. The Hero owned a MotionValue that faded the starfield up as the
+ * assembly finished, because opaque frames meant stars behind them were
+ * invisible until then. Keying removed the reason and the coupling with it.
+ *
+ * Nothing is swapped in at the end either. An earlier cut dissolved the frames
+ * out and faded a separate static pose in, for the same reason — that pose is
+ * gone, and with it the visible handover between two different renders.
  *
  * The section ends by dissolving that final frame away over a full screen of
  * scroll, so the mascot fades into the starfield instead of sliding off the
@@ -83,10 +108,33 @@ const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
  * and chain at a 3-9x upscale. Anyone reviving it needs an answer to the second
  * point, not just the first.
  */
-export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) {
+export function Hero() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [alive, setAlive] = useState(false);
+  // Media-query driven, so it follows a rotate. State is safe here for the same
+  // reason the old resize measurement was: this changes on orientation, not on
+  // every scroll tick.
+  //
+  // Read synchronously for the first render, not defaulted to false and
+  // corrected in the effect. Defaulting meant a phone mounted the landscape
+  // sequence, started pulling 133KB frames, and only then swapped — measured at
+  // 8 wasted desktop frames, about a megabyte of a mobile visitor's data, plus
+  // a full teardown and refetch on a connection least able to afford it.
+  const [portrait, setPortrait] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(PORTRAIT_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(PORTRAIT_QUERY);
+    const sync = () => setPortrait(mql.matches);
+    sync();
+    mql.addEventListener("change", sync);
+    return () => mql.removeEventListener("change", sync);
+  }, []);
+
+  const sequence = portrait ? HERO_SEQUENCE_MOBILE : HERO_SEQUENCE;
+  const budgetBytes = portrait ? MOBILE_BUDGET : DESKTOP_BUDGET;
 
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
@@ -130,23 +178,10 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // before it: the sequence plays clean.
   const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
-  // The starfield rises behind the frames rather than replacing them. The
-  // frames are keyed, so their backdrop is already clear — the stars appear
-  // through it and the final frame stays exactly where it is.
-  const galaxyReveal = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
-
   // The exit: the whole stage dissolves across EXIT_VH, so the mascot fades
   // into the starfield that is already behind it. Spread over a full screen of
   // scroll rather than snapped at the end, so it stays gradual under the hand.
   const stageOpacity = useTransform(scrollYProgress, [HOLD_END, 1], [1, 0]);
-
-  // Written straight to a MotionValue the App reads — routing it through state
-  // would re-render the Hero on every scroll tick. Seeded on mount as well as
-  // on change, so landing deep in the page starts with the right value.
-  useEffect(() => {
-    galaxyOpacity.set(galaxyReveal.get());
-    return galaxyReveal.on("change", (v) => galaxyOpacity.set(v));
-  }, [galaxyReveal, galaxyOpacity]);
 
   return (
     <section
@@ -188,11 +223,12 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
             }
           >
             <ScrollImageSequence
-              count={HERO_SEQUENCE.count}
-              srcFor={HERO_SEQUENCE.srcFor}
+              count={sequence.count}
+              srcFor={sequence.srcFor}
               progress={sequenceProgress}
-              width={HERO_SEQUENCE.width}
-              height={HERO_SEQUENCE.height}
+              width={sequence.width}
+              height={sequence.height}
+              budgetBytes={budgetBytes}
               onReady={() => setReady(true)}
               fit="cover"
               className="w-full h-full"

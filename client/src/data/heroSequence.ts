@@ -5,3 +5,10 @@ export const HERO_SEQUENCE = {
   height: 1440,
   srcFor: (i: number) => `/hero/f_${String(i).padStart(4, "0")}.webp`,
 } as const;
+
+export const HERO_SEQUENCE_MOBILE = {
+  count: 298,
+  width: 900,
+  height: 1600,
+  srcFor: (i: number) => `/hero-m/f_${String(i).padStart(4, "0")}.webp`,
+} as const;
