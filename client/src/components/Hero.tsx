@@ -23,7 +23,7 @@ import { HERO_SEQUENCE } from "@/data/heroSequence";
 const ASSEMBLY_VH = 660; // the scrub — see below, this is the speed control
 const REVEAL_VH = 50; // starfield up behind the frames, CTA in
 const HOLD_VH = 42; // final frame breathing over stars
-const ZOOM_VH = 100; // the push into the chin
+const EXIT_VH = 100; // the final frame dissolving away
 const STAGE_VH = 100; // the sticky stage itself
 
 /**
@@ -37,25 +37,12 @@ const STAGE_VH = 100; // the sticky stage itself
  * scroll overall. There is no way around that trade, only a choice of where to
  * sit on it.
  */
-const SCROLL_VH = ASSEMBLY_VH + REVEAL_VH + HOLD_VH + ZOOM_VH;
+const SCROLL_VH = ASSEMBLY_VH + REVEAL_VH + HOLD_VH + EXIT_VH;
 const TOTAL_VH = SCROLL_VH + STAGE_VH;
 
 const ASSEMBLY_END = ASSEMBLY_VH / SCROLL_VH;
 const REVEAL_END = (ASSEMBLY_VH + REVEAL_VH) / SCROLL_VH;
 const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
-
-/**
- * Where the push lands: the deepest point of the final frame's opaque-but-unlit
- * region, which is the jaw under the visor. Measured off f_0297 as the pixel
- * furthest from anything lit or transparent.
- *
- * Its clear radius is only 61px, which is what sets ZOOM_SCALE. At 8x the
- * window is still 19% lit; at 14x it is 0.4% lit with a peak luminance of 23,
- * which is black. Do not lower ZOOM_SCALE without re-checking that — the whole
- * point of the push is that it ends in darkness.
- */
-const CHIN = { x: 0.5125, y: 0.6132 };
-const ZOOM_SCALE = 14;
 
 /**
  * The mascot is the Hero — not an image beside the copy. The sequence is
@@ -79,57 +66,38 @@ const ZOOM_SCALE = 14;
  * the starfield — that pose is gone, and with it the visible handover between
  * two different renders.
  *
- * The section then ends by pushing the camera into the dark under the helmet's
- * chin rather than scrolling the mascot off the top. The frame is opaque there,
- * so the push runs out of picture and into black, and the stage fades from that
- * black to the starfield just before the sticky releases. Fading matters: left
- * on black, the sticky would release on a black rectangle and you would watch
- * that rectangle slide up against the stars.
+ * The section ends by dissolving that final frame away over a full screen of
+ * scroll, so the mascot fades into the starfield instead of sliding off the
+ * top. Only opacity changes, which is why it holds up while two WebGL contexts
+ * are already on the page.
+ *
+ * A camera push into the dark under the helmet's chin was built here first and
+ * pulled. Two reasons, and they are worth knowing before anyone rebuilds it.
+ * Its smoothness could not be demonstrated: screenshots of the middle of the
+ * pin never complete in CI, because software GL will not composite the
+ * starfield, the sphere and a fully opaque hero canvas at once. And the picture
+ * ran out before the travel did — at zoom Z the screen shows 2560/Z pixels of
+ * source across ~2880 device pixels, so the deep end was only acceptable
+ * because it was black, while the middle of the move would have shown the visor
+ * and chain at a 3-9x upscale. Anyone reviving it needs an answer to the second
+ * point, not just the first.
  */
 export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [alive, setAlive] = useState(false);
-  const [origin, setOrigin] = useState("50% 50%");
 
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
     offset: ["start start", "end end"],
   });
 
-  // Breathing stops when the push starts. Its scale would otherwise multiply
-  // into the zoom — 1.5% of a 14x stage is a very visible wobble.
+  // Keeps breathing through the dissolve — better than freezing a beat before
+  // the mascot disappears.
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const next = v >= ASSEMBLY_END && v < HOLD_END;
+    const next = v >= ASSEMBLY_END;
     setAlive((prev) => (prev === next ? prev : next));
   });
-
-  // Where the chin lands on screen, as a transform-origin.
-  //
-  // The canvas draws with "cover", so the chin's position depends on the
-  // viewport's aspect — it is not a fixed percentage of the stage. This
-  // reproduces the same geometry ScrollImageSequence draws with, so the two
-  // cannot drift apart.
-  //
-  // Resize-driven, not scroll-driven, so React state is fine here: this
-  // recomputes when the window changes, not on every scroll tick.
-  useEffect(() => {
-    const measure = () => {
-      const el = stageRef.current;
-      if (!el) return;
-      const { width: cw, height: ch } = el.getBoundingClientRect();
-      if (!cw || !ch) return;
-      const { width: fw, height: fh } = HERO_SEQUENCE;
-      const s = Math.max(cw / fw, ch / fh);
-      const x = ((cw - fw * s) / 2 + CHIN.x * fw * s) / cw;
-      const y = ((ch - fh * s) / 2 + CHIN.y * fh * s) / ch;
-      setOrigin(`${(x * 100).toFixed(2)}% ${(y * 100).toFixed(2)}%`);
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
 
   // The sequence consumes most of the pin; the tail is the exit.
   const rawSeq = useTransform(scrollYProgress, [0, ASSEMBLY_END], [0, 1]);
@@ -155,43 +123,21 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
     pointerY.set((e.clientY / window.innerHeight - 0.5) * 14);
   };
 
-  // In over the reveal, out again as the push begins — the buttons cannot ride
-  // along on a face that is rushing at the viewer. Nothing overlays the
-  // assembly before it: the sequence plays clean.
-  const ctaOpacity = useTransform(
-    scrollYProgress,
-    [ASSEMBLY_END, REVEAL_END, HOLD_END, HOLD_END + 0.02],
-    [0, 1, 1, 0],
-  );
+  // Reaches 1 and holds. It does not fade itself out — the stage dissolve below
+  // carries it, so the buttons and the mascot leave as one image rather than as
+  // two elements fading on separate curves. Nothing overlays the assembly
+  // before it: the sequence plays clean.
+  const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
   // The starfield rises behind the frames rather than replacing them. The
   // frames are keyed, so their backdrop is already clear — the stars appear
   // through it and the final frame stays exactly where it is.
   const galaxyReveal = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
-  // The push. Stops approximating an exponential, so it reads as a camera
-  // moving at a constant speed rather than one coasting to a halt — a linear
-  // ramp in scale decelerates visibly as the subject fills the frame.
-  const zoom = useTransform(
-    scrollYProgress,
-    [HOLD_END, 0.912, 0.941, 0.971, 1],
-    [1, 1.93, 3.74, 7.24, ZOOM_SCALE],
-  );
-
-  // A veil, for the aspects the measurement does not cover. CHIN's clear radius
-  // was measured at 16:9; on a much taller or wider viewport "cover" crops
-  // differently and something lit could sit closer to the centre than it does
-  // there. Rather than re-measure per aspect, black is guaranteed on the way
-  // out — by then the frame is doing nearly all of the work anyway.
-  // Lands fully before the stage begins to fade. Overlapping the two would mean
-  // the veil is still climbing while the stage is already dissolving, so the
-  // black never actually arrives — the push would hand straight to the stars
-  // and skip the beat it was aiming for.
-  const veilOpacity = useTransform(scrollYProgress, [0.93, 0.965], [0, 1]);
-
-  // Then black to starfield, so the sticky never releases on a black rectangle
-  // that would be seen sliding up against the stars.
-  const stageOpacity = useTransform(scrollYProgress, [0.97, 1], [1, 0]);
+  // The exit: the whole stage dissolves across EXIT_VH, so the mascot fades
+  // into the starfield that is already behind it. Spread over a full screen of
+  // scroll rather than snapped at the end, so it stays gradual under the hand.
+  const stageOpacity = useTransform(scrollYProgress, [HOLD_END, 1], [1, 0]);
 
   // Written straight to a MotionValue the App reads — routing it through state
   // would re-render the Hero on every scroll tick. Seeded on mount as well as
@@ -212,7 +158,6 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
           derived from the phase lengths at runtime, and Tailwind's JIT only
           sees class names it can find in the source. */}
       <motion.div
-        ref={stageRef}
         onMouseMove={handlePointer}
         style={{ opacity: stageOpacity }}
         className="sticky top-0 h-[100svh] w-full overflow-hidden"
@@ -221,45 +166,28 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
             breathing have room to move without pulling the canvas' own edge
             into frame. */}
         <motion.div style={{ x: parallaxX, y: parallaxY }} className="absolute -inset-[5%]">
-          {/* The push sits inside the parallax, not outside it. Outside, the
-              pointer's 22px drift would be multiplied by the zoom and the stage
-              would fly around under the cursor. */}
-          {/* No will-change here on purpose. Framer already promotes an element
-              it is animating a transform on, and pinning a permanent
-              compositor layer across a full-bleed stage on top of the page's
-              two WebGL contexts was enough to stall compositing outright. */}
+          {/* Once assembled, the canvas breathes in place. */}
           <motion.div
             className="absolute inset-0"
-            style={{ scale: zoom, transformOrigin: origin }}
+            animate={alive ? { scale: [1, 1.015, 1] } : { scale: 1 }}
+            transition={
+              alive
+                ? { duration: 6, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+            }
           >
-            {/* Once assembled, the canvas breathes in place. */}
-            <motion.div
-              className="absolute inset-0"
-              animate={alive ? { scale: [1, 1.015, 1] } : { scale: 1 }}
-              transition={
-                alive
-                  ? { duration: 6, repeat: Infinity, ease: "easeInOut" }
-                  : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-              }
-            >
-              <ScrollImageSequence
-                count={HERO_SEQUENCE.count}
-                srcFor={HERO_SEQUENCE.srcFor}
-                progress={sequenceProgress}
-                width={HERO_SEQUENCE.width}
-                height={HERO_SEQUENCE.height}
-                onReady={() => setReady(true)}
-                fit="cover"
-                className="w-full h-full"
-              />
-            </motion.div>
+            <ScrollImageSequence
+              count={HERO_SEQUENCE.count}
+              srcFor={HERO_SEQUENCE.srcFor}
+              progress={sequenceProgress}
+              width={HERO_SEQUENCE.width}
+              height={HERO_SEQUENCE.height}
+              onReady={() => setReady(true)}
+              fit="cover"
+              className="w-full h-full"
+            />
           </motion.div>
         </motion.div>
-
-        <motion.div
-          style={{ opacity: veilOpacity }}
-          className="absolute inset-0 bg-[#05070A] pointer-events-none"
-        />
 
         {/* The hero carries no visible copy: the assembly plays clean from the
             first frame, and by the time it finishes the character fills the
