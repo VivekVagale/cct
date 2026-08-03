@@ -238,3 +238,20 @@
 .notes:nth-child(3) {
   transform: translateY(60%);
 }
+
+/* ---------------------------------------------------------------------------
+   Enlarged. The stock 180x320 could not hold a client name and a ~125-character
+   quote: the name took two lines and the quote overflowed the card, where
+   overflow:hidden cut it off along with the whole footer.
+
+   The proportion is untouched. 320/180 is exactly 16/9, so the height is
+   derived from the width and every size below is the same ticket, only bigger.
+
+   The width is clamped rather than fixed because the card cannot reflow: it is
+   a fixed-size object in a grid, so at a hard 360px it would have overrun the
+   viewport on a phone instead of shrinking.
+   --------------------------------------------------------------------------- */
+.card {
+  --width: clamp(260px, 78vw, 360px);
+  --height: calc(var(--width) * 16 / 9);
+}
