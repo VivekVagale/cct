@@ -11,6 +11,7 @@ import {
 import { ScrollImageSequence } from "@/components/ui/ScrollImageSequence";
 import { Magnet } from "@/components/Magnet";
 import { GlowButton } from "@/components/GlowButton";
+import { ScrollCue } from "@/components/ScrollCue";
 import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
 
 /**
@@ -41,7 +42,11 @@ const STAGE_VH = 100; // the sticky stage itself
 const SCROLL_VH = ASSEMBLY_VH + REVEAL_VH + HOLD_VH + EXIT_VH;
 const TOTAL_VH = SCROLL_VH + STAGE_VH;
 
+/** How much scroll the "scroll down" cue takes to fade out, in vh. */
+const CUE_VH = 26;
+
 const ASSEMBLY_END = ASSEMBLY_VH / SCROLL_VH;
+const CUE_END = CUE_VH / SCROLL_VH;
 const REVEAL_END = (ASSEMBLY_VH + REVEAL_VH) / SCROLL_VH;
 const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
 
@@ -183,6 +188,11 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // before it: the sequence plays clean.
   const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
 
+  // The scroll cue's job is done the moment it is obeyed, so it leaves over the
+  // first ~26vh — long enough to acknowledge the gesture, short enough that it
+  // is not still sitting over the mascot once the assembly is under way.
+  const cueOpacity = useTransform(scrollYProgress, [0, CUE_END], [1, 0]);
+
   // The starfield rises behind the frames rather than replacing them. The
   // frames are keyed, so their backdrop is already clear — the stars appear
   // through it and the final frame stays exactly where it is.
@@ -263,6 +273,21 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
         <h1 className="sr-only">
           Cold Chain Theory — cinematic automotive CGI studio. Every frame tells a story.
         </h1>
+
+        {/* Held back until the frames are ready, so it does not share the
+            screen with the loading line below it. The two opacities are on
+            separate elements because they come from different places — one is
+            scroll-driven, the other is a state transition — and a single
+            element cannot take both. */}
+        <motion.div
+          animate={{ opacity: ready ? 1 : 0 }}
+          transition={{ duration: 0.6 }}
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        >
+          <motion.div style={{ opacity: cueOpacity }}>
+            <ScrollCue />
+          </motion.div>
+        </motion.div>
 
         <motion.div
           style={{ opacity: ctaOpacity }}
