@@ -1,0 +1,10 @@
+{
+  "count": 298,
+  "width": 900,
+  "height": 1600,
+  "pattern": "f_{i}.webp",
+  "sourceFrames": 714,
+  "urlBase": "/hero-m",
+  "export": "HERO_SEQUENCE_MOBILE",
+  "cropAspect": 0.5625
+}
