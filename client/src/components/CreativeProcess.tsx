@@ -111,7 +111,12 @@ function Stage({
               these, so the mobile step of each is a size down from what the
               scale would otherwise give — the number most of all, since it is
               decoration and the description is the part that has to be read. */}
-          <span className="font-display font-black text-[#F5F7FA]/20 leading-none text-5xl sm:text-8xl md:text-[10rem] lg:text-[13rem]">
+          {/* No font-black. The display face is a single-weight family, so
+              asking for 900 does not select a heavier cut — there isn't one —
+              it makes the browser synthesise the weight by smearing the
+              outlines, which at 13rem is plainly visible against the real
+              headline beside it. The face is already black. */}
+          <span className="font-display text-[#F5F7FA]/20 leading-none text-5xl sm:text-8xl md:text-[10rem] lg:text-[13rem]">
             {stage.index}
           </span>
           <h3 className="font-display text-2xl sm:text-5xl md:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05]">
