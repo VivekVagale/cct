@@ -46,10 +46,12 @@ export function CreativeProcess() {
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         <motion.div
           style={{ opacity: headingOpacity, y: headingY }}
-          className="absolute inset-x-0 top-[16%] z-20 px-6 sm:px-10 max-w-[1600px] mx-auto pointer-events-none"
+          className="absolute inset-x-0 top-[12%] sm:top-[16%] z-20 px-6 sm:px-10 max-w-[1600px] mx-auto pointer-events-none"
         >
-          <p className="text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4">How We Work</p>
-          <h2 className="font-display text-4xl sm:text-6xl text-[#F5F7FA] leading-[1.05]">
+          <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-3 sm:mb-4">
+            How We Work
+          </p>
+          <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] leading-[1.05]">
             Creative Process
           </h2>
         </motion.div>
@@ -94,15 +96,30 @@ function Stage({
       {/* Two columns from md up: copy left, mascot right. Below that there is
           not enough width to sit them side by side, so they stack — mascot
           above, copy beneath — and both centre. */}
-      <div className="relative h-full w-full max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col items-center justify-end gap-6 pb-[8%] md:flex-row md:items-center md:justify-between md:gap-10 md:pb-0">
+      {/* pb in vh, not %. A percentage padding resolves against the container's
+          width even when it is the bottom edge — 8% of a 390px viewport is 31px,
+          not the 8% of height it reads as. The stage also drifts ±8vh as it
+          crosses, so the clearance has to cover that drift as well as sit the
+          copy off the bottom: at 31px the description's last line ended up flush
+          against the viewport edge at the bottom of the travel. */}
+      <div className="relative h-full w-full max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col items-center justify-end gap-5 pb-[14vh] sm:gap-6 md:flex-row md:items-center md:justify-between md:gap-10 md:pb-0">
         <motion.div
           style={{ y }}
           className="order-2 md:order-1 md:w-[46%] flex flex-col items-center text-center md:items-start md:text-left gap-2 md:gap-4 pointer-events-none"
         >
-          <span className="font-display font-black text-[#F5F7FA]/20 leading-none text-6xl sm:text-8xl md:text-[10rem] lg:text-[13rem]">
+          {/* The stacked layout has one viewport for a mascot and all three of
+              these, so the mobile step of each is a size down from what the
+              scale would otherwise give — the number most of all, since it is
+              decoration and the description is the part that has to be read. */}
+          {/* No font-black. The display face is a single-weight family, so
+              asking for 900 does not select a heavier cut — there isn't one —
+              it makes the browser synthesise the weight by smearing the
+              outlines, which at 13rem is plainly visible against the real
+              headline beside it. The face is already black. */}
+          <span className="font-display text-[#F5F7FA]/20 leading-none text-5xl sm:text-8xl md:text-[10rem] lg:text-[13rem]">
             {stage.index}
           </span>
-          <h3 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05]">
+          <h3 className="font-display text-2xl sm:text-5xl md:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05]">
             {stage.title}
           </h3>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#B8C4D6] leading-relaxed max-w-lg md:max-w-xl">
@@ -114,12 +131,18 @@ function Stage({
           style={{ y, scale }}
           className="order-1 md:order-2 md:w-[50%] flex justify-center md:justify-end pointer-events-none"
         >
+          {/* Height-sized, so width is intrinsic and a wide pose can overrun a
+              narrow viewport: laptop and thumbsUp are near-square, and at the
+              42vh this used to be that is ~378px across on a 375px phone. The
+              vw term caps the width by capping the height that produces it —
+              the image itself cannot carry a max-width, because with a fixed
+              height that would constrain both axes and render it fill-stretched. */}
           <Mascot
             pose={stage.pose}
             animateIn={false}
             parallax
             sizing="height"
-            className="h-[42vh] sm:h-[46vh] md:h-[74vh] lg:h-[82vh]"
+            className="h-[min(34vh,68vw)] sm:h-[46vh] md:h-[74vh] lg:h-[82vh]"
           />
         </motion.div>
       </div>

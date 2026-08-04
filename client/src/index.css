@@ -4,7 +4,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  /* The fallbacks are a sans stack, not the serif one Fraunces had. A fallback
+     is what renders while the webfont loads and on any request that fails, and
+     swapping a black display sans for Georgia changes the page's whole texture
+     in that window — the headlines would reflow from serif to sans in front of
+     the reader. */
+  --font-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   /* The wordmark only. Its rounded geometric shapes are the logo's likeness —
      Inter's are not — so it is worth the one extra family on a request that

@@ -41,7 +41,7 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
             transition={{ duration: 0.4 }}
           />
         </div>
-        <div className="px-4 py-3 bg-[#0D1117] flex items-center gap-2.5">
+        <div className="px-3 py-2.5 sm:px-4 sm:py-3 bg-[#0D1117] flex items-center gap-2 sm:gap-2.5">
           <span
             className="w-2.5 h-2.5 rounded-full border border-white/20 flex-shrink-0"
             style={{ backgroundColor: color.swatch }}

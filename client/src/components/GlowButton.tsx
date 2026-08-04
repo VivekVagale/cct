@@ -10,6 +10,19 @@ interface GlowButtonProps {
    * one in here would mean every call site fighting it back off.
    */
   className?: string;
+  /**
+   * For the wrapper rather than the face — the ring and the glow are drawn by
+   * the wrapper, so anything that changes the control's own box belongs here.
+   * The mobile nav panel uses it to run the button full width.
+   *
+   * Layout and box properties only. Nothing that makes the wrapper a stacking
+   * context, which is to say no transform, opacity or filter: the glow is a
+   * negative-z pseudo-element and would paint over the ring instead of behind
+   * it. GlowButton.css has the long version.
+   */
+  wrapperClassName?: string;
+  /** Fires alongside the navigation — the mobile panel closes itself on tap. */
+  onClick?: () => void;
 }
 
 /**
@@ -22,10 +35,16 @@ interface GlowButtonProps {
  * constraint to break by accident and a confusing one to debug — see
  * GlowButton.css.
  */
-export function GlowButton({ href, children, className }: GlowButtonProps) {
+export function GlowButton({
+  href,
+  children,
+  className,
+  wrapperClassName,
+  onClick,
+}: GlowButtonProps) {
   return (
-    <span className="glow-button">
-      <a href={href} className={`glow-button__face ${className ?? ""}`}>
+    <span className={`glow-button ${wrapperClassName ?? ""}`}>
+      <a href={href} onClick={onClick} className={`glow-button__face ${className ?? ""}`}>
         {children}
       </a>
     </span>

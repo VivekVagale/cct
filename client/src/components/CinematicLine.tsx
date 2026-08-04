@@ -26,13 +26,13 @@ export function CinematicLine({ text, className }: CinematicLineProps) {
     <div
       ref={ref}
       className={cn(
-        "relative w-full py-28 sm:py-40 flex items-center justify-center text-center px-6",
+        "relative w-full py-20 sm:py-40 flex items-center justify-center text-center px-6",
         className,
       )}
     >
       <motion.p
         style={{ opacity, y, letterSpacing }}
-        className="font-display text-3xl sm:text-5xl md:text-6xl text-[#F5F7FA] max-w-4xl leading-[1.15]"
+        className="font-display text-2xl sm:text-5xl md:text-6xl text-[#F5F7FA] max-w-4xl leading-[1.15]"
       >
         {text}
       </motion.p>

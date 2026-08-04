@@ -12,7 +12,7 @@ all pushed. `main` is still at the pre-session state; nothing has been merged.
 React + TypeScript + Vite + Tailwind + Framer Motion. Repo root = project root.
 `vercel.json` sets `buildCommand: vite build`, `outputDirectory: dist/public`.
 pnpm is canonical (`pnpm-lock.yaml`); don't let a `package-lock.json` reappear.
-Fonts: Fraunces (`font-display`) + Inter (`font-sans`) via Google Fonts in
+Fonts: Archivo Black (`font-display`) + Inter (`font-sans`) via Google Fonts in
 `client/index.html`.
 
 Always run `npx tsc --noEmit` and `npx vite build` before pushing. There is one

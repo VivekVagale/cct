@@ -46,8 +46,13 @@ export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
       </div>
 
+      {/* These stay two-up on a phone where the experience cards drop to one:
+          the caption is a marque and a model name, not a sentence, so it still
+          reads in a ~156px column. It does need the smaller step of the scale
+          to do it — at text-xl in that width the longer names broke to three
+          lines. */}
       <motion.div
-        className="relative p-5"
+        className="relative p-3.5 sm:p-5"
         animate={{ y: selected ? -2 : 0 }}
         transition={{ duration: 0.3 }}
       >
@@ -56,7 +61,7 @@ export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
             {vehicle.manufacturer}
           </p>
         )}
-        <h4 className="font-display text-xl text-[#F5F7FA]">{vehicle.name}</h4>
+        <h4 className="font-display text-base sm:text-xl text-[#F5F7FA]">{vehicle.name}</h4>
       </motion.div>
 
       {selected && (

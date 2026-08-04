@@ -81,12 +81,15 @@ function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
 
 export function CGIExperiences() {
   return (
-    <section id="experiences" className="relative pointer-events-auto py-32 sm:py-40">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-16 sm:mb-24">
-        <p className="text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-5">
+    <section
+      id="experiences"
+      className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
+    >
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-24">
+        <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
           What We Build
         </p>
-        <h2 className="font-display text-4xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
+        <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
           CGI Experiences
         </h2>
       </div>
@@ -94,8 +97,15 @@ export function CGIExperiences() {
       {/* Separate bordered cards with a real gap, rather than the old
           gap-px hairline grid — that trick draws its lines with the gap's
           background showing between opaque tiles, which cannot survive cards
-          that are meant to be see-through. */}
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          that are meant to be see-through.
+
+          One column on phones, not two. Each card carries a title, a sentence
+          of description and a badge, and two across a 375px viewport is a
+          ~156px column — the description broke to five or six lines of
+          two words and the badge wrapped. The column count moves up a
+          breakpoint the whole way rather than only at the bottom, so no width
+          gets a card narrower than its own contents. */}
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {experiences.map((exp, i) => (
           <ExperienceCard key={exp.id} exp={exp} index={i} />
         ))}
