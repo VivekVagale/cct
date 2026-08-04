@@ -22,7 +22,6 @@ import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
  * changing a phase meant re-deriving all the others by hand. Lengths compose,
  * and the section height falls out of them.
  */
-const ASSEMBLY_VH = 660; // the scrub — see below, this is the speed control
 const REVEAL_VH = 50; // starfield up behind the frames, CTA in
 const HOLD_VH = 42; // final frame breathing over stars
 const EXIT_VH = 100; // the final frame dissolving away
@@ -39,12 +38,46 @@ const STAGE_VH = 100; // the sticky stage itself
  * scroll overall. There is no way around that trade, only a choice of where to
  * sit on it.
  */
-const SCROLL_VH = ASSEMBLY_VH + REVEAL_VH + HOLD_VH + EXIT_VH;
-const TOTAL_VH = SCROLL_VH + STAGE_VH;
+const ASSEMBLY_VH = 660;
 
-const ASSEMBLY_END = ASSEMBLY_VH / SCROLL_VH;
-const REVEAL_END = (ASSEMBLY_VH + REVEAL_VH) / SCROLL_VH;
-const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
+/**
+ * The scrub is shorter on phones — 400vh rather than 660.
+ *
+ * vh is a unit of screen, not of effort, and the two come apart on touch. A
+ * wheel notch is a fixed ~100px, so on a desktop the vh figure is close to a
+ * count of how much work the sequence costs. A swipe is not fixed: it carries
+ * most of a screen per flick and then keeps going under momentum. The same 852vh
+ * of section is around nine flicks on a phone against a scroll wheel's steady
+ * turn, and it is all before the first word of the page.
+ *
+ * 400vh at a ~700px viewport is ~9.4px of scroll per frame. That figure was
+ * rejected for the wheel — at 9.9px a notch jumped ten frames and read as
+ * flicking through the animation rather than playing it. It does not carry the
+ * same cost here, because a swipe was never going to advance one frame at a
+ * time: it covers 40-80 either way, so what the number actually changes on
+ * touch is how long the section lasts, not how smooth it looks.
+ */
+const MOBILE_ASSEMBLY_VH = 400;
+
+/**
+ * The phase geometry, derived from whichever scrub length applies.
+ *
+ * Lengths compose and the fractions fall out of them, which is the whole reason
+ * the phases are expressed in vh — one number changes and the other three
+ * re-derive themselves rather than needing to be worked out by hand.
+ */
+function geometry(assemblyVh: number) {
+  const scroll = assemblyVh + REVEAL_VH + HOLD_VH + EXIT_VH;
+  return {
+    totalVh: scroll + STAGE_VH,
+    assemblyEnd: assemblyVh / scroll,
+    revealEnd: (assemblyVh + REVEAL_VH) / scroll,
+    holdEnd: (assemblyVh + REVEAL_VH + HOLD_VH) / scroll,
+  };
+}
+
+const DESKTOP_GEOMETRY = geometry(ASSEMBLY_VH);
+const MOBILE_GEOMETRY = geometry(MOBILE_ASSEMBLY_VH);
 
 /**
  * Which sequence a viewport gets.
@@ -144,6 +177,12 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
 
   const sequence = portrait ? HERO_SEQUENCE_MOBILE : HERO_SEQUENCE;
   const budgetBytes = portrait ? MOBILE_BUDGET : DESKTOP_BUDGET;
+  // Same media query the sequence choice uses. A portrait phone is exactly the
+  // case the shorter scrub is for, and having one switch drive both keeps the
+  // section's length and its frame source from ever disagreeing.
+  const { totalVh, assemblyEnd, revealEnd, holdEnd } = portrait
+    ? MOBILE_GEOMETRY
+    : DESKTOP_GEOMETRY;
 
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
@@ -153,7 +192,7 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // Keeps breathing through the dissolve — better than freezing a beat before
   // the mascot disappears.
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const next = v >= ASSEMBLY_END;
+    const next = v >= assemblyEnd;
     setAlive((prev) => (prev === next ? prev : next));
     // One-way latch for the scroll cue. It is a flag, not a curve: the cue goes
     // the moment the page moves and never comes back, even if the reader
@@ -163,7 +202,7 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   });
 
   // The sequence consumes most of the pin; the tail is the exit.
-  const rawSeq = useTransform(scrollYProgress, [0, ASSEMBLY_END], [0, 1]);
+  const rawSeq = useTransform(scrollYProgress, [0, assemblyEnd], [0, 1]);
   // A light spring smooths the scroll input without lag you can feel. It only
   // shapes which frame gets chosen — nothing seeks, so unlike the old video
   // scrub there is no decode cost to smoothing here.
@@ -190,18 +229,18 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // carries it, so the buttons and the mascot leave as one image rather than as
   // two elements fading on separate curves. Nothing overlays the assembly
   // before it: the sequence plays clean.
-  const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
+  const ctaOpacity = useTransform(scrollYProgress, [assemblyEnd, revealEnd], [0, 1]);
 
 
   // The starfield rises behind the frames rather than replacing them. The
   // frames are keyed, so their backdrop is already clear — the stars appear
   // through it and the final frame stays exactly where it is.
-  const galaxyReveal = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
+  const galaxyReveal = useTransform(scrollYProgress, [assemblyEnd, revealEnd], [0, 1]);
 
   // The exit: the whole stage dissolves across EXIT_VH, so the mascot fades
   // into the starfield that is already behind it. Spread over a full screen of
   // scroll rather than snapped at the end, so it stays gradual under the hand.
-  const stageOpacity = useTransform(scrollYProgress, [HOLD_END, 1], [1, 0]);
+  const stageOpacity = useTransform(scrollYProgress, [holdEnd, 1], [1, 0]);
 
   // Written straight to a MotionValue the App reads — routing it through state
   // would re-render the Hero on every scroll tick. Seeded on mount as well as
@@ -215,7 +254,7 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
     <section
       id="top"
       ref={wrapperRef}
-      style={{ height: `${TOTAL_VH}vh` }}
+      style={{ height: `${totalVh}vh` }}
       className="relative pointer-events-auto"
     >
       {/* Height has to be an inline style rather than an h-[...] class: it is
@@ -290,10 +329,18 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
 
         <motion.div
           style={{ opacity: ctaOpacity }}
-          className="absolute inset-x-0 bottom-[10%] flex flex-wrap items-center justify-center gap-6 px-6"
+          className="absolute inset-x-0 bottom-[12%] sm:bottom-[10%] flex flex-col sm:flex-row flex-wrap items-center justify-center gap-5 sm:gap-6 px-6"
         >
+          {/* Stacked below sm. Side by side these two came to ~330px against a
+              375px viewport, so they wrapped anyway — but wrapped they sat
+              hard against both gutters with the row's gap between them, which
+              read as two orphaned controls rather than a primary action and
+              its alternative. */}
           <Magnet padding={40} strength={5}>
-            <GlowButton href="#booking" className="text-xs tracking-[0.14em] uppercase px-7 py-4">
+            <GlowButton
+              href="#booking"
+              className="text-xs tracking-[0.14em] uppercase px-6 py-3.5 sm:px-7 sm:py-4"
+            >
               Start a Project
             </GlowButton>
           </Magnet>

@@ -436,13 +436,33 @@ class ArcballControl {
     canvas.addEventListener('pointerleave', () => {
       this.isPointerDown = false;
     });
+    // Fired when the browser takes the gesture over for a page scroll — see the
+    // touch-action note below. Without it the drag stays latched after the
+    // finger has been handed to the scroller and the sphere keeps spinning
+    // toward wherever the pointer was last seen.
+    canvas.addEventListener('pointercancel', () => {
+      this.isPointerDown = false;
+    });
     canvas.addEventListener('pointermove', (e: PointerEvent) => {
       if (this.isPointerDown) {
         vec2.set(this.pointerPos, e.clientX, e.clientY);
       }
     });
 
-    canvas.style.touchAction = 'none';
+    /*
+     * pan-y, not none.
+     *
+     * `none` tells the browser this element consumes every touch gesture, which
+     * on a phone means a vertical swipe anywhere over the canvas rotates the
+     * sphere instead of scrolling the page. The section is a full viewport of
+     * canvas, so there was no way past it — the page simply stopped there.
+     *
+     * `pan-y` keeps vertical swipes with the scroller and leaves everything
+     * else here, so a horizontal drag still turns the sphere and the page still
+     * scrolls. It only governs touch and pen input; a mouse drag is unaffected,
+     * so the desktop interaction is exactly as it was.
+     */
+    canvas.style.touchAction = 'pan-y';
   }
 
   public update(deltaTime: number, targetFrameDuration = 16): void {

@@ -109,9 +109,54 @@
   transition: 0.1s ease;
 }
 
+/* ---------------------------------------------------------------------------
+   Narrow viewports.
+
+   The desktop layout sets the title against the left edge and the description
+   against the right, with the sphere between them. Below ~1100px there is no
+   "between" left, so upstream simply hides both — which on a phone left the
+   sphere with nothing naming what it was showing.
+
+   They are stacked under the sphere instead: centred, full width, and out of
+   the way of the disc that is currently snapped to front. The horizontal slide
+   is dropped with the horizontal layout; a plain fade is what is left.
+   --------------------------------------------------------------------------- */
 @media (max-width: 1100px) {
   .face-title,
   .face-description {
-    display: none;
+    top: auto;
+    left: 0;
+    right: 0;
+    max-width: none;
+    padding: 0 1.5rem;
+    text-align: center;
+    transform: none;
+  }
+
+  .face-title {
+    bottom: 8.5rem;
+    font-size: clamp(1.5rem, 7vw, 2.25rem);
+  }
+
+  .face-description {
+    bottom: 6.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .face-title.active,
+  .face-description.active,
+  .face-title.inactive,
+  .face-description.inactive {
+    transform: none;
+  }
+
+  .action-button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .action-button.active {
+    bottom: 2.5rem;
   }
 }

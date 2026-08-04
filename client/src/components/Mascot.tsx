@@ -27,11 +27,24 @@ interface MascotProps {
   sizing?: "width" | "height";
 }
 
+/*
+ * The mobile step of each size is a vw-capped min(), not a fixed width.
+ *
+ * These were fixed rem widths at every viewport, and the top two were wider
+ * than the phone they had to fit inside: xl is 24rem, or 384px, against a
+ * 375px viewport that has already spent 48px on the section's own gutters. The
+ * mascot pushed the document wider than the screen, and because the page has no
+ * horizontal-overflow guard that turned into a sideways scroll on every section
+ * one appeared in.
+ *
+ * The cap is against the gutters rather than the full viewport — 78vw leaves
+ * the pose clear of both edges instead of bleeding into them.
+ */
 const sizes: Record<NonNullable<MascotProps["size"]>, string> = {
-  sm: "w-48 sm:w-64",
-  md: "w-64 sm:w-80",
-  lg: "w-80 sm:w-[26rem]",
-  xl: "w-96 sm:w-[34rem]",
+  sm: "w-[min(12rem,52vw)] sm:w-64",
+  md: "w-[min(15rem,64vw)] sm:w-80",
+  lg: "w-[min(18rem,72vw)] sm:w-[26rem]",
+  xl: "w-[min(20rem,78vw)] sm:w-[34rem]",
 };
 
 /**

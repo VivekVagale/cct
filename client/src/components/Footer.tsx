@@ -1,7 +1,7 @@
 export function Footer() {
   return (
-    <footer className="relative pointer-events-auto border-t border-white/[0.08] py-16">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-10">
+    <footer className="relative pointer-events-auto border-t border-white/[0.08] py-12 sm:py-16">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8 sm:gap-10">
         <div>
           <p className="text-sm tracking-[0.22em] uppercase text-[#F5F7FA] mb-4">
             Cold Chain Theory
@@ -15,7 +15,9 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col sm:items-end gap-4">
-          <div className="flex items-center gap-6 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+          {/* Wraps rather than overflowing: four uppercase links with this much
+              tracking are wider than a 375px viewport's content box. */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
             <a href="#experiences" className="hover:text-[#F5F7FA] transition-colors duration-300">
               Work
             </a>

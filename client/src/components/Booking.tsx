@@ -48,13 +48,16 @@ export function Booking() {
 
   if (status === "success") {
     return (
-      <section id="booking" className="relative pointer-events-auto py-32 sm:py-40">
+      <section
+        id="booking"
+        className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
+      >
         <div className="max-w-2xl mx-auto px-6 text-center flex flex-col items-center">
           <Mascot pose="fistPump" size="xl" />
-          <h2 className="font-display text-3xl sm:text-4xl text-[#F5F7FA] mt-8 mb-4">
+          <h2 className="font-display text-2xl sm:text-4xl text-[#F5F7FA] mt-8 mb-4">
             Request received.
           </h2>
-          <p className="text-[#B8C4D6]">
+          <p className="text-sm sm:text-base text-[#B8C4D6]">
             We'll be in touch within two business days to talk through your project.
           </p>
         </div>
@@ -63,16 +66,19 @@ export function Booking() {
   }
 
   return (
-    <section id="booking" className="relative pointer-events-auto py-32 sm:py-40">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 lg:grid-cols-12 gap-12">
+    <section
+      id="booking"
+      className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
+    >
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
         <div className="lg:col-span-4">
-          <p className="text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-5">
+          <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
             Start a Project
           </p>
-          <h2 className="font-display text-4xl sm:text-5xl text-[#F5F7FA] leading-[1.05] mb-8 max-w-md">
+          <h2 className="font-display text-3xl sm:text-5xl text-[#F5F7FA] leading-[1.05] mb-6 sm:mb-8 max-w-md">
             Ready to turn your machine into cinema.
           </h2>
-          <p className="text-[#B8C4D6] leading-relaxed max-w-sm mb-10">
+          <p className="text-sm sm:text-base text-[#B8C4D6] leading-relaxed max-w-sm mb-0 lg:mb-10">
             Configure the vehicle, tell us the story you want it to tell. We'll
             follow up to scope the shot list together.
           </p>
@@ -101,7 +107,7 @@ export function Booking() {
 
         <form
           onSubmit={handleSubmit}
-          className="lg:col-span-8 flex flex-col gap-10"
+          className="lg:col-span-8 flex flex-col gap-8 sm:gap-10"
         >
           <VehicleConfigurator
             selectedVehicleId={vehicleId}
@@ -110,7 +116,7 @@ export function Booking() {
             onSelectColor={setColorId}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
             <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
               Full Name
               <input
@@ -143,10 +149,13 @@ export function Booking() {
             <legend className="text-xs tracking-[0.14em] uppercase text-[#B8C4D6] mb-3">
               Experience
             </legend>
+            {/* Same reasoning as the CGI Experiences grid: these are that card
+                with a selected state, so they need the same column width to
+                hold the same title and description. */}
             <div
               role="radiogroup"
               aria-label="Experience"
-              className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
             >
               {experiences.map((exp) => (
                 <ExperienceOptionCard
@@ -168,7 +177,7 @@ export function Booking() {
             />
           </label>
 
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             <Magnet padding={40} strength={5}>
               <SparkleButton type="submit" disabled={status === "submitting"}>
                 {status === "submitting" ? "Sending..." : "Submit Request"}

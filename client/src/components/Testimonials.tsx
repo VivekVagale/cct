@@ -4,12 +4,12 @@ import { TestimonialTicket, TicketBumpFilter } from "@/components/TestimonialTic
 
 export function Testimonials() {
   return (
-    <section className="relative pointer-events-auto py-32 sm:py-40">
+    <section className="relative pointer-events-auto py-20 sm:py-40">
       {/* One filter for the whole section — see TicketBumpFilter. */}
       <TicketBumpFilter />
 
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10">
-        <p className="text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-16 sm:mb-24">
+        <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-10 sm:mb-24">
           Client Words
         </p>
         {/* The tickets have a fixed width and cast a wide drop shadow, so they
@@ -20,7 +20,7 @@ export function Testimonials() {
             columns are about 282px against a 360px card — it would have run
             into its neighbours rather than shrinking. Two across at lg gives
             448px, which fits. */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-16 sm:gap-12 justify-items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10 sm:gap-12 justify-items-center">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}

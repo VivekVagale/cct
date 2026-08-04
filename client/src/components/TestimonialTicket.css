@@ -255,3 +255,30 @@
   --width: clamp(260px, 78vw, 360px);
   --height: calc(var(--width) * 16 / 9);
 }
+
+/* ---------------------------------------------------------------------------
+   The type is tied to the card's width rather than to the root font size.
+
+   Every size above was a fixed rem while --width is fluid, so the ticket's
+   contents stayed at their 360px size inside a card that gets 100px narrower
+   on a phone. The name is what gave it away — "Elena Kovač" at a fixed 2.75rem
+   overran a 292px card — but the same slack was in the quote and the footer,
+   and the ticket cannot reflow its way out of it: it is a fixed-size object
+   with overflow hidden, so anything too wide is cut off rather than wrapped.
+
+   The multipliers are each element's existing size divided by 360, so the
+   ticket is unchanged at its full width and scales as one below it. Setting
+   the card's own font-size carries the body, footer, number and symbol, which
+   all inherit it — only the two that name a size of their own need restating.
+   --------------------------------------------------------------------------- */
+.card {
+  font-size: calc(var(--width) * 0.0444);
+}
+
+.card .header {
+  font-size: calc(var(--width) * 0.1222);
+}
+
+.card .notes {
+  font-size: calc(var(--width) * 0.2222);
+}
