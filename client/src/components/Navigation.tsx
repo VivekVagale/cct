@@ -85,7 +85,7 @@ export function Navigation() {
             ].join(","),
           }}
         >
-          <span className="font-logo font-semibold lowercase text-[13px] sm:text-base tracking-[-0.01em] text-[#0b0a14]">
+          <span className="font-logo font-semibold lowercase text-[13px] sm:text-base tracking-[-0.01em] text-white">
             @coldchaintheory
           </span>
         </a>
