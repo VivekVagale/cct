@@ -66,9 +66,25 @@ export function Booking() {
   }
 
   return (
+    /*
+     * overflow-x-clip contains the sparkle button's particle pen.
+     *
+     * The pen is a decorative square around the submit button at width:200% with
+     * aspect-ratio:1 — about 391px across, centred on the button, so it reaches
+     * ~98px past each side. It is unshrinkable, and on a narrow phone Chromium
+     * grows the layout viewport to fit content it cannot shrink: the whole page
+     * rendered at a 383px viewport on a 320px and a 375px screen, every section
+     * scaled to a width the device does not have.
+     *
+     * clip, not hidden. `hidden` would make this section a scroll container,
+     * and the pinned sections rely on position:sticky, which does not survive
+     * one. `clip` does no such thing — and it only bites at the section's own
+     * edges, which are the viewport's, so it takes nothing off the effect that
+     * was not already off-screen.
+     */
     <section
       id="booking"
-      className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
+      className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20 overflow-x-clip"
     >
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
         <div className="lg:col-span-4">
