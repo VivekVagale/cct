@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import InfiniteMenu, { type MenuItem } from "@/components/ui/InfiniteMenu";
 import { projects } from "@/data/projects";
 import { experiences } from "@/data/content";
@@ -12,6 +12,36 @@ import { experiences } from "@/data/content";
  * placeholder imagery — and each links to the section it belongs to.
  */
 export function WorkShowcase() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [near, setNear] = useState(false);
+
+  // The sphere's WebGL context is not created until the section is close.
+  //
+  // It used to exist from first paint, a full viewport below the fold, running
+  // its render loop against the same GPU the hero's canvas and the starfield
+  // are competing for — during the one part of the page where that competition
+  // is most visible. Once created it stays: this defers the cost, it does not
+  // tear anything down behind the visitor.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setNear(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNear(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "100% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const items = useMemo<MenuItem[]>(
     () => [
       ...projects.map((p) => ({
@@ -36,10 +66,11 @@ export function WorkShowcase() {
     // Full-bleed: the sphere is the section, not a panel sitting inside one.
     // The heading floats over it so nothing steals vertical space from the
     // canvas, and stays click-through so it never blocks a drag.
-    <section className="relative h-[100svh] w-full overflow-hidden pointer-events-auto">
-      <div className="absolute inset-0">
-        <InfiniteMenu items={items} scale={2.2} />
-      </div>
+    <section
+      ref={sectionRef}
+      className="relative h-[100svh] w-full overflow-hidden pointer-events-auto"
+    >
+      <div className="absolute inset-0">{near && <InfiniteMenu items={items} scale={2.2} />}</div>
 
       <div className="absolute inset-x-0 top-0 z-10 px-6 sm:px-10 pt-24 sm:pt-28 pointer-events-none">
         <div className="max-w-[1600px] mx-auto">

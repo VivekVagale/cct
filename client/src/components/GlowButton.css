@@ -11,10 +11,26 @@
  */
 
 .glow-button {
+  /*
+   * The face's radius is the ring's minus the ring's width, so the two curves
+   * are concentric and the gradient reads as an even band the whole way round.
+   * They were 0.9em and 0.5em, which left the black face visibly squarer than
+   * the ring it sat in and the band thick at the corners and thin along the
+   * sides.
+   *
+   * In rem, not em, and that part matters. The wrapper inherits its font-size
+   * from the page while the face is given one by each call site — the nav and
+   * the hero both pass text-xs — so the same em value resolved to two different
+   * lengths, and the mismatch changed depending on where the button was used.
+   * rem is the same length in both.
+   */
+  --glow-radius: 0.9rem;
+  --glow-ring: 3px;
+
   position: relative;
   display: inline-block;
-  padding: 3px;
-  border-radius: 0.9em;
+  padding: var(--glow-ring);
+  border-radius: var(--glow-radius);
   background: linear-gradient(90deg, #03a9f4, #f441a5);
   transition: all 0.4s ease;
 }
@@ -37,7 +53,7 @@
   position: absolute;
   inset: 0;
   margin: auto;
-  border-radius: 0.9em;
+  border-radius: var(--glow-radius);
   z-index: -10;
   filter: blur(0);
   transition: filter 0.4s ease;
@@ -59,7 +75,7 @@
  */
 .glow-button__face {
   display: block;
-  border-radius: 0.5em;
+  border-radius: calc(var(--glow-radius) - var(--glow-ring));
   background-color: #000;
   color: #fff;
   cursor: pointer;

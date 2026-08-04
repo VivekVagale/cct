@@ -11,7 +11,8 @@ import {
 import { ScrollImageSequence } from "@/components/ui/ScrollImageSequence";
 import { Magnet } from "@/components/Magnet";
 import { GlowButton } from "@/components/GlowButton";
-import { HERO_SEQUENCE } from "@/data/heroSequence";
+import { ScrollCue } from "@/components/ScrollCue";
+import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
 
 /**
  * The pin's phases, in vh of scroll rather than as fractions of the section.
@@ -46,6 +47,30 @@ const REVEAL_END = (ASSEMBLY_VH + REVEAL_VH) / SCROLL_VH;
 const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
 
 /**
+ * Which sequence a viewport gets.
+ *
+ * Orientation, not width, because orientation is what makes the landscape
+ * sequence wasteful. The canvas fits with "cover", so a portrait viewport keeps
+ * a centre strip about a quarter of the frame's width and discards the rest —
+ * and then still upscales it, because it wants ~1928px of frame height and the
+ * landscape frame only has 1440. Phones were paying full freight for a soft
+ * result. The portrait sequence is that same centre strip, delivered at the
+ * size it is actually drawn at.
+ *
+ * The max-width guard keeps portrait tablets on the landscape sequence, where
+ * the strip would be too narrow to fill them.
+ */
+const PORTRAIT_QUERY = "(orientation: portrait) and (max-width: 900px)";
+
+/**
+ * Decoded-frame ceilings. A phone tab is killed at a small fraction of what a
+ * desktop tolerates, so it gets a much tighter one — which still buys a larger
+ * window in frames, since a portrait frame is 2.6x smaller.
+ */
+const DESKTOP_BUDGET = 500 * 1024 * 1024;
+const MOBILE_BUDGET = 180 * 1024 * 1024;
+
+/**
  * The mascot is the Hero — not an image beside the copy. The sequence is
  * absolutely positioned across the whole pinned stage and the copy floats over
  * the top. Nothing sits in a card, a column, or a wrapper that would constrain
@@ -56,11 +81,17 @@ const HOLD_END = (ASSEMBLY_VH + REVEAL_VH + HOLD_VH) / SCROLL_VH;
  * runs out the next section scrolls up and covers it naturally.
  *
  * The frames carry their own alpha — the black backdrop is keyed out by
- * tools/key_hero_frames.py, which finds it as the black connected to the frame
- * border, so the character's equally-black clothing stays solid. That is what
- * lets the section simply end on its final frame: there is no backdrop left to
- * hide the starfield, so the stars come up behind the mascot and the frame
- * stays put.
+ * tools/build_hero_frames.py, which finds it as the black connected to the
+ * frame border, so the character's equally-black clothing stays solid. That is
+ * what lets the section simply end on its final frame: there is no backdrop
+ * left to hide the starfield, so the stars come up behind the mascot and the
+ * frame stays put.
+ *
+ * The Hero owns the starfield's opacity and hands it to App through a
+ * MotionValue, so the assembly plays against flat black and the stars rise with
+ * the reveal. Keying means they *could* be on from the first frame — that was
+ * built and rejected: stars behind an assembling mascot read as busy, and
+ * having them arrive is what gives the reveal its beat.
  *
  * Nothing is swapped in at the end. An earlier cut dissolved the frames out and
  * faded a separate static pose in, because opaque frames left no way to reveal
@@ -87,6 +118,32 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [alive, setAlive] = useState(false);
+  // Whether the page has moved at all. Only ever flips false -> true, so this
+  // is one re-render for the life of the section, not one per scroll tick.
+  const [scrolled, setScrolled] = useState(false);
+  // Media-query driven, so it follows a rotate. State is safe here for the same
+  // reason the old resize measurement was: this changes on orientation, not on
+  // every scroll tick.
+  //
+  // Read synchronously for the first render, not defaulted to false and
+  // corrected in the effect. Defaulting meant a phone mounted the landscape
+  // sequence, started pulling 133KB frames, and only then swapped — measured at
+  // 8 wasted desktop frames, about a megabyte of a mobile visitor's data, plus
+  // a full teardown and refetch on a connection least able to afford it.
+  const [portrait, setPortrait] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(PORTRAIT_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(PORTRAIT_QUERY);
+    const sync = () => setPortrait(mql.matches);
+    sync();
+    mql.addEventListener("change", sync);
+    return () => mql.removeEventListener("change", sync);
+  }, []);
+
+  const sequence = portrait ? HERO_SEQUENCE_MOBILE : HERO_SEQUENCE;
+  const budgetBytes = portrait ? MOBILE_BUDGET : DESKTOP_BUDGET;
 
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
@@ -98,6 +155,11 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     const next = v >= ASSEMBLY_END;
     setAlive((prev) => (prev === next ? prev : next));
+    // One-way latch for the scroll cue. It is a flag, not a curve: the cue goes
+    // the moment the page moves and never comes back, even if the reader
+    // scrolls back to the top. A threshold this small is any real scroll at all
+    // — about 4px — while still ignoring subpixel noise.
+    if (v > 0.0005) setScrolled((prev) => prev || true);
   });
 
   // The sequence consumes most of the pin; the tail is the exit.
@@ -129,6 +191,7 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // two elements fading on separate curves. Nothing overlays the assembly
   // before it: the sequence plays clean.
   const ctaOpacity = useTransform(scrollYProgress, [ASSEMBLY_END, REVEAL_END], [0, 1]);
+
 
   // The starfield rises behind the frames rather than replacing them. The
   // frames are keyed, so their backdrop is already clear — the stars appear
@@ -188,11 +251,12 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
             }
           >
             <ScrollImageSequence
-              count={HERO_SEQUENCE.count}
-              srcFor={HERO_SEQUENCE.srcFor}
+              count={sequence.count}
+              srcFor={sequence.srcFor}
               progress={sequenceProgress}
-              width={HERO_SEQUENCE.width}
-              height={HERO_SEQUENCE.height}
+              width={sequence.width}
+              height={sequence.height}
+              budgetBytes={budgetBytes}
               onReady={() => setReady(true)}
               fit="cover"
               className="w-full h-full"
@@ -209,6 +273,20 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
         <h1 className="sr-only">
           Cold Chain Theory — cinematic automotive CGI studio. Every frame tells a story.
         </h1>
+
+        {/* Appears once the frames are ready, so it does not share the screen
+            with the loading line below it, and leaves the instant the page
+            moves. It was tied to scroll position before — fading across a span
+            of scroll — which meant it was still on screen while the assembly
+            was already running. It is a prompt to start, so it ends when the
+            reader starts. */}
+        <motion.div
+          animate={{ opacity: ready && !scrolled ? 1 : 0 }}
+          transition={{ duration: scrolled ? 0.25 : 0.6 }}
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        >
+          <ScrollCue />
+        </motion.div>
 
         <motion.div
           style={{ opacity: ctaOpacity }}

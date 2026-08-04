@@ -17,9 +17,13 @@ import Galaxy from "./components/ui/Galaxy";
 import { motion, useMotionValue } from "framer-motion";
 
 function App() {
-  // The Hero's frames are opaque, so the starfield stays hidden behind them and
-  // is faded up by the Hero as the assembly finishes — the two backgrounds meet
-  // without a cut rather than the starfield being visible around a frame edge.
+  // The starfield is faded up by the Hero as its assembly finishes, so the page
+  // opens on flat black and the stars arrive with the reveal.
+  //
+  // This is a deliberate look, not a technical constraint. The frames are keyed,
+  // so the stars *can* show through from the very first one — that was tried and
+  // it read as busy behind an assembling mascot. Black holds the assembly, and
+  // the starfield arriving is what makes the reveal land.
   const galaxyOpacity = useMotionValue(0);
 
   return (
