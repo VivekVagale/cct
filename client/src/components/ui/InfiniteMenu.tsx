@@ -662,6 +662,14 @@ class InfiniteGridMenu {
   public smoothRotationVelocity = 0;
   public scaleFactor = 1.0;
   private disposed = false;
+  /**
+   * Set while the canvas is off screen. The sphere is created once and then
+   * kept — tearing a WebGL context down behind the visitor is worse than
+   * holding it — so without this its render loop draws a full viewport of
+   * WebGL for every section below it, forever, competing with the starfield
+   * for the same GPU. Paused it still ticks, but the frame costs nothing.
+   */
+  private paused = false;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -682,6 +690,10 @@ class InfiniteGridMenu {
     this.disposed = true;
   }
 
+  public setPaused(paused: boolean): void {
+    this.paused = paused;
+  }
+
   public resize(): void {
     const needsResize = resizeCanvasToDisplaySize(this.canvas);
     if (!this.gl) return;
@@ -693,6 +705,19 @@ class InfiniteGridMenu {
 
   public run(time = 0): void {
     if (this.disposed) return;
+
+    // The chain stays alive while paused rather than being stopped and
+    // restarted: an empty rAF callback is free next to a viewport of WebGL,
+    // and keeping it means there is no resume path to get wrong. The clock is
+    // re-based on the way through, so a minute spent off screen does not
+    // arrive back as a minute of simulation on the first visible frame — the
+    // 32ms clamp below would spread it over the following frames as a lurch.
+    if (this.paused) {
+      this._time = time;
+      requestAnimationFrame(t => this.run(t));
+      return;
+    }
+
     this._deltaTime = Math.min(32, time - this._time);
     this._time = time;
     this._deltaFrames = this._deltaTime / this.TARGET_FRAME_DURATION;
@@ -1064,8 +1089,28 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({ items = [], scale = 1.0 }) => {
     window.addEventListener('resize', handleResize);
     handleResize();
 
+    // Draw only while the canvas is actually on screen, and only while the tab
+    // is. Everything below this section — About onward, which is most of the
+    // page — was scrolling against a full viewport of WebGL still being drawn
+    // behind it at 60fps.
+    const syncHidden = () => sketch?.setPaused(document.hidden);
+    document.addEventListener('visibilitychange', syncHidden);
+
+    let io: IntersectionObserver | null = null;
+    if (canvas && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(
+        ([entry]) => sketch?.setPaused(!entry.isIntersecting || document.hidden),
+        // A margin, so the sphere is already turning by the time it is on
+        // screen rather than starting from a standstill at the section edge.
+        { rootMargin: '20% 0px' }
+      );
+      io.observe(canvas);
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', syncHidden);
+      io?.disconnect();
       sketch?.dispose();
     };
   }, [items, scale]);

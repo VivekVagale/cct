@@ -1,5 +1,6 @@
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
 import { useEffect, useRef } from 'react';
+import type { MotionValue } from 'framer-motion';
 import './Galaxy.css';
 
 const vertexShader = `
@@ -187,6 +188,21 @@ interface GalaxyProps {
   repulsionStrength?: number;
   autoCenterRepulsion?: number;
   transparent?: boolean;
+  /**
+   * The opacity this starfield is being displayed at, so it can skip drawing
+   * while it is invisible.
+   *
+   * A MotionValue rather than a number: this is driven by scroll, and routing
+   * a scroll-derived value through React state re-renders the tree on every
+   * tick — the same failure that tore down the hero's frame loader. Nothing
+   * here re-renders; the subscription writes to a ref the render loop reads.
+   *
+   * It matters most exactly where the page is busiest. The starfield is held
+   * at zero for the whole hero, which is the one stretch already paying for a
+   * frame sequence being decoded and drawn on scroll — and it was spending a
+   * full viewport of fragment shader per frame there to show nothing at all.
+   */
+  opacity?: MotionValue<number>;
 }
 
 export default function Galaxy({
@@ -206,6 +222,7 @@ export default function Galaxy({
   rotationSpeed = 0.1,
   autoCenterRepulsion = 0,
   transparent = true,
+  opacity,
   ...rest
 }: GalaxyProps) {
   const ctnDom = useRef<HTMLDivElement>(null);
@@ -213,6 +230,20 @@ export default function Galaxy({
   const smoothMousePos = useRef({ x: 0.5, y: 0.5 });
   const targetMouseActive = useRef(0.0);
   const smoothMouseActive = useRef(0.0);
+  // Read by the render loop, written by the subscription below. Defaults to
+  // visible, so leaving the prop off keeps the old always-drawing behaviour.
+  const visible = useRef(true);
+
+  useEffect(() => {
+    if (!opacity) return;
+    const sync = (v: number) => {
+      visible.current = v > 0.001;
+    };
+    // Seeded as well as subscribed: landing deep in the page starts at the
+    // right value rather than drawing until the first change comes through.
+    sync(opacity.get());
+    return opacity.on('change', sync);
+  }, [opacity]);
 
   useEffect(() => {
     if (!ctnDom.current) return;
@@ -282,6 +313,14 @@ export default function Galaxy({
 
     function update(t: number) {
       animateId = requestAnimationFrame(update);
+
+      // Nothing below this line is worth doing for a starfield that is either
+      // fully transparent or on a tab nobody is looking at. uTime is derived
+      // from the timestamp rather than accumulated, so the animation is where
+      // it would have been when it comes back rather than resuming from where
+      // it stopped.
+      if (!visible.current || document.hidden) return;
+
       if (!disableAnimation) {
         program.uniforms.uTime.value = t * 0.001;
         program.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0;
