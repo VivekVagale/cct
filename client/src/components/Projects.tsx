@@ -93,7 +93,7 @@ export function Projects() {
       id="projects"
       className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
     >
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-24">
+      <div className="scene-heading max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-24">
         <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
           What We Build
         </p>
@@ -113,7 +113,7 @@ export function Projects() {
           two words and the badge wrapped. The column count moves up a
           breakpoint the whole way rather than only at the bottom, so no width
           gets a card narrower than its own contents. */}
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      <div className="scene-body max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {projects.map((project, i) => (
           <ProjectCard key={project.id} project={project} index={i} />
         ))}

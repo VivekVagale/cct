@@ -13,6 +13,7 @@ import { Magnet } from "@/components/Magnet";
 import { GlowButton } from "@/components/GlowButton";
 import { ScrollCue } from "@/components/ScrollCue";
 import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
+import { useScene } from "@/components/SceneDeck";
 
 /**
  * The pin's phases, in vh of scroll rather than as fractions of the section.
@@ -197,8 +198,19 @@ export function Hero({
     ? MOBILE_GEOMETRY
     : DESKTOP_GEOMETRY;
 
+  /*
+   * Measured against the scene's own scroller, not the window.
+   *
+   * In the deck the window never moves, so a sequence scrubbed from window
+   * scroll would sit on frame one forever. `container` points useScroll at the
+   * element that does move; it is null in the reduced-motion document
+   * fallback, where the window is the right answer and framer's default
+   * already is that.
+   */
+  const { scroller } = useScene();
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
+    container: scroller ? { current: scroller } : undefined,
     offset: ["start start", "end end"],
   });
 

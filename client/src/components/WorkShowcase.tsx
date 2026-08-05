@@ -93,11 +93,11 @@ export function WorkShowcase() {
       ref={sectionRef}
       className="relative h-[74svh] sm:h-[100svh] w-full overflow-hidden pointer-events-auto"
     >
-      <div className="absolute inset-0">
+      <div className="scene-body absolute inset-0">
         {near && <InfiniteMenu items={items} scale={narrow ? 1.5 : 2.2} />}
       </div>
 
-      <div className="absolute inset-x-0 top-0 z-10 px-6 sm:px-10 pt-20 sm:pt-28 pointer-events-none">
+      <div className="scene-heading absolute inset-x-0 top-0 z-10 px-6 sm:px-10 pt-20 sm:pt-28 pointer-events-none">
         <div className="max-w-[1600px] mx-auto">
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-2 sm:mb-3">
             Selected Work

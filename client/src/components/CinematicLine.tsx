@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import WarpText from "@/components/WarpText";
+import { useScene } from "@/components/SceneDeck";
 import { cn } from "@/lib/utils";
 
 interface CinematicLineProps {
@@ -36,6 +37,18 @@ interface CinematicLineProps {
 export function CinematicLine({ text, className }: CinematicLineProps) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  /*
+   * In the deck this line is a title card on a screen of its own, and its
+   * entrance is the deck's — `.scene-heading` fades and unblurs it on the
+   * scene's own clock.
+   *
+   * The scroll-linked opacity below must not run there. It is driven by the
+   * window's scroll position, and in the deck the window never moves: the
+   * transform would sit at its starting value and hold the card at opacity 0
+   * forever, which is a blank screen rather than a subtle reveal. It stays for
+   * the reduced-motion document, where the window does scroll.
+   */
+  const { active: inDeck } = useScene();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start 0.85", "start 0.35"],
@@ -53,8 +66,8 @@ export function CinematicLine({ text, className }: CinematicLineProps) {
       )}
     >
       <motion.div
-        style={reduceMotion ? undefined : { opacity, y }}
-        className="w-full max-w-4xl"
+        style={reduceMotion || inDeck ? undefined : { opacity, y }}
+        className="scene-heading w-full max-w-4xl"
       >
         {reduceMotion ? (
           // No canvas at all under reduced motion. The shader's whole output is

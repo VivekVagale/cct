@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring, type MotionValue } from "framer-motion";
 import { processStages, type ProcessStage } from "@/data/content";
 import { Mascot } from "@/components/Mascot";
+import { useScene } from "@/components/SceneDeck";
 import { FoldHeading } from "@/components/FoldHeading";
 
 /**
@@ -23,7 +24,14 @@ import { FoldHeading } from "@/components/FoldHeading";
  */
 export function CreativeProcess() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  // Measured against the scene's scroller — see the same note in Hero. In the
+  // deck the window never moves, so the five stages would all sit on stage one.
+  const { scroller } = useScene();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    container: scroller ? { current: scroller } : undefined,
+    offset: ["start start", "end end"],
+  });
 
   const progress = useSpring(scrollYProgress, {
     stiffness: 180,
@@ -47,7 +55,7 @@ export function CreativeProcess() {
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         <motion.div
           style={{ opacity: headingOpacity, y: headingY }}
-          className="absolute inset-x-0 top-[12%] sm:top-[16%] z-20 px-6 sm:px-10 max-w-[1600px] mx-auto pointer-events-none"
+          className="scene-heading absolute inset-x-0 top-[12%] sm:top-[16%] z-20 px-6 sm:px-10 max-w-[1600px] mx-auto pointer-events-none"
         >
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-3 sm:mb-4">
             How We Work

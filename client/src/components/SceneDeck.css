@@ -1,0 +1,146 @@
+/*
+ * The frame the scenes play in. It never moves.
+ *
+ * Fixed rather than a tall element with `position: sticky` inside it: sticky
+ * still needs a document taller than the screen to pin against, which means a
+ * scrollbar, a scroll position, and a page that can be dragged around behind
+ * the effect. There is no page here to drag — the deck is the viewport.
+ */
+.scene-deck {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  /* Above the starfield, which stays behind every scene as the one thing that
+     does not change between them — the fixed background of a fixed camera. */
+  z-index: 10;
+  outline: none;
+}
+
+/*
+ * Every scene occupies the whole frame and they stack in the same place, so
+ * one can dissolve into the next without the frame ever going empty.
+ *
+ * `will-change` is on because the transition animates filter, and a blur that
+ * is promoted mid-animation visibly re-rasterises on the first frame.
+ */
+.scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  will-change: transform, opacity, filter;
+}
+
+/* A scene that fits. Nothing about it can scroll — the whole point. */
+.scene-fixed {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/*
+ * A scene that cannot fit: the analytics and the booking form.
+ *
+ * The frame is still fixed and still full-screen — what moves is the content
+ * inside it, and the deck will not advance until that movement has reached its
+ * end. `overscroll-behavior: contain` stops a flick at the bottom of one of
+ * these from chaining into the document underneath.
+ */
+.scene-scroller {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+/*
+ * The staging inside a scene.
+ *
+ * A section marks its heading block and its supporting blocks, and the deck's
+ * timing does the rest: the heading draws first and alone, everything else
+ * waits for it to finish and then arrives in order. The delays are long on
+ * purpose — see SCENE in SceneDeck.tsx.
+ *
+ * Done in CSS rather than by wrapping every element in a motion component,
+ * because it has to apply across nine sections that already have their own
+ * markup, and a class on a wrapper is a far smaller change to each of them
+ * than a new component around their contents.
+ */
+.scene-heading,
+.scene-body > * {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scene-heading {
+  animation-name: scene-heading-in;
+  animation-duration: 1.9s;
+  animation-delay: 0.55s;
+}
+
+/* Each child of a body block follows the one before it. Six is enough for any
+   section here; past that they share the last step rather than drifting ever
+   later, since a seventh element arriving four seconds in has been waited for
+   rather than revealed. */
+.scene-body > * {
+  animation-name: scene-content-in;
+  animation-duration: 1.2s;
+  animation-delay: 3.05s;
+}
+.scene-body > *:nth-child(2) {
+  animation-delay: 3.23s;
+}
+.scene-body > *:nth-child(3) {
+  animation-delay: 3.41s;
+}
+.scene-body > *:nth-child(4) {
+  animation-delay: 3.59s;
+}
+.scene-body > *:nth-child(5) {
+  animation-delay: 3.77s;
+}
+.scene-body > *:nth-child(n + 6) {
+  animation-delay: 3.95s;
+}
+
+@keyframes scene-heading-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes scene-content-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * None of it under prefers-reduced-motion. The deck itself does not mount in
+ * that case, so these would only ever hold real content invisible behind an
+ * animation that is not going to play.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .scene-heading,
+  .scene-body > * {
+    animation: none;
+  }
+}

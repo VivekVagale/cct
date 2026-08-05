@@ -59,8 +59,10 @@ export const projects: Project[] = [
     id: "bike-free-fall",
     title: "Project Free Fall",
     description: "Suspended motion, gravity rendered with intent.",
-    image:
-      "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=1200&auto=format&fit=crop",
+    // The studio's own frame, not a stock photograph — the same render the
+    // sphere carries as "It Say Grrr". The card crops it 4:3 from a 9:16
+    // source, which keeps the fork and front wheel and loses the sky.
+    image: "/showcase/it-say-grrr.webp",
   },
   {
     id: "jet-escort",
