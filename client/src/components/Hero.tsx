@@ -22,27 +22,39 @@ import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
  * changing a phase meant re-deriving all the others by hand. Lengths compose,
  * and the section height falls out of them.
  */
-const REVEAL_VH = 40; // starfield up behind the frames, CTA in
-const HOLD_VH = 10; // final frame breathing over stars
-const EXIT_VH = 40; // the final frame dissolving away
+const REVEAL_VH = 25; // starfield up behind the frames, CTA in
+const HOLD_VH = 0; // final frame breathing over stars
+const EXIT_VH = 25; // the final frame dissolving away
 const STAGE_VH = 100; // the sticky stage itself
 
+/**
+ * How much of the assembly the reveal starts inside.
+ *
+ * The reveal used to begin where the frames stopped, which is what made the
+ * tail expensive: every vh of stars-rising and CTA-arriving was a vh of scroll
+ * bought after the animation was already over. Overlapping it with the last
+ * 6% of the scrub — about 40vh of the 660 — means most of the beat is paid for
+ * out of scroll the sequence was spending anyway, and the section can end
+ * almost as soon as the last frame lands.
+ */
+const REVEAL_LEAD = 0.06;
+
 /*
- * The tail was 192vh and is now 90.
+ * The tail was 192vh, then 90, and is now 50.
  *
- * The three phases after the assembly used to run 50 + 42 + 100. What that
- * bought at the end was two full screens of scrolling in which nothing
- * happened but a mascot slowly going transparent over a starfield — the
- * animation had finished, the stars were up, and there was still a screen and
- * a half of scroll before the next section arrived. It read as the page having
- * ended.
+ * The three phases after the assembly originally ran 50 + 42 + 100 — two full
+ * screens in which nothing happened but a mascot slowly going transparent over
+ * a starfield. Halving it left 90, and that was still most of a screen of
+ * scrolling past a finished animation to reach Selected Work.
  *
- * None of the three is cut to zero, because each does something. The reveal
- * has to be long enough to read as the stars rising rather than switching on.
- * The hold is what lets the CTA land before anything starts taking it away —
- * at zero the buttons would reach full opacity and immediately begin fading.
- * The exit stays gradual under the hand rather than snapping, which is what a
- * dissolve is for; 40vh is still around four notches of a wheel.
+ * What makes 50 possible is REVEAL_LEAD: the stars and the CTA now start
+ * arriving before the last frame lands, so the reveal is no longer a phase the
+ * section has to buy scroll for. The hold goes to zero with it — its job was to
+ * let the CTA settle before the dissolve started, and a CTA that began arriving
+ * 40vh earlier has already settled.
+ *
+ * The exit is the one thing left that has to cost something. It is a dissolve,
+ * and a dissolve with no scroll under it is a cut.
  *
  * Selected Work is `h-[100svh]` with no top padding, so it arrives full-screen
  * the moment the stage releases.
@@ -249,13 +261,19 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   // carries it, so the buttons and the mascot leave as one image rather than as
   // two elements fading on separate curves. Nothing overlays the assembly
   // before it: the sequence plays clean.
-  const ctaOpacity = useTransform(scrollYProgress, [assemblyEnd, revealEnd], [0, 1]);
-
+  //
+  // It starts before the frames finish. The last 6% of the scrub is the
+  // mascot settling rather than assembling, and putting the buttons' arrival
+  // there costs the section nothing — where starting it at assemblyEnd meant
+  // buying every vh of it after the animation was already over.
+  const revealStart = assemblyEnd * (1 - REVEAL_LEAD);
+  const ctaOpacity = useTransform(scrollYProgress, [revealStart, revealEnd], [0, 1]);
 
   // The starfield rises behind the frames rather than replacing them. The
   // frames are keyed, so their backdrop is already clear — the stars appear
-  // through it and the final frame stays exactly where it is.
-  const galaxyReveal = useTransform(scrollYProgress, [assemblyEnd, revealEnd], [0, 1]);
+  // through it and the final frame stays exactly where it is. Same lead as the
+  // CTA: they are one beat and must not arrive on two different curves.
+  const galaxyReveal = useTransform(scrollYProgress, [revealStart, revealEnd], [0, 1]);
 
   // The exit: the whole stage dissolves across EXIT_VH, so the mascot fades
   // into the starfield that is already behind it. Spread across the phase
