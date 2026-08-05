@@ -28,16 +28,17 @@ import "./SceneDeck.css";
  *   0.00  the previous scene begins leaving, this one begins arriving
  *   0.55  the heading starts drawing — after the transition has landed, not
  *         during it, so the two are never competing
+ *   0.90  advancing unlocks — a visitor who wants to move on is never made to
+ *         wait for the rest of this
  *   2.45  the heading has settled
  *   3.05  the supporting content begins, staggered
- *   3.20  advancing unlocks
  *
  * Nothing here is fast on purpose. A heading that arrives in 0.4s is a thing
  * that happened; one that takes two seconds is a thing being said.
  */
 export const SCENE = {
   /** The crossfade between two scenes. */
-  transition: 1.1,
+  transition: 0.8,
   /** Quiet after the transition lands, before the heading starts. */
   headingDelay: 0.55,
   /** The heading's own draw. */
@@ -51,27 +52,42 @@ export const SCENE = {
   /**
    * How long a scene is held before the next one can be asked for.
    *
-   * This is the one that decides whether the page feels calm or stuck. Long
-   * enough that a heading is never skipped past before it has finished
-   * speaking; short enough that a second deliberate scroll is answered rather
-   * than swallowed. A visitor who wants to move on is not made to wait for the
-   * full content stagger — only for the heading.
+   * This is the one that decides whether the page feels calm or stuck, and it
+   * was stuck. At 2.4s it was long enough to protect a heading from being
+   * skipped — and long enough that every single scene change waited on it,
+   * which is a page that argues with the person reading it.
+   *
+   * 0.9s is about the length of one wheel gesture's inertia: it stops a single
+   * flick advancing twice, and answers anything deliberate after it. Nothing
+   * now protects a heading from a visitor who wants to move on, which is the
+   * right way round — they can always come back, and coming back is free (see
+   * `dwellSettled`).
    */
-  dwell: 2.4,
+  dwell: 0.9,
+  /**
+   * The hold on arriving at a scene that has been read before.
+   *
+   * Barely a hold at all — long enough that one wheel gesture's inertia cannot
+   * fire twice, and no longer. The full dwell exists to stop a heading being
+   * skipped before it has finished speaking; a scene the visitor has already
+   * been through has no heading left to protect, and making them wait through
+   * it again to get back where they were is the delay, not the pacing.
+   */
+  dwellSettled: 0.3,
 } as const;
 
 /**
  * How much wheel a scene has to be pushed against before it yields.
  *
- * Higher than it needs to be to register intent, on purpose. The push is now
- * visible — the scene gives a little under it — and a threshold a single
- * trackpad flick clears instantly leaves no travel for that feedback to happen
- * in. This is roughly a firm notch and a half.
+ * Roughly one firm notch. There has to be enough travel for the give to be
+ * felt before the scene changes — that is the whole point of it — but every
+ * unit above that is a unit of scrolling that looks like nothing happening,
+ * and 90 was over that line.
  */
-const WHEEL_THRESHOLD = 90;
+const WHEEL_THRESHOLD = 62;
 
 /** The same, for a finger. */
-const SWIPE_THRESHOLD = 64;
+const SWIPE_THRESHOLD = 50;
 
 /**
  * How long a run of wheel events can pause before the charge is treated as
@@ -203,6 +219,22 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [scroller, setScroller] = useState<HTMLElement | null>(null);
+
+  /*
+   * Stable, and it has to be.
+   *
+   * This was an inline arrow, which React treats as a new ref every render: it
+   * detaches the old one with null and attaches the new one with the element,
+   * on every single render. Since the callback sets state, each render queued
+   * another — null, element, null, element — and the deck sat in a render loop
+   * for as long as it was mounted, handing every scene a `scroller` that
+   * changed identity underneath it. A `useCallback` with no dependencies is
+   * called once when the element mounts and once when it goes.
+   */
+  const attachScroller = useCallback((el: HTMLDivElement | null) => {
+    scrollerRef.current = el;
+    setScroller(el);
+  }, []);
 
   const count = scenes.length;
 
@@ -357,7 +389,17 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       if (next < 0 || next >= count) return false;
 
       queued.current = 0;
-      jump(next, delta, scenes[next].dwell ?? SCENE.dwell);
+      const target = scenes[next];
+      jump(
+        next,
+        delta,
+        // A scene already read is handed back almost immediately. Only a first
+        // sighting is worth holding, and only that one has anything to hold
+        // for. This is most of what made moving back and forth feel slow.
+        seen.current.has(target.id)
+          ? SCENE.dwellSettled
+          : (target.dwell ?? SCENE.dwell),
+      );
       return true;
     },
     [index, count, jump, scenes],
@@ -611,10 +653,7 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
             >
               <div
                 className={current.scrolls ? "scene-scroller" : "scene-fixed"}
-                ref={(el) => {
-                  scrollerRef.current = el;
-                  setScroller(el);
-                }}
+                ref={attachScroller}
                 id={current.id}
               >
                 {current.render()}

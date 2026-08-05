@@ -81,9 +81,10 @@ function App() {
         id: "work",
         render: () => <WorkShowcase />,
         // Longer than anywhere else, because this scene is a thing to be used
-        // rather than read. At the deck's ordinary hold the sphere was gone
-        // before a visitor had worked out it could be turned at all.
-        dwell: 5,
+        // rather than read — at the ordinary hold the sphere was gone before a
+        // visitor had worked out it could be turned at all. First sighting
+        // only: coming back to it is as immediate as anywhere else.
+        dwell: 2.6,
       },
       {
         id: "every-frame",
