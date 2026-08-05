@@ -7,7 +7,7 @@ import { StatCounter } from "@/components/StatCounter";
 import { ReelsBarChart } from "@/components/ReelsBarChart";
 import { AudienceMap } from "@/components/AudienceMap";
 import { headline, reachStats, reachWindow, topReels } from "@/data/reach";
-import { audienceShares, audienceWindow } from "@/data/audience";
+import { audienceTotals, audienceWindow } from "@/data/audience";
 import { FoldHeading } from "@/components/FoldHeading";
 
 /**
@@ -199,7 +199,7 @@ export function About() {
               heading's height higher than the thing it describes. */}
           <div className="lg:col-span-4 flex flex-col justify-center">
             <ul className="divide-y divide-white/[0.08] border-t border-white/[0.08]">
-              {audienceShares.slice(0, 8).map((row) => (
+              {audienceTotals.slice(0, 8).map((row) => (
                 <li
                   key={row.country}
                   tabIndex={0}
@@ -211,7 +211,7 @@ export function About() {
                 >
                   <span className="text-sm text-[#F5F7FA]">{row.country}</span>
                   <span className="shrink-0 text-sm text-[#B8C4D6] [font-variant-numeric:tabular-nums]">
-                    {row.share.toFixed(2)}%
+                    {row.percentOfTotal.toFixed(2)}%
                   </span>
                 </li>
               ))}
@@ -219,9 +219,10 @@ export function About() {
             {/* Said out loud rather than left for someone to notice the
                 column does not reach 100. */}
             <p className="mt-6 text-xs sm:text-sm text-[#B8C4D6]/70 leading-relaxed">
-              Mean share across {audienceWindow.reelCount} reels. Instagram
-              reports only each reel’s top five countries, so{" "}
-              {audienceWindow.untrackedShare}% sits below what it will show.
+              Share of all tracked views across {audienceWindow.reelCount}{" "}
+              reels. Instagram reports only each reel’s top five countries, so
+              roughly {audienceWindow.untrackedShare}% of views sit below what
+              it will show and are not counted here.
             </p>
           </div>
         </div>

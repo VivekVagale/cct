@@ -18,9 +18,9 @@ import { audienceFor, shareBucket } from "@/data/audience";
  * the entry chunk for a map most visitors scroll past. Fetched once, cached by
  * the browser like any other static asset.
  *
- * Colour is bucketed, not a linear ramp — India is 95.66% and second place is
- * 0.81%, so a linear scale paints one country and leaves every other viewer
- * country indistinguishable from empty ocean.
+ * Colour is bucketed, not a linear ramp — India is ~97.6% of the total and
+ * second place is ~0.8%, so a linear scale paints one country and leaves every
+ * other viewer country indistinguishable from empty ocean.
  */
 
 type ChoroplethData = Parameters<typeof ChoroplethChart>[0]["data"];
@@ -33,8 +33,10 @@ const FILLS = [
   "var(--chart-5)",
 ];
 
+/* Percent of the total, not the mean across reels — see data/audience.ts. The
+   two rank identically, so the buckets below are unaffected. */
 const getShare = (feature: { properties?: { name?: string } | null }) =>
-  audienceFor(feature.properties?.name ?? undefined)?.share;
+  audienceFor(feature.properties?.name ?? undefined)?.percentOfTotal;
 
 /**
  * Lets the country list beside the map drive the map's hover.
@@ -138,7 +140,7 @@ export function AudienceMap({
       <ChoroplethTooltip
         getFeatureValue={(feature) => getShare(feature)}
         formatValue={(value) => `${value.toFixed(2)}%`}
-        valueLabel="Share of views"
+        valueLabel="Share of total views"
       />
 
       <ListHoverBridge country={hoveredCountry} />

@@ -24,10 +24,29 @@
 export interface AudienceShare {
   /** Must match the geojson feature's `properties.name`. */
   country: string;
-  /** Mean share of a reel's views, in percent. */
+  /** Mean share of a reel's views, in percent. The transcribed figure. */
   share: number;
   /** How many of the twenty reels placed this country in their top five. */
   reels: number;
+}
+
+export interface AudienceTotal extends AudienceShare {
+  /**
+   * The country's percent of everything that was tracked.
+   *
+   * `share` is an average — a mean of the country's percentage across twenty
+   * reels — and a column of averages that reads "95.66%, 0.81%, 0.62%" invites
+   * being read as a split of the audience, which is not what an average of
+   * percentages is. This is that same distribution expressed as a proportion
+   * of the total: every `share` over their sum, so the column reaches 100.00
+   * and each row is straightforwardly "this much of the tracked views".
+   *
+   * The ranking is identical — dividing by a constant cannot reorder anything.
+   * What changes is that the numbers now mean the thing a reader assumes they
+   * mean. The ~2.1% Instagram never showed is still missing from the input and
+   * is now folded proportionally into the rest, which is stated on the page.
+   */
+  percentOfTotal: number;
 }
 
 /** The window these reels were exported over. Printed on the page. */
@@ -56,7 +75,22 @@ export const audienceShares: AudienceShare[] = [
   { country: "Serbia", share: 0.01, reels: 1 },
 ];
 
-const byCountry = new Map(audienceShares.map((a) => [a.country, a]));
+/** What the transcribed averages add up to before they are normalised. */
+export const trackedShareTotal = audienceShares.reduce(
+  (sum, a) => sum + a.share,
+  0,
+);
+
+/**
+ * The list the page actually renders: every country as its percent of the
+ * total rather than as its average across reels. See `percentOfTotal`.
+ */
+export const audienceTotals: AudienceTotal[] = audienceShares.map((a) => ({
+  ...a,
+  percentOfTotal: (a.share / trackedShareTotal) * 100,
+}));
+
+const byCountry = new Map(audienceTotals.map((a) => [a.country, a]));
 
 export const audienceFor = (country: string | undefined) =>
   country ? byCountry.get(country) : undefined;
