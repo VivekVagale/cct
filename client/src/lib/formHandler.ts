@@ -26,7 +26,14 @@ export async function submitBookingForm(data: BookingFormData): Promise<boolean>
 
   const response = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    // Accept matters as much as Content-Type. Formspree answers a JSON POST
+    // with a 302 to its own thank-you page unless the request asks for JSON,
+    // and a followed redirect resolves to an ok response for a page this code
+    // never wanted — so a failed submission could read as a successful one.
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
     body: JSON.stringify(data),
   });
 
