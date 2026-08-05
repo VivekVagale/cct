@@ -68,8 +68,10 @@ export const projects: Project[] = [
     id: "jet-escort",
     title: "Project Jet Mist",
     description: "Formation flight alongside your machine, to scale.",
-    image:
-      "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop",
+    // The studio's own frame. The bike, the cruiser and the jet all sit in the
+    // lower two-thirds, so the card's 4:3 crop of a 9:16 source keeps the whole
+    // arrangement and loses only mist and mountain.
+    image: "/showcase/project-jet-mist.webp",
   },
   {
     id: "water-impact",
