@@ -147,7 +147,20 @@ const MOBILE_BUDGET = 180 * 1024 * 1024;
  * and chain at a 3-9x upscale. Anyone reviving it needs an answer to the second
  * point, not just the first.
  */
-export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) {
+export function Hero({
+  galaxyOpacity,
+  /**
+   * How far through its dissolve the stage is: 0 while the mascot is up, 1
+   * once it has gone. The nav bar reads it to decide when to put its glass on,
+   * which has to be as the hero leaves rather than when the starfield arrives —
+   * those are two different moments, and only the second one clears the space
+   * under the bar.
+   */
+  heroExit,
+}: {
+  galaxyOpacity: MotionValue<number>;
+  heroExit: MotionValue<number>;
+}) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [alive, setAlive] = useState(false);
@@ -249,6 +262,12 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
     galaxyOpacity.set(galaxyReveal.get());
     return galaxyReveal.on("change", (v) => galaxyOpacity.set(v));
   }, [galaxyReveal, galaxyOpacity]);
+
+  // The same arrangement for the exit, inverted: 1 means the stage has gone.
+  useEffect(() => {
+    heroExit.set(1 - stageOpacity.get());
+    return stageOpacity.on("change", (v) => heroExit.set(1 - v));
+  }, [stageOpacity, heroExit]);
 
   return (
     <section

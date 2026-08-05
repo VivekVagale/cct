@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  type MotionValue,
+} from "framer-motion";
 import { GlowButton } from "@/components/GlowButton";
 
 const LINKS = [
@@ -10,21 +15,58 @@ const LINKS = [
 ];
 
 /**
- * Legibility comes from a shadow on the type, not from anything behind it.
+ * Legibility comes from a shadow on the type, not only from what is behind it.
  *
- * The bar has no background, no blur and no bottom border, because every one of
- * those draws an edge across the viewport — and at the end of the hero that edge
- * lands straight across the mascot's helmet. A halo on the text reads over both
- * the bright hoodie and the starfield without putting a line anywhere.
+ * Through the hero the bar has no background, no blur and no bottom border,
+ * because every one of those draws an edge across the viewport — and while the
+ * sequence plays that edge lands straight across the mascot's helmet. A halo on
+ * the text reads over both the bright hoodie and the starfield without putting
+ * a line anywhere. The glass only arrives once that mascot is dissolving, and
+ * the halo stays on under it: the tint is 55%, not a plate, and the type still
+ * has starfield showing through behind it.
  *
  * Blurred rather than offset: an offset shadow reads as cheap, a halo reads as
- * depth. It is also the cheapest option going — backdrop-filter over the hero
- * would re-blur on every composited frame while the sequence scrubs.
+ * depth.
  */
 const HALO = "[text-shadow:0_1px_10px_rgba(5,7,10,0.85)]";
 
-export function Navigation() {
+export function Navigation({
+  /**
+   * How far through its dissolve the hero's stage is: 0 while the mascot is up,
+   * 1 once it has gone.
+   *
+   * Not the starfield's opacity, which was the first thing tried. The stars
+   * rise behind a mascot that is still fully there, so a bar that puts its
+   * plate on at that moment draws its edge straight across the helmet — the
+   * one thing this bar has always refused to do. The space under it clears
+   * when the hero leaves, not when the background arrives.
+   */
+  heroExit,
+}: {
+  heroExit: MotionValue<number>;
+}) {
   const [open, setOpen] = useState(false);
+
+  /*
+   * Mounted, not just faded.
+   *
+   * A backdrop-filter still costs its blur at opacity 0 — the element is
+   * transparent, the compositing is not — so animating opacity alone would
+   * re-blur the whole bar on every frame of the scrub, over a sequence that is
+   * already the most expensive thing on the page. Crossing the threshold is one
+   * re-render in each direction, and the glass simply does not exist before it.
+   *
+   * A third of the way through the dissolve, not the start of it. At 0 the
+   * glass would begin arriving while the mascot is still at full opacity, and
+   * the two would cross-fade — which is the same edge-across-the-helmet
+   * problem in slow motion. By 0.35 the hero is visibly leaving.
+   */
+  const [glass, setGlass] = useState(() => heroExit.get() > 0.35);
+
+  useMotionValueEvent(heroExit, "change", (v) => {
+    const next = v > 0.35;
+    setGlass((prev) => (prev === next ? prev : next));
+  });
 
   // The panel is the only thing on the page that takes the whole viewport on
   // purpose, so the page behind it must not scroll under it. Restored on close
@@ -58,6 +100,21 @@ export function Navigation() {
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className="fixed top-0 inset-x-0 z-50 pointer-events-auto"
     >
+      {/* Behind the bar's own content and nothing else — the header has no
+          background of its own for this to hide, so a negative z here only
+          orders it under the links. */}
+      <AnimatePresence>
+        {glass && (
+          <motion.div
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 -z-10 bg-[#05070A]/55 backdrop-blur-md border-b border-white/[0.06]"
+          />
+        )}
+      </AnimatePresence>
       {/* h-16 on phones. The bar is fixed, so its height is subtracted from
           every section's usable viewport for the whole page — 80px of it is
           worth having on a desktop and is not on a 667px screen. */}
