@@ -1187,6 +1187,25 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({ items = [], scale = 1.0 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null) as MutableRefObject<HTMLCanvasElement | null>;
   const [activeItem, setActiveItem] = useState<MenuItem | null>(null);
   const [isMoving, setIsMoving] = useState<boolean>(false);
+  /*
+   * Bumped to rebuild the sphere from scratch after the browser takes its
+   * WebGL context away.
+   *
+   * Local addition — re-adding this component from the registry drops it. A
+   * lost context is not an error anyone sees: every draw call afterwards is
+   * silently ignored and the canvas stays exactly as it was, which on this
+   * page means a blank square where the work is meant to be. It happens for
+   * ordinary reasons — the page runs a starfield, the hero's canvas and two
+   * WarpText instances besides this one, two scenes are alive at once during
+   * every transition, and the sphere's own context is thrown away and
+   * remade on each visit to the scene. That is the sphere being "sometimes
+   * there and sometimes not".
+   *
+   * `preventDefault` on the lost event is what makes the browser promise a
+   * restore at all; the remount is what actually rebuilds the geometry, the
+   * shaders and the texture atlas, none of which survive the loss.
+   */
+  const [contextEpoch, setContextEpoch] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -1225,6 +1244,16 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({ items = [], scale = 1.0 }) => {
     const syncHidden = () => sketch?.setPaused(document.hidden);
     document.addEventListener('visibilitychange', syncHidden);
 
+    // See contextEpoch. Without the preventDefault the browser never offers a
+    // restore, and the sphere is gone until the page is reloaded.
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      sketch?.setPaused(true);
+    };
+    const onContextRestored = () => setContextEpoch(n => n + 1);
+    canvas?.addEventListener('webglcontextlost', onContextLost);
+    canvas?.addEventListener('webglcontextrestored', onContextRestored);
+
     let io: IntersectionObserver | null = null;
     if (canvas && typeof IntersectionObserver !== 'undefined') {
       io = new IntersectionObserver(
@@ -1239,10 +1268,12 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({ items = [], scale = 1.0 }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', syncHidden);
+      canvas?.removeEventListener('webglcontextlost', onContextLost);
+      canvas?.removeEventListener('webglcontextrestored', onContextRestored);
       io?.disconnect();
       sketch?.dispose();
     };
-  }, [items, scale]);
+  }, [items, scale, contextEpoch]);
 
   const handleButtonClick = () => {
     if (!activeItem?.link) return;

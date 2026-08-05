@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -220,21 +221,51 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [scroller, setScroller] = useState<HTMLElement | null>(null);
 
-  /*
-   * Stable, and it has to be.
+  /**
+   * Where each scene's inner scroll was when the visitor left it.
    *
-   * This was an inline arrow, which React treats as a new ref every render: it
-   * detaches the old one with null and attaches the new one with the element,
-   * on every single render. Since the callback sets state, each render queued
-   * another — null, element, null, element — and the deck sat in a render loop
-   * for as long as it was mounted, handing every scene a `scroller` that
-   * changed identity underneath it. A `useCallback` with no dependencies is
-   * called once when the element mounts and once when it goes.
+   * A scene is remounted from nothing every time it comes back round, which
+   * means its scroller comes back at the top — and for the two scenes that are
+   * *scrubbed* by that scroll rather than merely scrolled, the top is frame
+   * one. Scrolling back up to the hero played the entire assembly again from
+   * the beginning, which is the one thing a deck that remembers its scenes
+   * must not do.
+   */
+  const scrollMemory = useRef<Map<string, number>>(new Map());
+
+  /*
+   * Stable, and it ignores being detached.
+   *
+   * Two separate faults lived here. It was an inline arrow, which React treats
+   * as a new ref on every render — detach with null, attach with the element,
+   * every time — and since the callback sets state, each render queued
+   * another, forever.
+   *
+   * The null is the worse half, and it survives a `useCallback`. Scenes
+   * overlap: the incoming one mounts and sets this, and then, most of a second
+   * later, the outgoing one finishes its exit and unmounts — handing this
+   * callback a null that wipes the *current* scene's scroller. From that
+   * moment `innerScrollHasRoom` said no to everything, so a section with
+   * content below the fold gave its wheel to the deck and was skipped past
+   * instead of read; and `useScene().scroller` went null, which is what
+   * `useScroll` needs to measure against, so the hero and the process stages
+   * fell back to a window that never moves and froze.
+   *
+   * A detach is therefore ignored outright. A scene leaving has nothing to say
+   * about which element is current — the one that has just arrived does.
    */
   const attachScroller = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
     scrollerRef.current = el;
     setScroller(el);
   }, []);
+
+  // Put a returning scene back where it was left, before the frame is drawn.
+  useLayoutEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTop = scrollMemory.current.get(el.id) ?? 0;
+  }, [index, scroller]);
 
   const count = scenes.length;
 
@@ -249,6 +280,26 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
    */
   const seen = useRef<Set<string>>(new Set());
   const [settled, setSettled] = useState(false);
+
+  /**
+   * How many scene changes have happened. Part of the key each scene is
+   * mounted under, and the reason the deck cannot lock up.
+   *
+   * `AnimatePresence` identifies its children by key, and the key was the
+   * scene's id. Scenes overlap by design — the outgoing one takes 0.64s to
+   * leave — and a scene that has been read can be asked for again 0.3s after
+   * it was left. Turn back within that window and the deck tried to mount a
+   * child under a key that was already present as an exiting child. It does
+   * not resolve that by starting a second copy: the entering scene is dropped,
+   * and since the deck's own index had already moved, every input after that
+   * was answered by a scene that was not on screen. The deck was simply dead,
+   * and only a reload brought it back.
+   *
+   * Counting the visit into the key makes a return a genuinely new child, so
+   * a scene can be arriving and leaving at the same time without the two ever
+   * being mistaken for one another.
+   */
+  const [visit, setVisit] = useState(0);
 
   useEffect(() => {
     const id = scenes[index]?.id;
@@ -323,6 +374,10 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
   /** Move to `target`, from any input. The one place scene state changes. */
   const jump = useCallback(
     (target: number, delta: number, dwell: number) => {
+      // Remember how far into this scene the visitor got, before it goes.
+      const leaving = scrollerRef.current;
+      if (leaving?.id) scrollMemory.current.set(leaving.id, leaving.scrollTop);
+
       lockedUntil.current = performance.now() + dwell * 1000;
       wheelAccumulator.current = 0;
       // Any move at all discharges a held one. A visitor who has just clicked
@@ -337,6 +392,7 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       setDirection(delta);
       setSettled(seen.current.has(scenes[target].id));
       setIndex(target);
+      setVisit((n) => n + 1);
     },
     [scenes, release],
   );
@@ -427,7 +483,15 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
     const el = scrollerRef.current;
     if (!el) return false;
     const max = el.scrollHeight - el.clientHeight;
-    if (max <= 2) return false;
+    /*
+     * A scroller with only a few pixels of travel is not a scrolling scene,
+     * it is a rounding error — and it used to cost a whole wheel notch to
+     * clear before the deck would listen, which is the "I have to scroll
+     * twice" of a section that looks like it fits. The floor is well above
+     * the fractional-pixel case the old 2px was written for and well below
+     * anything a reader would call content.
+     */
+    if (max <= 24) return false;
     return delta > 0 ? el.scrollTop < max - 2 : el.scrollTop > 2;
   }, []);
 
@@ -556,11 +620,10 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
     };
   }, [reduceMotion]);
 
-  // A new scene starts at the top of its own travel; without this, arriving
-  // back at a scrolling scene would land halfway down it.
-  useEffect(() => {
-    scrollerRef.current?.scrollTo({ top: 0 });
-  }, []);
+  /* A scene's starting scroll position is handled by the layout effect above,
+     which is the only thing that should touch it: this one ran once, on the
+     deck's own mount, and said the opposite — every scene starts at the top —
+     which is exactly what the memory exists to stop. */
 
   /*
    * Anchors still work. The nav's links are `#about` and the like, and in a
@@ -619,7 +682,8 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
         <motion.div
           className={`scene${settled ? " scene--settled" : ""}`}
           custom={direction}
-          key={current.id}
+          // Not the id alone — see `visit`.
+          key={`${current.id}#${visit}`}
           initial="enter"
           animate="center"
           exit="exit"
