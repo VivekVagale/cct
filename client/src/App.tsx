@@ -48,7 +48,11 @@ function App() {
             </motion.div>
 
             <div className="relative z-10 pointer-events-none">
-              <Navigation />
+              {/* One value, two things: the starfield's opacity is also the
+                  bar's cue to put its glass on. They are the same beat — the
+                  hero finishing — and deriving the second from the first is
+                  what keeps them from drifting if the phase lengths change. */}
+              <Navigation revealProgress={galaxyOpacity} />
               <Hero galaxyOpacity={galaxyOpacity} />
               <WorkShowcase />
 
