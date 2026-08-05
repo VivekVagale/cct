@@ -4,7 +4,9 @@ import { AnimatedText } from "@/components/AnimatedText";
 import { CountUp } from "@/components/CountUp";
 import Cubes from "@/components/ui/Cubes";
 import { ReelsBarChart } from "@/components/ReelsBarChart";
+import { AudienceMap } from "@/components/AudienceMap";
 import { headline, reachStats, reachWindow, topReels } from "@/data/reach";
+import { audienceShares, audienceWindow } from "@/data/audience";
 
 /**
  * What the studio is, argued with what the work did rather than with adjectives.
@@ -149,6 +151,44 @@ export function About() {
                 autoAnimate
               />
             </div>
+          </div>
+        </div>
+
+        {/* Where those views came from. Its own band rather than a third
+            column: a world map at a quarter of the width is a blue smudge. */}
+        <div className="mt-16 sm:mt-24 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          <div className="lg:col-span-8">
+            <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4">
+              {audienceWindow.label}
+            </p>
+            <h3 className="font-display text-2xl sm:text-4xl text-[#F5F7FA] leading-[1.05] mb-6">
+              Where it landed.
+            </h3>
+            <AudienceMap />
+          </div>
+
+          {/* The map's table view, same as the chart has one. */}
+          <div className="lg:col-span-4">
+            <ul className="divide-y divide-white/[0.08] border-t border-white/[0.08]">
+              {audienceShares.slice(0, 8).map((row) => (
+                <li
+                  key={row.country}
+                  className="py-3 flex items-baseline justify-between gap-4"
+                >
+                  <span className="text-sm text-[#F5F7FA]">{row.country}</span>
+                  <span className="shrink-0 text-sm text-[#B8C4D6] [font-variant-numeric:tabular-nums]">
+                    {row.share.toFixed(2)}%
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {/* Said out loud rather than left for someone to notice the
+                column does not reach 100. */}
+            <p className="mt-6 text-xs sm:text-sm text-[#B8C4D6]/70 leading-relaxed">
+              Mean share across {audienceWindow.reelCount} reels. Instagram
+              reports only each reel’s top five countries, so{" "}
+              {audienceWindow.untrackedShare}% sits below what it will show.
+            </p>
           </div>
         </div>
       </div>

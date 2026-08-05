@@ -14,6 +14,7 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
+import { ChartSize } from "./chart-size";
 import { DEFAULT_ANIMATION_EASING } from "./animation";
 import type { BarProps } from "./bar";
 import { topSquareCenterY } from "./bar-squares-layout";
@@ -97,49 +98,6 @@ export interface BarChartProps {
 }
 
 const DEFAULT_MARGIN: Margin = { top: 40, right: 40, bottom: 40, left: 40 };
-
-/**
- * Measures the chart's own box and hands its size to the children.
- *
- * Replaces @visx/responsive's ParentSize, which is published here as
- * 4.0.1-alpha.0 and never rendered its children under React 19 — its element
- * measured 319x180 in the DOM while the render prop stayed at zero, so the
- * chart mounted as an empty box with no error to explain it. Observing the
- * container this component already holds a ref to removes the dependency
- * rather than pinning a different alpha.
- */
-function ChartSize({
-  containerRef,
-  children,
-}: {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  children: (size: { width: number; height: number }) => ReactNode;
-}) {
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const measure = () => {
-      const { width, height } = el.getBoundingClientRect();
-      setSize((prev) =>
-        // Sub-pixel churn from a scrollbar or a zoom would otherwise re-render
-        // the whole chart on every observer tick.
-        Math.abs(prev.width - width) < 1 && Math.abs(prev.height - height) < 1
-          ? prev
-          : { width, height },
-      );
-    };
-
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [containerRef]);
-
-  return <>{children(size)}</>;
-}
 
 // Extract bar configs from children synchronously
 function extractBarConfigs(children: ReactNode): LineConfig[] {
