@@ -282,3 +282,53 @@
 .card .notes {
   font-size: calc(var(--width) * 0.2222);
 }
+
+/* ---------------------------------------------------------------------------
+   Back down to a ticket you could hold.
+
+   360px was a poster. The reference this is copied from is a small object —
+   the type is what fills it, not the card. The width comes down to 268 and the
+   type goes up relative to it (0.0444 → 0.052 of the width), which is the same
+   correction in two directions: less card, more words on it.
+
+   The 16/9 proportion is untouched; --height still derives from --width, so
+   this is the same ticket at a different size.
+
+   The colour was the other half of the mismatch. Nothing here set one, so the
+   quote and the stub inherited the page's #F5F7FA and rendered near-white on
+   pale card stock. The reference sets near-black type on pastel paper — which
+   is also what the header depends on, since it blends with `difference`.
+
+   The body's hairline 200 goes to 400 for the same reason: at this size a
+   200-weight quote on a textured background is a smudge.
+   --------------------------------------------------------------------------- */
+.card {
+  --width: clamp(212px, 62vw, 268px);
+
+  color: #2f2f2f;
+  font-size: calc(var(--width) * 0.052);
+}
+
+.card .header {
+  font-size: calc(var(--width) * 0.128);
+}
+
+.card .body {
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* Was #000 against a body that is now #2f2f2f — two blacks on one ticket. */
+.card .number {
+  color: inherit;
+}
+
+/* Bottom right, as on the reference. The bars are box-shadows thrown to the
+   right of a zero-width box, so aligning that box to the end would put all 74px
+   of them outside the card, where overflow:hidden eats them. The translate
+   brings them back inside, flush to the footer's right edge. */
+.card .barcode {
+  justify-self: end;
+  height: 28px;
+  transform: translateX(-74px);
+}

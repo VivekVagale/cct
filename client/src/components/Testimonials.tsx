@@ -16,11 +16,12 @@ export function Testimonials() {
             are centred in their columns with room around them rather than
             stretched to fill.
 
-            Three across only from xl. A ticket cannot reflow, and at lg the
-            columns are about 282px against a 360px card — it would have run
-            into its neighbours rather than shrinking. Two across at lg gives
-            448px, which fits. */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-10 sm:gap-12 justify-items-center">
+            Three across from lg rather than xl. A ticket cannot reflow, and
+            that used to rule out lg — about 282px of column against a 360px
+            card, which would have run into its neighbours instead of
+            shrinking. The card is 268px now and clears it, so the row closes
+            up a breakpoint earlier and two across arrives at sm. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-12 justify-items-center">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
