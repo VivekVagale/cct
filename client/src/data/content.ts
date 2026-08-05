@@ -107,8 +107,9 @@ export const projects: Project[] = [
     id: "re-9",
     title: "Project RE 9",
     description: "Nine frames of a single machine, built end to end.",
-    image:
-      "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?q=80&w=1200&auto=format&fit=crop",
+    // The studio's own frame. 9:16, cropped 4:3 by the card, which keeps the
+    // rider and the roof edge and loses the top of the sky.
+    image: "/showcase/project-re-9.webp",
     comingSoon: true,
   },
   {
