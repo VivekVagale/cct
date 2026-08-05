@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -13,6 +13,7 @@ import { Testimonials } from "./components/Testimonials";
 import { FAQ } from "./components/FAQ";
 import { Footer } from "./components/Footer";
 import { CinematicLine } from "./components/CinematicLine";
+import { Preloader } from "./components/Preloader";
 import { SceneDeck, type SceneDefinition } from "./components/SceneDeck";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
@@ -68,6 +69,17 @@ function App() {
    * second thing writing it, so the hero's own reveal still plays out in full
    * on the way through.
    */
+  /*
+   * The curtain is up until the opening frames exist. See Preloader.
+   *
+   * The deck is mounted behind it the whole time — that is the point, it is
+   * what gives the frames something to load into — but it must not *listen*
+   * yet: a scroll during the load would scrub an assembly that is still full
+   * of holes, which is the exact hiccup the curtain is there to remove.
+   */
+  const [ready, setReady] = useState(false);
+  const handleReady = useCallback(() => setReady(true), []);
+
   const handleSceneChange = useCallback(
     (index: number) => {
       if (index > 0 && galaxyOpacity.get() < 1) {
@@ -173,7 +185,13 @@ function App() {
               <Navigation heroExit={heroExit} />
             </div>
 
-            <SceneDeck scenes={scenes} onSceneChange={handleSceneChange} />
+            <SceneDeck
+              scenes={scenes}
+              onSceneChange={handleSceneChange}
+              paused={!ready}
+            />
+
+            <Preloader onDone={handleReady} />
           </div>
         </TooltipProvider>
       </ThemeProvider>

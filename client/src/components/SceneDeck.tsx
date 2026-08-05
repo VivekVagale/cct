@@ -115,6 +115,29 @@ const SWIPE_THRESHOLD = 72;
  */
 const PUSH_RELEASE_MS = 220;
 
+/**
+ * How much of the remaining distance a scrolling scene covers each frame.
+ *
+ * The deck's scenes used to scroll natively, which means a wheel notch is
+ * applied to `scrollTop` in one step and the content arrives where it arrives.
+ * That is what "stepped" feels like, and no amount of easing elsewhere hides
+ * it, because the thing being eased is not the thing that jumped.
+ *
+ * So the wheel no longer touches the scroller. It moves a *target*, and each
+ * frame the scroller closes a fraction of the gap to it. One notch becomes a
+ * short glide; a run of notches becomes one long one, because they land on the
+ * target while the element is still travelling toward the last of them. It is
+ * the same technique as the smooth-scroll library on the reduced-motion path,
+ * applied to the element that actually moves inside a fixed frame.
+ *
+ * 0.085 is roughly a quarter-second to settle. Lower reads as syrup and puts
+ * the content behind the hand; higher gives the step back.
+ */
+const SCROLL_LERP = 0.085;
+
+/** Below this the glide is over and the last fraction of a pixel is snapped. */
+const SCROLL_SETTLE_PX = 0.3;
+
 /** When the supporting content at position `order` starts moving. */
 export const contentDelay = (order = 0) =>
   SCENE.headingDelay +
@@ -248,8 +271,17 @@ export interface SceneDefinition {
 export function SceneDeck({
   scenes,
   onSceneChange,
+  paused = false,
 }: {
   scenes: SceneDefinition[];
+  /**
+   * Ignore input entirely.
+   *
+   * Held true while the loading curtain is up. The deck is mounted underneath
+   * it so its first scene can fetch what it needs, but a scroll landing during
+   * that would scrub an image sequence that is still full of gaps.
+   */
+  paused?: boolean;
   /**
    * Which scene is on screen, for the few things that live outside the deck
    * and need to know — the starfield behind it, principally.
@@ -262,6 +294,8 @@ export function SceneDeck({
   const lockedUntil = useRef(0);
   const wheelAccumulator = useRef(0);
   const touchStart = useRef<number | null>(null);
+  /** How far the current drag has already been handed to the scene. */
+  const lastTouchDelta = useRef(0);
   const frameRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [scroller, setScroller] = useState<HTMLElement | null>(null);
@@ -553,6 +587,73 @@ export function SceneDeck({
    * a scroller at its true bottom reports a remainder under one CSS pixel, and
    * an exact comparison leaves the deck permanently stuck on that scene.
    */
+  /*
+   * The damped scroll for whichever scene is currently scrolling. See
+   * SCROLL_LERP. `target` is where the content has been asked to go; the frame
+   * loop is what actually moves it there.
+   */
+  const glideState = useRef({ target: 0, running: false, frame: 0 });
+
+  const runGlide = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) {
+      glideState.current.running = false;
+      return;
+    }
+    const max = Math.max(0, el.scrollHeight - el.clientHeight);
+    const target = Math.min(max, Math.max(0, glideState.current.target));
+    glideState.current.target = target;
+
+    const gap = target - el.scrollTop;
+    if (Math.abs(gap) < SCROLL_SETTLE_PX) {
+      el.scrollTop = target;
+      glideState.current.running = false;
+      return;
+    }
+    el.scrollTop += gap * SCROLL_LERP;
+    glideState.current.frame = requestAnimationFrame(runGlide);
+  }, []);
+
+  /**
+   * Hand a scroll to the current scene, if it has anywhere left to go.
+   *
+   * Returns whether the scene took it. False means the content is against one
+   * of its ends and the push belongs to the deck instead — which is what makes
+   * one continuous gesture read the section to its end and then carry on into
+   * the next scene without ever being stopped and asked again.
+   */
+  const glide = useCallback(
+    (delta: number) => {
+      const el = scrollerRef.current;
+      if (!el || !el.classList.contains("scene-scroller")) return false;
+      const max = el.scrollHeight - el.clientHeight;
+      if (max <= 24) return false;
+
+      const from = glideState.current.target;
+      const to = Math.min(max, Math.max(0, from + delta));
+      if (to === from) return false;
+
+      glideState.current.target = to;
+      if (!glideState.current.running) {
+        glideState.current.running = true;
+        glideState.current.frame = requestAnimationFrame(runGlide);
+      }
+      return true;
+    },
+    [runGlide],
+  );
+
+  // A new scene starts its glide from wherever that scene actually is, which
+  // for one already visited is where it was left.
+  useLayoutEffect(() => {
+    glideState.current.target = scrollerRef.current?.scrollTop ?? 0;
+  }, [index, scroller]);
+
+  useEffect(
+    () => () => cancelAnimationFrame(glideState.current.frame),
+    [],
+  );
+
   const innerScrollHasRoom = useCallback((delta: number) => {
     const el = scrollerRef.current;
     if (!el) return false;
@@ -582,13 +683,25 @@ export function SceneDeck({
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) return;
+    if (reduceMotion || paused) return;
 
     const onWheel = (e: WheelEvent) => {
       const delta = e.deltaY;
-      if (innerScrollHasRoom(Math.sign(delta))) return; // the scene wants it
 
+      /*
+       * The browser never scrolls anything here. Every notch is taken, and
+       * either the current scene glides under it or the deck advances — those
+       * are the only two outcomes, and there is no third one where the content
+       * jumps by exactly one notch because the default fired.
+       */
       e.preventDefault();
+
+      if (glide(delta)) {
+        // The section is still being read. Nothing else to do; the frame loop
+        // has it from here.
+        wheelAccumulator.current = 0;
+        return;
+      }
 
       /*
        * A real direction change resets the run-up, or a flick down followed by
@@ -660,12 +773,20 @@ export function SceneDeck({
 
     const onTouchStart = (e: TouchEvent) => {
       touchStart.current = e.touches[0]?.clientY ?? null;
+      lastTouchDelta.current = 0;
+      glideState.current.target = scrollerRef.current?.scrollTop ?? 0;
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (touchStart.current === null) return;
       const dy = touchStart.current - (e.touches[0]?.clientY ?? 0);
-      if (innerScrollHasRoom(Math.sign(dy))) return;
+      // A finger drags the content directly rather than through the damping —
+      // under a touch the content should be where the finger is — but the
+      // moment it runs out of travel the drag becomes a push on the deck.
+      if (glide(dy - lastTouchDelta.current)) {
+        lastTouchDelta.current = dy;
+        return;
+      }
       // A finger gets the give live, under the finger, for the whole length of
       // the drag — the one input where the feedback can track the gesture
       // continuously rather than being fed discrete notches.
@@ -677,6 +798,7 @@ export function SceneDeck({
 
     const onTouchEnd = () => {
       touchStart.current = null;
+      lastTouchDelta.current = 0;
       release();
     };
 
@@ -693,7 +815,7 @@ export function SceneDeck({
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [reduceMotion, go, innerScrollHasRoom, count, jump, charge, release]);
+  }, [reduceMotion, paused, go, innerScrollHasRoom, count, jump, charge, release, glide]);
 
   // The document itself must not scroll — there is nothing below the fold to
   // scroll to, and a rubber-band on a locked page reads as breakage.
