@@ -7,6 +7,13 @@ export interface BookingFormData {
   projectType: string;
   vehicle: string;
   description: string;
+  /**
+   * Whether the client wants the reel posted as an Instagram collab, which
+   * puts it in both accounts' feeds at once. Sent on every submission,
+   * including the ones that say no — "they did not ask for it" and "they were
+   * never asked" are different things to read in an inbox.
+   */
+  collabPost: boolean;
 }
 
 /**

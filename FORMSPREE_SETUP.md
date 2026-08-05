@@ -56,6 +56,7 @@ request should arrive in the inbox with these fields:
 | `projectType` | the project card the client picked |
 | `vehicle` | marque, model and colour, or empty if they skipped step 01 |
 | `description` | free text |
+| `collabPost` | `true` or `false` — whether they want the reel posted as a collab. Always present, including when the answer is no |
 
 Formspree asks you to confirm the destination address on the first submission.
 Until you click that link, submissions are held rather than delivered — an empty

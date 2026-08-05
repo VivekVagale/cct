@@ -4,6 +4,7 @@ import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import { SparkleButton } from "@/components/SparkleButton";
+import { CollabToggle } from "@/components/CollabToggle";
 import { ThankYouCard } from "@/components/ThankYouCard";
 import { vehicles } from "@/data/vehicles";
 import { projects } from "@/data/content";
@@ -49,6 +50,9 @@ export function Booking() {
   const [selectedProject, setSelectedProject] = useState(projects[0].title);
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [colorId, setColorId] = useState<string | null>(null);
+  // Off by default. A collab post puts the reel in the client's own feed under
+  // both names, and that is theirs to opt into rather than to notice and undo.
+  const [collabPost, setCollabPost] = useState(false);
 
   function handleSelectVehicle(id: string) {
     setVehicleId(id);
@@ -75,6 +79,7 @@ export function Booking() {
       projectType: selectedProject,
       vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
+      collabPost,
     }).catch(() => false);
 
     setStatus(ok ? "success" : "error");
@@ -132,7 +137,7 @@ export function Booking() {
             Pick your machine.
           </h2>
           <p className="text-sm sm:text-base text-[#B8C4D6] mt-4 sm:mt-5 max-w-md">
-            Choose the vehicle, then its colour. Four steps in all — this is the
+            Choose the vehicle, then its colour. Five steps in all — this is the
             only one that needs a decision from you before the form.
           </p>
         </div>
@@ -259,12 +264,26 @@ export function Booking() {
 
         </div>
 
+        {/* The collab question sits before the button rather than beside the
+            fields: it is a decision about what happens after the work is
+            delivered, not a detail of the brief, and the answer is worth
+            nothing if it is buried in a column someone has already scrolled
+            past. Centred on the same axis as the button below it. */}
+        <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-6 text-center">
+          <Step
+            number="04"
+            title="Post it together?"
+            hint="Collab post with @coldchaintheory for better engagement — the reel goes out from both accounts at once and reaches both sets of followers. Optional, and it changes nothing about the work."
+          />
+          <CollabToggle checked={collabPost} onChange={setCollabPost} />
+        </div>
+
         {/* text-center as well as items-center: items-center centres the
             block, and the block is only as wide as its widest line, so "Step
-            04" was still setting flush to the left edge of "Send it." above a
+            05" was still setting flush to the left edge of "Send it." above a
             button that was centred on something else again. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-4 text-center">
-          <Step number="04" title="Send it." />
+          <Step number="05" title="Send it." />
           <Magnet padding={40} strength={5}>
             <SparkleButton type="submit" disabled={status === "submitting"}>
               {status === "submitting" ? "Sending..." : "Submit Request"}
