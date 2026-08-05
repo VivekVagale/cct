@@ -63,6 +63,22 @@ uniform sampler2D uTex;
 uniform int uItemCount;
 uniform int uAtlasSize;
 
+/*
+ * Which item each disc shows, one entry per instance.
+ *
+ * This used to be \`vInstanceId % uItemCount\`, which is fine when there are as
+ * many images as discs and wrong the rest of the time: with 12 images across
+ * 42 discs, every image lands three or four times and nothing stops two copies
+ * being neighbours on the sphere. The assignment is worked out on the CPU
+ * instead, where the adjacency is known — see assignDiscItems.
+ *
+ * 64 is a fixed ceiling because a GLSL array needs a constant size. The sphere
+ * is a once-subdivided icosahedron: 12 vertices plus a midpoint on each of 30
+ * edges is 42. Subdivide again and it is 162, which overruns this — the JS
+ * falls back to the modulo if the count ever exceeds the array.
+ */
+uniform int uDiscItem[64];
+
 out vec4 outColor;
 
 in vec2 vUvs;
@@ -70,7 +86,7 @@ in float vAlpha;
 flat in int vInstanceId;
 
 void main() {
-    int itemIndex = vInstanceId % uItemCount;
+    int itemIndex = vInstanceId < 64 ? uDiscItem[vInstanceId] : vInstanceId % uItemCount;
     int cellsPerRow = uAtlasSize;
     int cellX = itemIndex % cellsPerRow;
     int cellY = itemIndex / cellsPerRow;
@@ -223,6 +239,84 @@ class Geometry {
     this.addVertex((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5);
     return ndx;
   }
+}
+
+/**
+ * Which item each disc on the sphere shows.
+ *
+ * The sphere has 42 disc positions — a once-subdivided icosahedron — and a
+ * portfolio rarely has 42 images. The stock component filled them with
+ * `instanceId % itemCount`, which repeats each image three or four times and
+ * has no idea where any of them ended up: two copies of the same render sat
+ * side by side, which reads as a bug rather than as a wall of work.
+ *
+ * This is a greedy graph colouring over the sphere's own adjacency. For each
+ * disc in turn, the candidates are the items no already-assigned neighbour is
+ * using; of those, the least-used wins, so the images stay evenly spread as
+ * well as separated. Vertices are visited most-connected first, which is what
+ * keeps the hard ones from being left until only bad options remain.
+ *
+ * It cannot always succeed and does not pretend to: with fewer items than a
+ * vertex has neighbours — six at most here — some disc will eventually have no
+ * clean choice, and it takes the least-used item instead. Above about seven
+ * images that never happens; below it the result is still far better spread
+ * than a modulo.
+ *
+ * Deterministic. The same items in the same order always produce the same
+ * sphere, so nothing shuffles between reloads.
+ */
+function assignDiscItems(faces: Face[], discCount: number, itemCount: number): number[] {
+  if (itemCount <= 0) return new Array(discCount).fill(0);
+  if (itemCount === 1) return new Array(discCount).fill(0);
+
+  const neighbours: Set<number>[] = Array.from({ length: discCount }, () => new Set<number>());
+  for (const face of faces) {
+    const edges: [number, number][] = [
+      [face.a, face.b],
+      [face.b, face.c],
+      [face.c, face.a]
+    ];
+    for (const [x, y] of edges) {
+      if (x < discCount && y < discCount) {
+        neighbours[x].add(y);
+        neighbours[y].add(x);
+      }
+    }
+  }
+
+  const order = Array.from({ length: discCount }, (_, i) => i).sort(
+    (a, b) => neighbours[b].size - neighbours[a].size || a - b
+  );
+
+  const assigned = new Array<number>(discCount).fill(-1);
+  const used = new Array<number>(itemCount).fill(0);
+
+  for (const disc of order) {
+    const taken = new Set<number>();
+    for (const n of neighbours[disc]) {
+      if (assigned[n] !== -1) taken.add(assigned[n]);
+    }
+
+    let best = -1;
+    for (let item = 0; item < itemCount; item++) {
+      if (taken.has(item)) continue;
+      if (best === -1 || used[item] < used[best]) best = item;
+    }
+
+    // Every item is already on a neighbour — only possible when there are
+    // fewer items than the disc has neighbours. Spread rather than clash.
+    if (best === -1) {
+      best = 0;
+      for (let item = 1; item < itemCount; item++) {
+        if (used[item] < used[best]) best = item;
+      }
+    }
+
+    assigned[disc] = best;
+    used[best]++;
+  }
+
+  return assigned;
 }
 
 class IcosahedronGeometry extends Geometry {
@@ -630,6 +724,7 @@ class InfiniteGridMenu {
     uFrames: WebGLUniformLocation | null;
     uItemCount: WebGLUniformLocation | null;
     uAtlasSize: WebGLUniformLocation | null;
+    uDiscItem: WebGLUniformLocation | null;
   };
 
   private viewportSize = vec2.create();
@@ -643,6 +738,8 @@ class InfiniteGridMenu {
 
   private instancePositions: vec3[] = [];
   private DISC_INSTANCE_COUNT = 0;
+  /** Item index per disc, from assignDiscItems. Never `instanceId % count`. */
+  private discItems: number[] = [];
   private atlasSize = 1;
 
   private _time = 0;
@@ -773,7 +870,8 @@ class InfiniteGridMenu {
       uTex: gl.getUniformLocation(this.discProgram!, 'uTex'),
       uFrames: gl.getUniformLocation(this.discProgram!, 'uFrames'),
       uItemCount: gl.getUniformLocation(this.discProgram!, 'uItemCount'),
-      uAtlasSize: gl.getUniformLocation(this.discProgram!, 'uAtlasSize')
+      uAtlasSize: gl.getUniformLocation(this.discProgram!, 'uAtlasSize'),
+      uDiscItem: gl.getUniformLocation(this.discProgram!, 'uDiscItem')
     };
 
     this.discGeo = new DiscGeometry(56, 1);
@@ -791,6 +889,11 @@ class InfiniteGridMenu {
     this.icoGeo.subdivide(1).spherize(this.SPHERE_RADIUS);
     this.instancePositions = this.icoGeo.vertices.map(v => v.position);
     this.DISC_INSTANCE_COUNT = this.icoGeo.vertices.length;
+    this.discItems = assignDiscItems(
+      this.icoGeo.faces,
+      this.DISC_INSTANCE_COUNT,
+      this.items.length
+    );
     this.initDiscInstances(this.DISC_INSTANCE_COUNT);
     this.initTexture();
 
@@ -962,6 +1065,11 @@ class InfiniteGridMenu {
 
     gl.uniform1i(this.discLocations.uItemCount, this.items.length);
     gl.uniform1i(this.discLocations.uAtlasSize, this.atlasSize);
+    // Only up to the shader array's fixed 64; beyond that the shader falls
+    // back to the modulo on its own.
+    if (this.discItems.length) {
+      gl.uniform1iv(this.discLocations.uDiscItem, this.discItems.slice(0, 64));
+    }
 
     gl.uniform1f(this.discLocations.uFrames, this._frames);
     gl.uniform1f(this.discLocations.uScaleFactor, this.scaleFactor);
@@ -1021,7 +1129,11 @@ class InfiniteGridMenu {
 
     if (!this.control.isPointerDown) {
       const nearestVertexIndex = this.findNearestVertexIndex();
-      const itemIndex = nearestVertexIndex % Math.max(1, this.items.length);
+      // The same table the shader samples with. Reading it from the modulo
+      // here would caption the disc with a different item than it is showing.
+      const itemIndex =
+        this.discItems[nearestVertexIndex] ??
+        nearestVertexIndex % Math.max(1, this.items.length);
       this.onActiveItemChange(itemIndex);
       const snapDirection = vec3.normalize(vec3.create(), this.getVertexWorldPosition(nearestVertexIndex));
       this.control.snapTargetDirection = snapDirection;
