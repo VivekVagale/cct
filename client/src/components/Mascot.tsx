@@ -92,6 +92,19 @@ export function Mascot({
     return () => window.removeEventListener("mousemove", handle);
   }, [parallax, mvX, mvY]);
 
+  /*
+   * Two nodes, because the parallax and the entrance both want `y`.
+   *
+   * They used to share one: `style={{ x, y }}` put a spring on the element's
+   * y, and `animate` set that same y to 0 on every render. Nothing was wrong
+   * on a static page — but the booking form re-renders on each keystroke and
+   * each pick, and every one of those renders had framer reassert y: 0 over a
+   * spring the pointer was still driving. That fight is the stutter that
+   * appeared beside step 02 as soon as a vehicle and a colour were chosen.
+   *
+   * The outer element carries the pointer parallax and the sizing; the inner
+   * one carries the entrance. Neither can touch the other's transform.
+   */
   return (
     <motion.div
       ref={ref}
@@ -101,10 +114,13 @@ export function Mascot({
         className,
       )}
       style={parallax ? { x, y } : undefined}
-      initial={animateIn ? { opacity: 0, y: 24 } : false}
-      animate={animateIn && !inView ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
-      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
+      <motion.div
+        className="w-full h-full"
+        initial={animateIn ? { opacity: 0, y: 24 } : false}
+        animate={animateIn && !inView ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+      >
       <motion.img
         src={MASCOT_POSES[pose]}
         alt="Cold Chain Theory mascot"
@@ -124,6 +140,7 @@ export function Mascot({
           ease: "easeInOut",
         }}
       />
+      </motion.div>
     </motion.div>
   );
 }

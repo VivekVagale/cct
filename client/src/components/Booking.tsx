@@ -219,7 +219,10 @@ export function Booking() {
         {/* Moved up from the copy column below. Two mascots in one section is
             clutter, and this is where the visitor is actually being asked to
             do something. */}
-        <Mascot pose="projectReady" size="lg" className="hidden lg:block shrink-0" />
+        {/* Bigger than the two beside the form. This one stands next to the
+            section's own heading with the full width of the band to itself,
+            where the other two share a column with the fields. */}
+        <Mascot pose="projectReady" size="xl" className="hidden lg:block shrink-0" />
       </div>
 
       <VehicleConfigurator

@@ -151,7 +151,15 @@ function Stage({
             it. */}
         <motion.div
           style={{ y, scale }}
-          className="order-1 md:order-2 md:w-[50%] flex items-end justify-center md:justify-end md:self-stretch pointer-events-none"
+          className={`order-1 md:order-2 md:w-[50%] flex items-end justify-center md:justify-end md:self-stretch pointer-events-none${
+            /* The first pose is cut square down its right side as well as its
+               hem, and unlike the hem there is no bottom edge to hide it under.
+               Pushed off the right of the frame instead, so the cut leaves the
+               screen and what is left reads as a figure standing at the edge of
+               shot. Only this one — the other four are cut at the waist alone
+               and sit where the row puts them. */
+            index === 0 ? " md:-mr-[7vw] lg:-mr-[5vw]" : ""
+          }`}
         >
           {/* Height-sized, so width is intrinsic and a wide pose can overrun a
               narrow viewport: laptop and thumbsUp are near-square, and at the
@@ -178,7 +186,15 @@ function Stage({
                the top of that travel a hem sitting exactly on the stage's edge
                would rise 8vh into frame — the whole cut edge, back again. 12
                keeps it under by 4 at the worst moment. */
-            className="h-[min(38vh,74vw)] sm:h-[52vh] md:h-[104vh] md:-mb-[12vh] lg:h-[116vh]"
+            /* The heights are what they are because of the *top* of the pose,
+               not the bottom. Bottom-anchored at 104vh with the -12vh margin,
+               a pose's head sat 8vh below the stage's top edge — and the stage
+               drifts each one 8vh upwards as it crosses, which put the helmet
+               into the nav bar at the top of that travel. Every step is now
+               short enough that the head stays clear of the bar at the worst
+               moment of the drift, while the hem is still well under the
+               bottom edge. */
+            className="h-[min(38vh,74vw)] sm:h-[48vh] md:h-[92vh] md:-mb-[12vh] lg:h-[102vh]"
           />
         </motion.div>
       </div>
