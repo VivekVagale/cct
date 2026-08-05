@@ -22,10 +22,31 @@ import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
  * changing a phase meant re-deriving all the others by hand. Lengths compose,
  * and the section height falls out of them.
  */
-const REVEAL_VH = 50; // starfield up behind the frames, CTA in
-const HOLD_VH = 42; // final frame breathing over stars
-const EXIT_VH = 100; // the final frame dissolving away
+const REVEAL_VH = 40; // starfield up behind the frames, CTA in
+const HOLD_VH = 10; // final frame breathing over stars
+const EXIT_VH = 40; // the final frame dissolving away
 const STAGE_VH = 100; // the sticky stage itself
+
+/*
+ * The tail was 192vh and is now 90.
+ *
+ * The three phases after the assembly used to run 50 + 42 + 100. What that
+ * bought at the end was two full screens of scrolling in which nothing
+ * happened but a mascot slowly going transparent over a starfield — the
+ * animation had finished, the stars were up, and there was still a screen and
+ * a half of scroll before the next section arrived. It read as the page having
+ * ended.
+ *
+ * None of the three is cut to zero, because each does something. The reveal
+ * has to be long enough to read as the stars rising rather than switching on.
+ * The hold is what lets the CTA land before anything starts taking it away —
+ * at zero the buttons would reach full opacity and immediately begin fading.
+ * The exit stays gradual under the hand rather than snapping, which is what a
+ * dissolve is for; 40vh is still around four notches of a wheel.
+ *
+ * Selected Work is `h-[100svh]` with no top padding, so it arrives full-screen
+ * the moment the stage releases.
+ */
 
 /**
  * ASSEMBLY_VH is how fast the sequence scrubs, and it is the only number to
@@ -131,10 +152,9 @@ const MOBILE_BUDGET = 180 * 1024 * 1024;
  * the starfield — that pose is gone, and with it the visible handover between
  * two different renders.
  *
- * The section ends by dissolving that final frame away over a full screen of
- * scroll, so the mascot fades into the starfield instead of sliding off the
- * top. Only opacity changes, which is why it holds up while two WebGL contexts
- * are already on the page.
+ * The section ends by dissolving that final frame away, so the mascot fades
+ * into the starfield instead of sliding off the top. Only opacity changes,
+ * which is why it holds up while two WebGL contexts are already on the page.
  *
  * A camera push into the dark under the helmet's chin was built here first and
  * pulled. Two reasons, and they are worth knowing before anyone rebuilds it.
@@ -238,8 +258,8 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
   const galaxyReveal = useTransform(scrollYProgress, [assemblyEnd, revealEnd], [0, 1]);
 
   // The exit: the whole stage dissolves across EXIT_VH, so the mascot fades
-  // into the starfield that is already behind it. Spread over a full screen of
-  // scroll rather than snapped at the end, so it stays gradual under the hand.
+  // into the starfield that is already behind it. Spread across the phase
+  // rather than snapped at the end, so it stays gradual under the hand.
   const stageOpacity = useTransform(scrollYProgress, [holdEnd, 1], [1, 0]);
 
   // Written straight to a MotionValue the App reads — routing it through state
