@@ -24,7 +24,7 @@ import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
  */
 const REVEAL_VH = 0; // starfield up behind the frames, CTA in — paid for inside the scrub
 const HOLD_VH = 0; // final frame breathing over stars
-const EXIT_VH = 0; // the dissolve — paid for by the stage's own travel, see below
+const EXIT_VH = 20; // the final frame dissolving away
 const STAGE_VH = 100; // the sticky stage itself
 
 /**
@@ -42,33 +42,26 @@ const STAGE_VH = 100; // the sticky stage itself
 const REVEAL_LEAD = 0.1;
 
 /*
- * All three phases after the assembly are zero, and none of them was cut.
+ * The tail was 192vh, then 90, then 50, and is now 20.
  *
- * They originally ran 50 + 42 + 100 — two full screens in which nothing
- * happened but a mascot slowly going transparent over a starfield. Trimming
- * them to 90, then 50, then 20 never removed the blank screen, because the
- * blank screen was never the phases.
+ * The three phases after the assembly originally ran 50 + 42 + 100 — two full
+ * screens in which nothing happened but a mascot slowly going transparent over
+ * a starfield.
  *
- * A sticky element pins while its parent still has height under it and then
- * travels the rest of the way up. This section is the scroll phases plus
- * STAGE_VH, so the last 100vh is the stage sliding out of view — and the
- * dissolve was finishing at the *start* of that stretch. What followed was one
- * whole screen of an invisible stage travelling up before Selected Work could
- * begin to arrive. That is the empty scroll, and no amount of shortening the
- * phases before it would touch it.
+ * Two of the three are now zero, and neither was cut: both were moved inside
+ * the scrub. REVEAL_LEAD puts the stars and the CTA in the last 10% of the
+ * assembly, where the mascot is settling rather than building, so the reveal
+ * costs the section nothing. The hold existed only to let the CTA settle
+ * before the dissolve began, and a CTA that finished arriving at the last
+ * frame has already settled.
  *
- * So the dissolve moves into it. The stage now fades across its own travel —
- * see `exitProgress` below — which is exactly the stretch where Selected Work
- * is rising into frame. The mascot goes as the next section comes, and there
- * is nothing left in between.
+ * That leaves the exit, which is the one thing that genuinely has to cost
+ * scroll: it is a dissolve, and a dissolve with nothing under it is a cut. 20vh
+ * is about two notches of a wheel.
  *
- * The other two are free for a different reason: REVEAL_LEAD puts the stars
- * and the CTA inside the last 10% of the assembly, where the mascot is
- * settling rather than building, and the hold only ever existed to let the CTA
- * land before the dissolve started.
- *
- * The section is 760vh, from 780, 810, 850 and 952. The pin now releases on the
- * last frame.
+ * Selected Work is `h-[100svh]` with no top padding, so it arrives full-screen
+ * the moment the stage releases — which is now two notches after the last
+ * frame lands.
  */
 
 /**
@@ -236,33 +229,13 @@ export function Hero({
   // Same media query the sequence choice uses. A portrait phone is exactly the
   // case the shorter scrub is for, and having one switch drive both keeps the
   // section's length and its frame source from ever disagreeing.
-  // holdEnd is gone from here: the dissolve is driven by the stage's travel
-  // now, not by a phase boundary. geometry() still reports it, which keeps the
-  // arithmetic in one place if a hold is ever wanted back.
-  const { totalVh, assemblyEnd, revealEnd } = portrait
+  const { totalVh, assemblyEnd, revealEnd, holdEnd } = portrait
     ? MOBILE_GEOMETRY
     : DESKTOP_GEOMETRY;
 
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
     offset: ["start start", "end end"],
-  });
-
-  /*
-   * The stage's own travel, which the progress above cannot see.
-   *
-   * `end end` is where the section's bottom meets the viewport's bottom — the
-   * moment the sticky stage stops pinning — so scrollYProgress is already at 1
-   * with a full screen of scrolling still to go. That screen is the stage
-   * sliding up and out, and it used to be spent empty.
-   *
-   * This one starts where that one ends and runs to `end start`, the section's
-   * bottom leaving the top of the viewport. 0 to 1 across exactly the stretch
-   * where Selected Work is rising into frame.
-   */
-  const { scrollYProgress: exitProgress } = useScroll({
-    target: wrapperRef,
-    offset: ["end end", "end start"],
   });
 
   // Keeps breathing through the dissolve — better than freezing a beat before
@@ -319,16 +292,10 @@ export function Hero({
   // CTA: they are one beat and must not arrive on two different curves.
   const galaxyReveal = useTransform(scrollYProgress, [revealStart, revealEnd], [0, 1]);
 
-  // The exit: the whole stage dissolves across its own travel, so the mascot
-  // fades into the starfield that is already behind it while Selected Work
-  // climbs into frame underneath. Only opacity changes, which is why it holds
-  // up while two WebGL contexts are already on the page.
-  //
-  // Finished at 0.8 rather than 1. The last fifth of the travel is Selected
-  // Work's own top edge crossing the screen, and a mascot still visibly going
-  // at that point reads as two sections overlapping rather than as one handing
-  // over to the next.
-  const stageOpacity = useTransform(exitProgress, [0, 0.8], [1, 0]);
+  // The exit: the whole stage dissolves across EXIT_VH, so the mascot fades
+  // into the starfield that is already behind it. Spread across the phase
+  // rather than snapped at the end, so it stays gradual under the hand.
+  const stageOpacity = useTransform(scrollYProgress, [holdEnd, 1], [1, 0]);
 
   // Written straight to a MotionValue the App reads — routing it through state
   // would re-render the Hero on every scroll tick. Seeded on mount as well as
