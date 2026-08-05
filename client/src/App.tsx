@@ -1,10 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./components/Hero";
-import { WorkShowcase } from "./components/WorkShowcase";
+import { WorkShowcase, preloadShowcase } from "./components/WorkShowcase";
 import { About } from "./components/About";
 import { CreativeProcess } from "./components/CreativeProcess";
 import { Projects } from "./components/Projects";
@@ -49,6 +49,10 @@ function App() {
   // refused to do.
   const heroExit = useMotionValue(0);
 
+  // The sphere's twelve renders, fetched during the hero rather than during the
+  // transition onto them. See preloadShowcase.
+  useEffect(preloadShowcase, []);
+
   /*
    * The story, as scenes.
    *
@@ -73,7 +77,14 @@ function App() {
         scrolls: true,
         render: () => <Hero galaxyOpacity={galaxyOpacity} heroExit={heroExit} />,
       },
-      { id: "work", render: () => <WorkShowcase /> },
+      {
+        id: "work",
+        render: () => <WorkShowcase />,
+        // Longer than anywhere else, because this scene is a thing to be used
+        // rather than read. At the deck's ordinary hold the sphere was gone
+        // before a visitor had worked out it could be turned at all.
+        dwell: 5,
+      },
       {
         id: "every-frame",
         render: () => <CinematicLine text="EVERY FRAME TELLS A STORY" />,

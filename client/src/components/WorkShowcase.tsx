@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import InfiniteMenu, { type MenuItem } from "@/components/ui/InfiniteMenu";
 import { showcaseItems } from "@/data/showcase";
 import { FoldHeading } from "@/components/FoldHeading";
+import { useScene } from "@/components/SceneDeck";
 
 /**
  * Replaces the scrolling image marquee with a draggable sphere of work.
@@ -23,9 +24,51 @@ import { FoldHeading } from "@/components/FoldHeading";
  */
 const NARROW_QUERY = "(max-width: 640px)";
 
+/**
+ * Pull the twelve renders into the browser's cache before the sphere is asked
+ * for.
+ *
+ * The sphere does not draw progressively — `InfiniteMenu` decodes every image
+ * into one texture atlas and only then has anything to put on a disc, so the
+ * slowest of the twelve sets when the sphere appears. In a deck that scene is
+ * not mounted until it is the scene, which used to mean the fetch *started* on
+ * the transition into it: a black frame for as long as the network took, on
+ * the section that is supposed to be the studio's work.
+ *
+ * Called once at startup, off the critical path. Idle if the browser has the
+ * callback, a timeout if not — this must never compete with the hero.
+ */
+let preloaded = false;
+export function preloadShowcase() {
+  if (preloaded || typeof window === "undefined") return;
+  preloaded = true;
+
+  const run = () => {
+    for (const item of showcaseItems) {
+      const img = new Image();
+      // Low, deliberately: these are wanted eventually, not now. The hero's
+      // frame sequence is the thing that must not be starved.
+      img.fetchPriority = "low";
+      img.decoding = "async";
+      img.src = item.image;
+    }
+  };
+
+  const idle = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
+  if (idle) idle(run, { timeout: 4000 });
+  else window.setTimeout(run, 1200);
+}
+
 export function WorkShowcase() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [near, setNear] = useState(false);
+  /*
+   * In the deck this section is only ever rendered as the scene on screen, so
+   * there is no "close" to wait for — the observer below would spend a frame
+   * or two working out what the deck already knows, and the sphere would start
+   * building that much later into a transition it is already behind.
+   */
+  const { active: inDeck } = useScene();
+  const [near, setNear] = useState(inDeck);
   const [narrow, setNarrow] = useState(
     () => typeof window !== "undefined" && window.matchMedia(NARROW_QUERY).matches,
   );
@@ -48,6 +91,7 @@ export function WorkShowcase() {
   // is most visible. Once created it stays: this defers the cost, it does not
   // tear anything down behind the visitor.
   useEffect(() => {
+    if (inDeck) return;
     const el = sectionRef.current;
     if (!el) return;
     if (typeof IntersectionObserver === "undefined") {
@@ -65,7 +109,7 @@ export function WorkShowcase() {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [inDeck]);
 
   const items = useMemo<MenuItem[]>(
     () =>
