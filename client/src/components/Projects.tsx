@@ -47,10 +47,18 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         <img
           src={project.image}
           alt={project.title}
+          /* Full strength, like the vehicle cards two sections down — those
+             carry no opacity at all and these were sitting at 0.6, so the same
+             kind of render looked washed out in one place and not the other.
+             The gradient below still fades the image into its caption.
+
+             A coming-soon card is held back a little and desaturated rather
+             than dimmed to 0.4: it has a badge saying what it is, and at 0.4
+             the render it is advertising could not be read. */
           className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
             disabled
-              ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
-              : "opacity-60 group-hover:opacity-85"
+              ? "opacity-80 grayscale-[0.45] group-hover:opacity-100 group-hover:grayscale-0"
+              : "opacity-100"
           }`}
         />
         {/* Fades the image into the caption. Stops at the image's own bottom
