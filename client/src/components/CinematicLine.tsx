@@ -61,19 +61,19 @@ export function CinematicLine({ text, className }: CinematicLineProps) {
     <div
       ref={ref}
       className={cn(
-        "relative w-full py-20 sm:py-40 flex items-center justify-center text-center px-6",
+        "relative w-full py-12 sm:py-24 flex items-center justify-center text-center px-4 sm:px-6",
         className,
       )}
     >
       <motion.div
         style={reduceMotion || inDeck ? undefined : { opacity, y }}
-        className="scene-heading w-full max-w-4xl"
+        className="scene-heading w-full max-w-6xl"
       >
         {reduceMotion ? (
           // No canvas at all under reduced motion. The shader's whole output is
           // drift, refraction and a ripple — there is nothing left of it to
           // keep, so this falls back to the type it is made of.
-          <p className="font-display text-2xl sm:text-5xl md:text-6xl text-[#F5F7FA] leading-[1.15]">
+          <p className="font-display text-4xl sm:text-6xl md:text-8xl text-[#F5F7FA] leading-[1.08]">
             {text}
           </p>
         ) : (
@@ -83,19 +83,27 @@ export function CinematicLine({ text, className }: CinematicLineProps) {
             // font-display is on the wrapper and the component inherits it, so
             // the warped type is the same face as the rest of the page.
             fontFamily="inherit"
-            fontSize="clamp(1.5rem, 5.5vw, 3.75rem)"
+            fontSize="clamp(2.25rem, 8.5vw, 6.5rem)"
             fontWeight={400}
-            letterSpacing="0.04em"
-            lineHeight={1.15}
-            // Gentler than the stock 0.08/0.38. At the defaults the line
-            // visibly swims, which suits a landing-page hero and not a
-            // sentence someone is meant to read on the way past.
-            warpStrength={0.045}
-            warpScale={1.5}
-            speed={0.35}
-            pointerStrength={0.3}
-            refraction={0.012}
-            className="font-display !min-h-[7.5rem] sm:!min-h-[11rem]"
+            letterSpacing="0.02em"
+            lineHeight={1.08}
+            /*
+             * Past the stock defaults now, not under them.
+             *
+             * The earlier numbers were set for a band inside a scrolling
+             * document, where the line went past and had to stay legible on
+             * the way. In the deck it is a title card on a screen of its own
+             * with nothing else on it and five seconds to be looked at — the
+             * restraint was reading as a static line with a slight wobble
+             * rather than as an effect. The type is roughly half again as
+             * large and the field moves enough to see it move.
+             */
+            warpStrength={0.11}
+            warpScale={1.9}
+            speed={0.6}
+            pointerStrength={0.85}
+            refraction={0.03}
+            className="font-display !min-h-[11rem] sm:!min-h-[16rem]"
           />
         )}
       </motion.div>
