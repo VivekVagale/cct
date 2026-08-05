@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="relative pointer-events-auto border-t border-white/[0.08] py-12 sm:py-16">
+    <footer id="footer" className="relative pointer-events-auto border-t border-white/[0.08] py-12 sm:py-16">
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8 sm:gap-10">
         <div>
           <p className="text-sm tracking-[0.22em] uppercase text-[#F5F7FA] mb-4">

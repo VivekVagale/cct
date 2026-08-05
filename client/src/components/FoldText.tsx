@@ -56,9 +56,20 @@ const renderWhitespace = (value: string, key: string): ReactNode[] =>
     if (part === '\n') return <br key={`${key}-br-${index}`} />;
     if (!part) return null;
 
+    /*
+     * Ordinary spaces, not non-breaking ones.
+     *
+     * Local fix \u2014 re-adding this component from the registry brings the bug
+     * back. Upstream swaps every space for U+00A0 to stop the browser
+     * collapsing them, which `.fold-text`'s own `white-space: pre-wrap`
+     * already prevents. What the swap does instead is remove every place a
+     * heading is allowed to break: a multi-word heading becomes one unbreakable
+     * run and simply overhangs its column. It was invisible while the headings
+     * were small and it is 300px of clipped type at the size they are now.
+     */
     return (
       <span className="fold-text-whitespace" key={`${key}-space-${index}`}>
-        {part.replace(/ /g, '\u00A0')}
+        {part}
       </span>
     );
   });

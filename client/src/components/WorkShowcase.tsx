@@ -134,6 +134,7 @@ export function WorkShowcase() {
     // of the sections either side keeps it a panel you scroll through rather
     // than a screen you land in.
     <section
+      id="work"
       ref={sectionRef}
       className="relative h-[74svh] sm:h-[100svh] w-full overflow-hidden pointer-events-auto"
     >

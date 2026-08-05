@@ -64,7 +64,16 @@ export const SCENE = {
    * right way round — they can always come back, and coming back is free (see
    * `dwellSettled`).
    */
-  dwell: 0.9,
+  dwell: 0.55,
+  /**
+   * The hold on a scene that is part of the flow rather than a beat.
+   *
+   * Barely there. A section the visitor has just read to the end of, still
+   * scrolling, should hand over the moment they ask — the section's own length
+   * was the pacing, and making them wait again on the far side of it is the
+   * page arguing with a decision they have already made twice.
+   */
+  dwellFlow: 0.15,
   /**
    * The hold on arriving at a scene that has been read before.
    *
@@ -80,15 +89,24 @@ export const SCENE = {
 /**
  * How much wheel a scene has to be pushed against before it yields.
  *
- * Roughly one firm notch. There has to be enough travel for the give to be
- * felt before the scene changes — that is the whole point of it — but every
- * unit above that is a unit of scrolling that looks like nothing happening,
- * and 90 was over that line.
+ * About two firm notches, or one deliberate push.
+ *
+ * This has been moved twice in both directions and the two failures are worth
+ * writing down, because they are not opposites. Too high and a scroll spends
+ * its length looking like nothing is happening — that was 90 with a 2.4s hold
+ * behind it, and it read as lag. Too low and a scene changes off a gesture the
+ * visitor did not think of as a decision, which reads as the page being
+ * twitchy and out of their control — that was 62.
+ *
+ * The hold is what buys the room to sit high: at 0.9s a scene answers a
+ * deliberate push immediately, so the threshold no longer has to compensate
+ * for a long lockout by firing early. The give is also visible for this whole
+ * distance now rather than being over before it starts.
  */
-const WHEEL_THRESHOLD = 62;
+const WHEEL_THRESHOLD = 118;
 
 /** The same, for a finger. */
-const SWIPE_THRESHOLD = 50;
+const SWIPE_THRESHOLD = 72;
 
 /**
  * How long a run of wheel events can pause before the charge is treated as
@@ -182,6 +200,23 @@ export interface SceneDefinition {
    * worked out that it can be turned.
    */
   dwell?: number;
+  /**
+   * Whether this scene is a beat in the story or a part of the flow.
+   *
+   * Not every section wants to be launched into. A beat — the sphere, the two
+   * title cards, the piece about the studio — is a thing to arrive at, and it
+   * gets the full push: the depth, the blur, and a hold long enough to take it
+   * in before it can be left. Everything else is a section the visitor is
+   * reading their way through, and the change between those should feel like
+   * the scroll continuing rather than a slide being advanced — a short
+   * dissolve and almost no hold at all, so a continuous scroll runs through
+   * them without ever being stopped.
+   *
+   * A scene that scrolls inside its frame is paced by its own length either
+   * way: the deck will not leave it until its content has been read to the
+   * end.
+   */
+  beat?: boolean;
 }
 
 /**
@@ -210,7 +245,17 @@ export interface SceneDefinition {
  * ordinary way. Turning a page into a slideshow is exactly the kind of motion
  * that setting exists to refuse.
  */
-export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
+export function SceneDeck({
+  scenes,
+  onSceneChange,
+}: {
+  scenes: SceneDefinition[];
+  /**
+   * Which scene is on screen, for the few things that live outside the deck
+   * and need to know — the starfield behind it, principally.
+   */
+  onSceneChange?: (index: number, id: string) => void;
+}) {
   const reduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -326,30 +371,12 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
     setScroller(el);
   }, [index, scenes, mounted]);
 
-  /**
-   * How many scene changes have happened. Part of the key each scene is
-   * mounted under, and the reason the deck cannot lock up.
-   *
-   * `AnimatePresence` identifies its children by key, and the key was the
-   * scene's id. Scenes overlap by design — the outgoing one takes 0.64s to
-   * leave — and a scene that has been read can be asked for again 0.3s after
-   * it was left. Turn back within that window and the deck tried to mount a
-   * child under a key that was already present as an exiting child. It does
-   * not resolve that by starting a second copy: the entering scene is dropped,
-   * and since the deck's own index had already moved, every input after that
-   * was answered by a scene that was not on screen. The deck was simply dead,
-   * and only a reload brought it back.
-   *
-   * Counting the visit into the key makes a return a genuinely new child, so
-   * a scene can be arriving and leaving at the same time without the two ever
-   * being mistaken for one another.
-   */
-  const [visit, setVisit] = useState(0);
 
   useEffect(() => {
     const id = scenes[index]?.id;
     if (id) seen.current.add(id);
-  }, [scenes, index]);
+    if (id) onSceneChange?.(index, id);
+  }, [scenes, index, onSceneChange]);
 
   /*
    * The give. How hard the deck is currently being pushed, -1 to 1.
@@ -490,16 +517,19 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
 
       queued.current = 0;
       const target = scenes[next];
-      jump(
-        next,
-        delta,
-        // A scene already read is handed back almost immediately. Only a first
-        // sighting is worth holding, and only that one has anything to hold
-        // for. This is most of what made moving back and forth feel slow.
-        seen.current.has(target.id)
-          ? SCENE.dwellSettled
-          : (target.dwell ?? SCENE.dwell),
-      );
+      /*
+       * Three cases, in order of how little the visitor should be made to
+       * wait. A scene already read has nothing left to show and is handed back
+       * at once. A scene that is part of the flow gets the flow's hold, which
+       * is barely a hold. Only a beat on its first sighting is worth stopping
+       * for, and even that one is over well before its entrance is.
+       */
+      const dwell = seen.current.has(target.id)
+        ? SCENE.dwellSettled
+        : target.beat
+          ? (target.dwell ?? SCENE.dwell)
+          : SCENE.dwellFlow;
+      jump(next, delta, dwell);
       return true;
     },
     [index, count, jump, scenes],
@@ -526,6 +556,18 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
   const innerScrollHasRoom = useCallback((delta: number) => {
     const el = scrollerRef.current;
     if (!el) return false;
+    /*
+     * Only a scene that actually scrolls can be given the wheel.
+     *
+     * This used to ask the element how much taller its content was than its
+     * box — and a *fixed* scene answers that question too. Its box is
+     * `overflow: hidden`, so content that does not quite fit reports travel
+     * that can never be travelled: the deck handed every notch to an element
+     * whose scrollTop is nailed to zero, waited for it to reach an end it
+     * could not reach, and stopped moving for good. One interstitial
+     * overflowing by 48px was enough to make the whole page a dead end.
+     */
+    if (!el.classList.contains("scene-scroller")) return false;
     const max = el.scrollHeight - el.clientHeight;
     /*
      * A scroller with only a few pixels of travel is not a scrolling scene,
@@ -700,7 +742,7 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
     return (
       <>
         {scenes.map((scene) => (
-          <div id={scene.id} key={scene.id}>
+          <div data-scene={scene.id} key={scene.id}>
             {scene.render()}
           </div>
         ))}
@@ -731,7 +773,7 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
           <motion.div
             key={scene.id}
             className="scene"
-            custom={direction}
+            custom={{ direction, beat: Boolean(scene.beat) }}
             variants={SCENE_VARIANTS}
             // `enter` runs on the mount that first shows the scene and never
             // again — a scene mounts once and stays.
@@ -779,7 +821,14 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
                 <div
                   className={scene.scrolls ? "scene-scroller" : "scene-fixed"}
                   ref={(el) => attachScroller(scene.id, el)}
-                  id={scene.id}
+                  /* Deliberately not `id`. Every section already carries its
+                     own — `#about` belongs to the About section, not to the
+                     box the deck happens to put it in — and setting it here as
+                     well put two elements with the same id on the page, which
+                     makes `getElementById` a coin toss and an anchor
+                     ambiguous. The deck matches anchors against its own scene
+                     list rather than the DOM, so it never needed one. */
+                  data-scene={scene.id}
                 >
                   {scene.render()}
                 </div>
@@ -804,17 +853,29 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
  * The two overlap deliberately (`mode="sync"`), so one dissolves into the
  * other rather than the frame going empty between them.
  */
+/**
+ * What a scene's transition needs to know: which way the deck is going, and
+ * whether the scene arriving is a beat or part of the flow.
+ */
+type SceneMotion = { direction: number; beat: boolean };
+
 const SCENE_VARIANTS = {
-  enter: (direction: number) => ({
+  enter: ({ direction, beat }: SceneMotion) => ({
     opacity: 0,
-    scale: direction > 0 ? 0.94 : 1.06,
-    filter: "blur(14px)",
+    // A beat arrives from somewhere. A section in the flow is already where it
+    // belongs and only has to appear — no depth to travel, no focus to find,
+    // because the visitor is reading their way forward rather than being taken
+    // somewhere.
+    scale: beat ? (direction > 0 ? 0.94 : 1.06) : 1,
+    filter: beat ? "blur(14px)" : "blur(0px)",
   }),
-  center: (direction: number) => ({
+  center: ({ direction, beat }: SceneMotion) => ({
     opacity: 1,
     scale: 1,
     filter: "blur(0px)",
-    transition: {
+    transition: !beat
+      ? { duration: 0.42, ease: [0.16, 1, 0.3, 1] as const }
+      : {
       /*
        * Going forward is the story being told and takes the full push. Going
        * back is navigation, and navigation should not be a production number:
@@ -829,14 +890,16 @@ const SCENE_VARIANTS = {
       filter: { duration: direction > 0 ? SCENE.transition : 0.18 },
     },
   }),
-  exit: (direction: number) => ({
+  exit: ({ direction, beat }: SceneMotion) => ({
     opacity: 0,
-    scale: direction > 0 ? 1.06 : 0.94,
-    filter: "blur(14px)",
-    transition: {
-      duration:
-        direction > 0 ? SCENE.transition * 0.8 : SCENE.transition * 0.45,
-      ease: [0.16, 1, 0.3, 1] as const,
-    },
+    scale: beat ? (direction > 0 ? 1.06 : 0.94) : 1,
+    filter: beat ? "blur(14px)" : "blur(0px)",
+    transition: !beat
+      ? { duration: 0.36, ease: [0.16, 1, 0.3, 1] as const }
+      : {
+          duration:
+            direction > 0 ? SCENE.transition * 0.8 : SCENE.transition * 0.45,
+          ease: [0.16, 1, 0.3, 1] as const,
+        },
   }),
 };

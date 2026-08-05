@@ -207,7 +207,22 @@ export function Hero({
    * fallback, where the window is the right answer and framer's default
    * already is that.
    */
-  const { scroller } = useScene();
+  const { scroller, active } = useScene();
+  /*
+   * Whether this scene is the one on screen, readable from inside a motion
+   * value subscription without re-subscribing on every change.
+   *
+   * The two values below belong to the whole page — the starfield behind every
+   * scene, and the nav bar's glass — but they are written from here, by this
+   * scene's scroll. That only holds while this scene is the current one. A
+   * scene that is not current is stood down with `content-visibility: hidden`,
+   * its subtree stops being rendered, and `useScroll` measuring a target inside
+   * it gets nothing back and reports zero. The hero would then dutifully write
+   * that zero out: the starfield went black for the entire rest of the site,
+   * and the nav lost its glass.
+   */
+  const activeRef = useRef(active);
+  activeRef.current = active;
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
     container: scroller ? { current: scroller } : undefined,
@@ -271,14 +286,27 @@ export function Hero({
   // would re-render the Hero on every scroll tick. Seeded on mount as well as
   // on change, so landing deep in the page starts with the right value.
   useEffect(() => {
-    galaxyOpacity.set(galaxyReveal.get());
-    return galaxyReveal.on("change", (v) => galaxyOpacity.set(v));
+    // One-way, and only while this scene is on screen. The stars coming up is
+    // an event in the story rather than a readout of a scroll position: once
+    // they are up they stay up, including on the way back to the top, and a
+    // hero that is no longer current says nothing at all.
+    const apply = (v: number) => {
+      if (!activeRef.current) return;
+      if (v > galaxyOpacity.get()) galaxyOpacity.set(v);
+    };
+    apply(galaxyReveal.get());
+    return galaxyReveal.on("change", apply);
   }, [galaxyReveal, galaxyOpacity]);
 
   // The same arrangement for the exit, inverted: 1 means the stage has gone.
+  // Not one-way — scrolling back up through the hero genuinely brings the
+  // stage back — but silent for the same reason once the scene is stood down.
   useEffect(() => {
-    heroExit.set(1 - stageOpacity.get());
-    return stageOpacity.on("change", (v) => heroExit.set(1 - v));
+    const apply = (v: number) => {
+      if (activeRef.current) heroExit.set(1 - v);
+    };
+    apply(stageOpacity.get());
+    return stageOpacity.on("change", apply);
   }, [stageOpacity, heroExit]);
 
   return (

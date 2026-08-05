@@ -4,7 +4,7 @@ import { TestimonialTicket, TicketBumpFilter } from "@/components/TestimonialTic
 
 export function Testimonials() {
   return (
-    <section className="relative pointer-events-auto py-20 sm:py-40">
+    <section id="testimonials" className="relative pointer-events-auto py-20 sm:py-40">
       {/* One filter for the whole section — see TicketBumpFilter. */}
       <TicketBumpFilter />
 

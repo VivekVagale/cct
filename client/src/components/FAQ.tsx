@@ -8,7 +8,7 @@ import { faqItems } from "@/data/content";
 
 export function FAQ() {
   return (
-    <section className="relative pointer-events-auto py-20 sm:py-40">
+    <section id="faq" className="relative pointer-events-auto py-20 sm:py-40">
       <div className="max-w-3xl mx-auto px-6 sm:px-10">
         <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5 text-center">
           Questions

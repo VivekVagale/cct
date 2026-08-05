@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 interface CinematicLineProps {
   text: string;
   className?: string;
+  /** The anchor this title card answers to. Each one owns its own id. */
+  id?: string;
 }
 
 /**
@@ -34,7 +36,7 @@ interface CinematicLineProps {
  * component: opacity and y on a plain div composite, where the same values
  * inside would mean re-rasterising the canvas.
  */
-export function CinematicLine({ text, className }: CinematicLineProps) {
+export function CinematicLine({ text, className, id }: CinematicLineProps) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   /*
@@ -60,20 +62,26 @@ export function CinematicLine({ text, className }: CinematicLineProps) {
   return (
     <div
       ref={ref}
+      id={id}
       className={cn(
-        "relative w-full py-12 sm:py-24 flex items-center justify-center text-center px-4 sm:px-6",
+        /* The height is the whole frame and the overflow is clipped, because
+           this is a fixed scene: content that does not quite fit cannot be
+           scrolled to, and a fixed scene reporting travel it can never travel
+           used to leave the deck waiting for an end that never came. Padding
+           in vh so the card breathes without ever adding up past the screen. */
+        "relative w-full h-full max-h-screen overflow-hidden py-[6vh] flex items-center justify-center text-center px-4 sm:px-6",
         className,
       )}
     >
       <motion.div
         style={reduceMotion || inDeck ? undefined : { opacity, y }}
-        className="scene-heading w-full max-w-6xl"
+        className="scene-heading w-full max-w-[95vw]"
       >
         {reduceMotion ? (
           // No canvas at all under reduced motion. The shader's whole output is
           // drift, refraction and a ripple — there is nothing left of it to
           // keep, so this falls back to the type it is made of.
-          <p className="font-display text-4xl sm:text-6xl md:text-8xl text-[#F5F7FA] leading-[1.08]">
+          <p className="font-display text-5xl sm:text-8xl md:text-9xl text-[#F5F7FA] leading-[1.02]">
             {text}
           </p>
         ) : (
@@ -83,10 +91,15 @@ export function CinematicLine({ text, className }: CinematicLineProps) {
             // font-display is on the wrapper and the component inherits it, so
             // the warped type is the same face as the rest of the page.
             fontFamily="inherit"
-            fontSize="clamp(2.25rem, 8.5vw, 6.5rem)"
+            /* As large as a title card can be and still hold the line. The vw
+               term is what does the work — this is type sized to the screen
+               rather than to a paragraph, which is the difference between a
+               line of copy and a card. The rem floor keeps it readable on a
+               phone; the ceiling stops it outgrowing a very wide monitor. */
+            fontSize="clamp(3rem, 13vw, 11rem)"
             fontWeight={400}
-            letterSpacing="0.02em"
-            lineHeight={1.08}
+            letterSpacing="0.01em"
+            lineHeight={1.02}
             /*
              * Past the stock defaults now, not under them.
              *
@@ -103,7 +116,10 @@ export function CinematicLine({ text, className }: CinematicLineProps) {
             speed={0.6}
             pointerStrength={0.85}
             refraction={0.03}
-            className="font-display !min-h-[11rem] sm:!min-h-[16rem]"
+            /* In vh, not rem. The card is a fixed scene now — whatever this
+               reserves has to fit the screen it is on, at every size, or the
+               scene clips content it can never scroll to. */
+            className="font-display !min-h-[42vh] sm:!min-h-[52vh]"
           />
         )}
       </motion.div>

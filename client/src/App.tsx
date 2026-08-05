@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -16,7 +16,7 @@ import { CinematicLine } from "./components/CinematicLine";
 import { SceneDeck, type SceneDefinition } from "./components/SceneDeck";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
-import { motion, useMotionValue, useReducedMotion } from "framer-motion";
+import { animate, motion, useMotionValue, useReducedMotion } from "framer-motion";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 
 function App() {
@@ -54,6 +54,30 @@ function App() {
   useEffect(preloadShowcase, []);
 
   /*
+   * The starfield belongs to the page, not to the hero.
+   *
+   * Its opacity is written by the hero as that scene's assembly finishes, which
+   * is right for the reveal itself and wrong as the only thing holding it up.
+   * The hero measures its own scroll to produce that number, and a scene that
+   * is not the current one cannot be relied on to measure anything: stood down,
+   * its subtree is not rendered, the measurement comes back as zero, and the
+   * page behind every later scene went black.
+   *
+   * So past the first scene this stops being the hero's business. Anywhere but
+   * the hero, the stars are simply up — a floor under the value rather than a
+   * second thing writing it, so the hero's own reveal still plays out in full
+   * on the way through.
+   */
+  const handleSceneChange = useCallback(
+    (index: number) => {
+      if (index > 0 && galaxyOpacity.get() < 1) {
+        animate(galaxyOpacity, 1, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+      }
+    },
+    [galaxyOpacity],
+  );
+
+  /*
    * The story, as scenes.
    *
    * The order is the old document's order, and the two interstitials stay as
@@ -80,6 +104,8 @@ function App() {
       {
         id: "work",
         render: () => <WorkShowcase />,
+        // A beat: the sphere is arrived at, not read past.
+        beat: true,
         // Longer than anywhere else, because this scene is a thing to be used
         // rather than read — at the ordinary hold the sphere was gone before a
         // visitor had worked out it could be turned at all. First sighting
@@ -88,15 +114,26 @@ function App() {
       },
       {
         id: "every-frame",
-        render: () => <CinematicLine text="EVERY FRAME TELLS A STORY" />,
+        beat: true,
+        dwell: 1.6,
+        render: () => (
+          <CinematicLine id="every-frame" text="EVERY FRAME TELLS A STORY" />
+        ),
       },
-      { id: "about", render: () => <About />, scrolls: true },
+      { id: "about", render: () => <About />, scrolls: true, beat: true, dwell: 1.2 },
       // Five pinned stages, scrubbed the same way.
       { id: "process", scrolls: true, render: () => <CreativeProcess /> },
       { id: "projects", render: () => <Projects />, scrolls: true },
       {
         id: "into-cinema",
-        render: () => <CinematicLine text="READY TO TURN YOUR MACHINE INTO CINEMA" />,
+        beat: true,
+        dwell: 1.6,
+        render: () => (
+          <CinematicLine
+            id="into-cinema"
+            text="READY TO TURN YOUR MACHINE INTO CINEMA"
+          />
+        ),
       },
       { id: "booking", render: () => <Booking />, scrolls: true },
       { id: "testimonials", render: () => <Testimonials />, scrolls: true },
@@ -136,7 +173,7 @@ function App() {
               <Navigation heroExit={heroExit} />
             </div>
 
-            <SceneDeck scenes={scenes} />
+            <SceneDeck scenes={scenes} onSceneChange={handleSceneChange} />
           </div>
         </TooltipProvider>
       </ThemeProvider>
