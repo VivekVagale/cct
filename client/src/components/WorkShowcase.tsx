@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import InfiniteMenu, { type MenuItem } from "@/components/ui/InfiniteMenu";
 import { showcaseItems } from "@/data/showcase";
-import { projects } from "@/data/content";
 
 /**
  * Replaces the scrolling image marquee with a draggable sphere of work.
  *
  * The marquee was a passive strip you could only watch go past; this is
  * something the visitor turns, which suits a studio whose product is motion.
- * Items are the studio's own showcase work and projects — not the component's
- * placeholder imagery — and each links to the section it belongs to.
+ *
+ * Every disc is a real frame from the studio's own work. It used to be five
+ * showcase entries topped up with three borrowed from `projects`, because five
+ * did not fill a twelve-disc sphere — and all eight were Unsplash photographs
+ * of other people's motorcycles, on the section called Selected Work, for a
+ * studio selling CAD-accurate rendering. `showcaseItems` is twelve renders now
+ * and there is nothing left to pad with.
  */
 /**
  * Phones get a nearer camera. `scale` is a camera-distance multiplier, so the
@@ -63,23 +67,14 @@ export function WorkShowcase() {
   }, []);
 
   const items = useMemo<MenuItem[]>(
-    () => [
-      ...showcaseItems.map((p) => ({
+    () =>
+      showcaseItems.map((p) => ({
         image: p.image,
         link: "#projects",
         title: p.title,
         description: `${p.vehicle} — ${p.category}`,
         focusY: p.focusY,
       })),
-      ...projects
-        .filter((e) => !e.comingSoon)
-        .map((e) => ({
-          image: e.image,
-          link: "#booking",
-          title: e.title,
-          description: e.description,
-        })),
-    ],
     [],
   );
 
