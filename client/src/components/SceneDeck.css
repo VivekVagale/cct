@@ -31,6 +31,35 @@
   will-change: transform, opacity, filter;
 }
 
+/*
+ * The layer that takes the give — a few pixels of lean under a scroll that
+ * moves nothing else. Separate from `.scene` because that one's transform
+ * belongs to the scene transition, and the two must not share a node.
+ */
+.scene-push {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  will-change: transform, filter;
+}
+
+/*
+ * A scene that has been read once already.
+ *
+ * Everything staged by the deck is switched off rather than replayed, which
+ * leaves each element at the natural state its keyframes end on: visible,
+ * untransformed, unblurred. Going back is turning back to a page, not
+ * reprinting it. Note this is `animation: none` and not a zero duration — a
+ * zero-duration animation still fires its events, and anything that listens
+ * for the entrance finishing would hear it a second time.
+ */
+.scene--settled .scene-heading,
+.scene--settled .scene-body > * {
+  animation: none;
+}
+
 /* A scene that fits. Nothing about it can scroll — the whole point. */
 .scene-fixed {
   position: relative;
@@ -74,7 +103,21 @@
  */
 .scene-heading,
 .scene-body > * {
-  animation-fill-mode: both;
+  /*
+   * `backwards`, emphatically not `both`.
+   *
+   * A CSS animation outranks an inline style for as long as it owns the
+   * property, and `both` means it never stops owning it — the last keyframe's
+   * `transform: none` sits on the element for the rest of its life. Any
+   * element that then wants its own transform silently loses: the project
+   * cards' 3D tilt wrote rotateX and rotateY to elements that were pinned flat
+   * by an animation which had finished several seconds earlier.
+   *
+   * `backwards` holds the *from* state during the delay, which is the only
+   * part that was ever needed — the last keyframe is the element's natural
+   * state, so there is nothing to keep holding once it has arrived.
+   */
+  animation-fill-mode: backwards;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 

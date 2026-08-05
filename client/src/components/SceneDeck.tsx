@@ -7,7 +7,16 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  motionValue,
+  type MotionValue,
+} from "framer-motion";
 import "./SceneDeck.css";
 
 /**
@@ -51,6 +60,26 @@ export const SCENE = {
   dwell: 2.4,
 } as const;
 
+/**
+ * How much wheel a scene has to be pushed against before it yields.
+ *
+ * Higher than it needs to be to register intent, on purpose. The push is now
+ * visible — the scene gives a little under it — and a threshold a single
+ * trackpad flick clears instantly leaves no travel for that feedback to happen
+ * in. This is roughly a firm notch and a half.
+ */
+const WHEEL_THRESHOLD = 90;
+
+/** The same, for a finger. */
+const SWIPE_THRESHOLD = 64;
+
+/**
+ * How long a run of wheel events can pause before the charge is treated as
+ * abandoned and relaxes back to nothing. One notch of a mouse wheel is a single
+ * event, so this cannot be tight enough to punish a slow, deliberate scroll.
+ */
+const PUSH_RELEASE_MS = 220;
+
 /** When the supporting content at position `order` starts moving. */
 export const contentDelay = (order = 0) =>
   SCENE.headingDelay +
@@ -58,7 +87,11 @@ export const contentDelay = (order = 0) =>
   SCENE.holdAfterHeading +
   order * SCENE.contentStagger;
 
-type ScenePhase = "idle" | "playing";
+/**
+ * A scene is unvisited until it is first shown, playing while its entrance
+ * runs, and settled from the moment it is left. It never goes back.
+ */
+type ScenePhase = "unvisited" | "playing" | "settled";
 
 interface SceneContextValue {
   /** True only for the scene currently on screen. */
@@ -66,6 +99,24 @@ interface SceneContextValue {
   /** Where this scene is in the deck, for anything that wants to know. */
   index: number;
   phase: ScenePhase;
+  /**
+   * True when this scene has been seen before in this session.
+   *
+   * Everything that plays an entrance reads this and renders its finished
+   * state instead: the CSS staging in SceneDeck.css, `Reveal`, `RevealLines`,
+   * `FoldHeading`. Going back to a scene is turning back to a page already
+   * read — the ink does not get laid down again.
+   */
+  settled: boolean;
+  /**
+   * How hard the visitor is currently pushing against this scene, -1 to 1.
+   *
+   * Signed by direction, 1 being a full push towards the next scene. Sprung, so
+   * a wheel notch arrives as a shove rather than a step. Anything decorative
+   * that wants to drift with the input can read this; the deck itself uses it
+   * for the scene's own give.
+   */
+  push: MotionValue<number>;
   /**
    * The element a scrolling scene actually scrolls, or null in the document
    * fallback.
@@ -79,10 +130,17 @@ interface SceneContextValue {
   scroller: HTMLElement | null;
 }
 
+/**
+ * The value outside a deck — the reduced-motion document, and every test that
+ * renders a section on its own. `settled: false` there means the sections keep
+ * the entrances they have always had.
+ */
 const SceneContext = createContext<SceneContextValue>({
   active: false,
   index: 0,
-  phase: "idle",
+  phase: "unvisited",
+  settled: false,
+  push: motionValue(0),
   scroller: null,
 });
 
@@ -99,6 +157,14 @@ export interface SceneDefinition {
    * viewport still never moves but nothing is cut off either.
    */
   scrolls?: boolean;
+  /**
+   * Override the hold before this scene can be left, in seconds.
+   *
+   * For a scene that is a thing to be *used* rather than read — the sphere is
+   * the one — where the deck's ordinary hold is over before the visitor has
+   * worked out that it can be turned.
+   */
+  dwell?: number;
 }
 
 /**
@@ -140,6 +206,93 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
 
   const count = scenes.length;
 
+  /*
+   * Which scenes have been shown, and whether the one on screen is one of them.
+   *
+   * The set is a ref because nothing should re-render when it grows. Whether
+   * the *current* scene was already in it has to be state, though, and has to
+   * be settled at the moment the scene changes rather than derived while
+   * rendering — a scene that recomputed it would flip from playing to settled
+   * partway through its own entrance and snap to the end of it.
+   */
+  const seen = useRef<Set<string>>(new Set());
+  const [settled, setSettled] = useState(false);
+
+  useEffect(() => {
+    const id = scenes[index]?.id;
+    if (id) seen.current.add(id);
+  }, [scenes, index]);
+
+  /*
+   * The give. How hard the deck is currently being pushed, -1 to 1.
+   *
+   * The page does not scroll, which leaves nothing to tell a visitor their
+   * wheel was heard — a screen that answers a gesture with nothing at all
+   * reads as broken long before it reads as deliberate. So the input drives a
+   * few pixels of movement in the scene itself: it leans away from the push,
+   * settles back slightly in depth, and dims a touch as it goes. Sprung, so a
+   * wheel notch — which arrives as one discrete event — lands as a shove and
+   * relaxes rather than stepping.
+   *
+   * Deliberately tiny. 7px and 1.6% is under the threshold of being noticed
+   * and well over the threshold of being felt, which is the whole brief. It is
+   * also on its own timeline, entirely separate from the scene transition: the
+   * two can overlap without either waiting for the other.
+   */
+  const push = useMotionValue(0);
+  const pushRelease = useRef<number | null>(null);
+
+  // Underdamped just enough to have a settle rather than a stop, nowhere near
+  // enough to bounce. A deck that springs back visibly is a toy.
+  const pushSpring = useSpring(push, {
+    stiffness: 240,
+    damping: 34,
+    mass: 0.45,
+  });
+  /** Leans away from the push: a shove downwards moves the scene up. */
+  const pushY = useTransform(pushSpring, [-1, 1], [7, -7]);
+  /* Depth and light both fall off with the *size* of the push regardless of
+     its direction — the scene withdraws from the visitor either way, which is
+     what makes the next one feel like it is already behind this one. */
+  const pushScale = useTransform(pushSpring, (v) => 1 - Math.abs(v) * 0.016);
+  const pushDim = useTransform(
+    pushSpring,
+    (v) => `brightness(${1 - Math.abs(v) * 0.07})`,
+  );
+
+  const charge = useCallback(
+    (amount: number) => {
+      push.set(Math.max(-1, Math.min(1, amount)));
+      if (pushRelease.current !== null) window.clearTimeout(pushRelease.current);
+      pushRelease.current = window.setTimeout(() => {
+        wheelAccumulator.current = 0;
+        push.set(0);
+      }, PUSH_RELEASE_MS);
+    },
+    [push],
+  );
+
+  const release = useCallback(() => {
+    if (pushRelease.current !== null) window.clearTimeout(pushRelease.current);
+    pushRelease.current = null;
+    push.set(0);
+  }, [push]);
+
+  useEffect(() => release, [release]);
+
+  /** Move to `target`, from any input. The one place scene state changes. */
+  const jump = useCallback(
+    (target: number, delta: number, dwell: number) => {
+      lockedUntil.current = performance.now() + dwell * 1000;
+      wheelAccumulator.current = 0;
+      release();
+      setDirection(delta);
+      setSettled(seen.current.has(scenes[target].id));
+      setIndex(target);
+    },
+    [scenes, release],
+  );
+
   const go = useCallback(
     (delta: number) => {
       const now = performance.now();
@@ -148,13 +301,10 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       const next = index + delta;
       if (next < 0 || next >= count) return false;
 
-      lockedUntil.current = now + SCENE.dwell * 1000;
-      wheelAccumulator.current = 0;
-      setDirection(delta);
-      setIndex(next);
+      jump(next, delta, scenes[next].dwell ?? SCENE.dwell);
       return true;
     },
-    [index, count],
+    [index, count, jump, scenes],
   );
 
   /*
@@ -190,9 +340,13 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       }
       wheelAccumulator.current += delta;
 
-      // ~One firm notch. Below this a trackpad's tail-off would advance two
-      // scenes for one gesture.
-      if (Math.abs(wheelAccumulator.current) > 60) {
+      // The push is answered before the threshold is anywhere near — this is
+      // the frame the visitor learns their scroll landed. Clamped, so leaning
+      // on the wheel during the hold does not wind up a charge that fires the
+      // moment it lifts.
+      charge(wheelAccumulator.current / WHEEL_THRESHOLD);
+
+      if (Math.abs(wheelAccumulator.current) > WHEEL_THRESHOLD) {
         go(Math.sign(wheelAccumulator.current));
       }
     };
@@ -222,15 +376,11 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
           break;
         case "Home":
           e.preventDefault();
-          lockedUntil.current = 0;
-          setDirection(-1);
-          setIndex(0);
+          jump(0, -1, 0);
           break;
         case "End":
           e.preventDefault();
-          lockedUntil.current = 0;
-          setDirection(1);
-          setIndex(count - 1);
+          jump(count - 1, 1, 0);
           break;
         default:
       }
@@ -244,14 +394,18 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       if (touchStart.current === null) return;
       const dy = touchStart.current - (e.touches[0]?.clientY ?? 0);
       if (innerScrollHasRoom(Math.sign(dy))) return;
-      // A swipe has to be a real one: 48px, against a wheel's 60 units.
-      if (Math.abs(dy) > 48) {
+      // A finger gets the give live, under the finger, for the whole length of
+      // the drag — the one input where the feedback can track the gesture
+      // continuously rather than being fed discrete notches.
+      charge(dy / SWIPE_THRESHOLD);
+      if (Math.abs(dy) > SWIPE_THRESHOLD) {
         if (go(Math.sign(dy))) touchStart.current = null;
       }
     };
 
     const onTouchEnd = () => {
       touchStart.current = null;
+      release();
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
@@ -267,7 +421,7 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [reduceMotion, go, innerScrollHasRoom, count]);
+  }, [reduceMotion, go, innerScrollHasRoom, count, jump, charge, release]);
 
   // The document itself must not scroll — there is nothing below the fold to
   // scroll to, and a rubber-band on a locked page reads as breakage.
@@ -300,13 +454,11 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       const target = scenes.findIndex((s) => `#${s.id}` === href);
       if (target === -1) return;
       e.preventDefault();
-      lockedUntil.current = 0;
-      setDirection(target > index ? 1 : -1);
-      setIndex(target);
+      jump(target, target > index ? 1 : -1, 0);
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
-  }, [reduceMotion, scenes, index]);
+  }, [reduceMotion, scenes, index, jump]);
 
   /*
    * The document, unchanged, for anyone who has asked for less motion.
@@ -343,7 +495,7 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
     >
       <AnimatePresence custom={direction} initial={false} mode="sync">
         <motion.div
-          className="scene"
+          className={`scene${settled ? " scene--settled" : ""}`}
           custom={direction}
           key={current.id}
           initial="enter"
@@ -353,25 +505,42 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
           aria-roledescription="scene"
           aria-label={`Scene ${index + 1} of ${count}`}
         >
-          {/* The scroller is handed down as state, not as the ref itself: a ref
-              is populated after the first render, and a scene reading it during
-              that render would measure against the window and stay frozen
-              there. Setting state on mount costs one extra render and makes the
-              element available on the one that matters. */}
-          <SceneContext.Provider
-            value={{ active: true, index, phase: "playing", scroller }}
+          {/* The give lives on its own element inside the transition's, because
+              both want a transform and the outer one is driven by variants —
+              a style transform on the same node would be overwritten by the
+              animation the moment a scene changed. Two nodes, two timelines,
+              neither aware of the other. */}
+          <motion.div
+            className="scene-push"
+            style={{ y: pushY, scale: pushScale, filter: pushDim }}
           >
-            <div
-              className={current.scrolls ? "scene-scroller" : "scene-fixed"}
-              ref={(el) => {
-                scrollerRef.current = el;
-                setScroller(el);
+            {/* The scroller is handed down as state, not as the ref itself: a
+                ref is populated after the first render, and a scene reading it
+                during that render would measure against the window and stay
+                frozen there. Setting state on mount costs one extra render and
+                makes the element available on the one that matters. */}
+            <SceneContext.Provider
+              value={{
+                active: true,
+                index,
+                phase: settled ? "settled" : "playing",
+                settled,
+                push: pushSpring,
+                scroller,
               }}
-              id={current.id}
             >
-              {current.render()}
-            </div>
-          </SceneContext.Provider>
+              <div
+                className={current.scrolls ? "scene-scroller" : "scene-fixed"}
+                ref={(el) => {
+                  scrollerRef.current = el;
+                  setScroller(el);
+                }}
+                id={current.id}
+              >
+                {current.render()}
+              </div>
+            </SceneContext.Provider>
+          </motion.div>
         </motion.div>
       </AnimatePresence>
     </div>

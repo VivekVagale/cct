@@ -7,6 +7,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
+import { useScene } from "@/components/SceneDeck";
 
 /**
  * The page's one entrance.
@@ -48,8 +49,15 @@ export function Reveal({
   scale?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
+  /*
+   * A scene the visitor has already been through renders this at its finished
+   * state and does not animate it again. The deck remounts a scene's whole
+   * subtree when it comes back round, so without this every one of these would
+   * treat a return visit as a first sighting and play the entrance again.
+   */
+  const { settled } = useScene();
 
-  if (reduceMotion) {
+  if (reduceMotion || settled) {
     return <div className={className}>{children}</div>;
   }
 
@@ -120,8 +128,9 @@ export function RevealLines({
 }) {
   const reduceMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
+  const { settled } = useScene();
 
-  if (reduceMotion) {
+  if (reduceMotion || settled) {
     return (
       <div className={className}>
         {lines.map((line) => (

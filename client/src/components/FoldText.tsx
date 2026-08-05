@@ -20,6 +20,15 @@ export interface FoldTextProps {
   perspective?: number;
   creaseShading?: number;
   trigger?: Trigger;
+  /**
+   * Skip the fold entirely and render the type already unfolded.
+   *
+   * Local addition, not part of the upstream component — re-adding this from
+   * the registry drops it. The deck uses it for a scene being revisited: the
+   * subtree is remounted on the way back, and without this every heading would
+   * fold itself open a second time.
+   */
+  settled?: boolean;
   fontSize?: string | number;
   fontWeight?: string | number;
   color?: string;
@@ -64,6 +73,7 @@ const FoldText = ({
   perspective = 700,
   creaseShading = 0.55,
   trigger = 'mount',
+  settled = false,
   fontSize = 80,
   fontWeight = 800,
   color = '#f7f2e8',
@@ -129,6 +139,19 @@ const FoldText = ({
 
     const pieces = Array.from(root.querySelectorAll<HTMLElement>('.fold-text-piece'));
     if (!pieces.length) return undefined;
+
+    // Already read once: put the type where the timeline would have left it and
+    // build nothing. No timeline, no ScrollTrigger, nothing to tear down.
+    if (settled) {
+      gsap.set(pieces, {
+        opacity: 1,
+        rotateX: 0,
+        rotateY: 0,
+        '--fold-crease': 0,
+        transformOrigin: hingeConfig.origin
+      });
+      return undefined;
+    }
 
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const activeDuration = reduceMotion ? Math.min(duration, 0.22) : duration;
@@ -201,6 +224,7 @@ const FoldText = ({
     perspective,
     safeCrease,
     trigger,
+    settled,
     hingeConfig.origin,
     hingeConfig.rotateX,
     hingeConfig.rotateY

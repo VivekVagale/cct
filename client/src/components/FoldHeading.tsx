@@ -1,4 +1,5 @@
 import FoldText from "@/components/FoldText";
+import { useScene } from "@/components/SceneDeck";
 
 /**
  * A section heading that unfolds a word at a time as it comes into view.
@@ -33,8 +34,13 @@ export function FoldHeading({
   className?: string;
   stagger?: number;
 }) {
+  // A heading on a scene that has already been read stays open. Everything
+  // else about it is unchanged.
+  const { settled } = useScene();
+
   return (
     <FoldText
+      settled={settled}
       text={text}
       color="inherit"
       duration={1}
