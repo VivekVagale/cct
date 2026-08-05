@@ -72,7 +72,8 @@ export function WorkShowcase() {
         image: p.image,
         link: "#projects",
         title: p.title,
-        description: `${p.vehicle} — ${p.category}`,
+        // The vehicle only when it is actually known — see data/showcase.ts.
+        description: p.vehicle ? `${p.vehicle} — ${p.category}` : p.category,
         focusY: p.focusY,
       })),
     [],

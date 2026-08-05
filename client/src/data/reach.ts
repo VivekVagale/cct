@@ -19,7 +19,20 @@
 
 export interface ReachStat {
   label: string;
+  /** What Instagram reported, as one string. Still the source of truth. */
   value: string;
+  /**
+   * The same figure split for the odometer: the number it rolls to, and the
+   * letter beside it.
+   *
+   * Split rather than parsed out of `value` at render, because "1.2M" and
+   * "138K" do not share a shape and a regex for both is a worse thing to
+   * maintain than two fields. The counter cannot roll the letter anyway —
+   * spelling 1.2M out as 1,200,000 would be seven digits wide and would claim
+   * a precision the export does not have.
+   */
+  amount: number;
+  suffix?: string;
 }
 
 export interface ReelStat {
@@ -57,11 +70,11 @@ export const headline = {
 };
 
 export const reachStats: ReachStat[] = [
-  { label: "Likes", value: "1.2M" },
-  { label: "Shares", value: "138K" },
-  { label: "Saves", value: "52K" },
-  { label: "Reposts", value: "21K" },
-  { label: "Reels", value: "37" },
+  { label: "Likes", value: "1.2M", amount: 1.2, suffix: "M" },
+  { label: "Shares", value: "138K", amount: 138, suffix: "K" },
+  { label: "Saves", value: "52K", amount: 52, suffix: "K" },
+  { label: "Reposts", value: "21K", amount: 21, suffix: "K" },
+  { label: "Reels", value: "37", amount: 37 },
 ];
 
 /**

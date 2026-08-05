@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mascot } from "@/components/Mascot";
 import { AnimatedText } from "@/components/AnimatedText";
-import { CountUp } from "@/components/CountUp";
+import { StatCounter } from "@/components/StatCounter";
 import Cubes from "@/components/ui/Cubes";
 import { ReelsBarChart } from "@/components/ReelsBarChart";
 import { AudienceMap } from "@/components/AudienceMap";
@@ -92,8 +92,11 @@ export function About() {
         <dl className="mt-14 sm:mt-20 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-y-8 gap-x-4 border-t border-white/[0.08] pt-10">
           {reachStats.map((stat) => (
             <div key={stat.label}>
-              <dd className="font-display text-2xl sm:text-4xl text-[#F5F7FA] leading-none mb-2">
-                <CountUp value={stat.value} />
+              {/* No type-scale class on the figure: the counter lays its digits
+                  out against a pixel height, so it reads the breakpoint itself
+                  rather than inheriting a size it cannot measure with. */}
+              <dd className="font-display text-[#F5F7FA] leading-none mb-2">
+                <StatCounter amount={stat.amount} suffix={stat.suffix} />
               </dd>
               <dt className="text-[10px] sm:text-xs tracking-[0.18em] uppercase text-[#B8C4D6]">
                 {stat.label}

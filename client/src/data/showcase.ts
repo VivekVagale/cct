@@ -1,7 +1,8 @@
 export interface ShowcaseItem {
   id: string;
   title: string;
-  vehicle: string;
+  /** Only where it is known for certain. Never guessed. */
+  vehicle?: string;
   category: string;
   year: string;
   description: string;
@@ -41,16 +42,17 @@ export interface ShowcaseItem {
  * so `focusY` still has something to choose from; 720 wide still gives the
  * 512px atlas cell more pixels than it samples.
  *
- * **The `vehicle` line on several of these is a best reading of what is legible
- * in the frame, not a fact.** Bear 650 and Continental GT 650 are named on the
- * bikes themselves; the rest are inferred from tank and wheel shape and should
- * be corrected. The two without a motorcycle in them say what they are instead.
+ * No `vehicle` on any of them. It was filled in from what the frames appeared
+ * to show — tank shape, wheel, a badge caught in the light — and only two of
+ * the twelve were actually legible. A studio that sells model-accurate work
+ * cannot publish a guess at a model name, and the user does not need the line,
+ * so the discs read as the shot and the project. The field stays on the type
+ * for the day something is known for certain.
  */
 export const showcaseItems: ShowcaseItem[] = [
   {
     id: "too-clean",
     title: "Too Clean",
-    vehicle: "Royal Enfield Continental GT 650",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -60,7 +62,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "spot-on-angles",
     title: "Spot On Angles",
-    vehicle: "Royal Enfield Bear 650",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -70,7 +71,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "white-beauty",
     title: "White Beauty",
-    vehicle: "Royal Enfield Himalayan 450",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -80,7 +80,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "stealth-bombers",
     title: "Sci-Fi Stealth Bombers",
-    vehicle: "Royal Enfield Interceptor 650",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -90,7 +89,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "braking-power",
     title: "Braking Power",
-    vehicle: "Royal Enfield Himalayan 450",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -100,7 +98,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "batmobile",
     title: "Batmobile",
-    vehicle: "Royal Enfield Interceptor 650",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -112,7 +109,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "tank-decor",
     title: "Tank Decor FTW",
-    vehicle: "Royal Enfield Classic 350",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -122,7 +118,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "tibetan-flags",
     title: "Tibetan Flags",
-    vehicle: "Royal Enfield Classic 350",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -134,7 +129,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "it-say-grrr",
     title: "It Say Grrr",
-    vehicle: "Royal Enfield Hunter 350",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -144,7 +138,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "custom-plates",
     title: "Custom Plates",
-    vehicle: "Raised lettering",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -156,7 +149,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "peak-customisation",
     title: "Peak Customisation",
-    vehicle: "Client's sedan",
     category: "Project Free Fall",
     year: "2026",
     description:
@@ -166,7 +158,6 @@ export const showcaseItems: ShowcaseItem[] = [
   {
     id: "chopper-delivery",
     title: "Chopper Delivery",
-    vehicle: "Mi-24 and cargo",
     category: "Project Free Fall",
     year: "2026",
     description:
