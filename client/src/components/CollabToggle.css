@@ -1,6 +1,6 @@
 /*
  * The collab-post switch. Adapted from a supplied holographic toggle, with
- * three deliberate changes.
+ * four deliberate changes.
  *
  * 1. The resting state is the brand violet, not the original's blue. Every
  *    blue in the source — track, rings, scan line, particles, interface ticks —
@@ -16,7 +16,14 @@
  *    of the track it captions. It hangs below the wrap now, and the container
  *    reserves the room.
  *
- * 3. Every animation stops under prefers-reduced-motion. There are five
+ * 3. Every absolutely-positioned layer that fills its parent is given an
+ *    explicit top/left. The source left them off, which works only where the
+ *    text is left-aligned: with no offsets an abspos box takes its static
+ *    position, and for the inline ones that is wherever the line box starts.
+ *    The booking section centres its text, and the track was landing half its
+ *    own width right of the wrap it is supposed to fill.
+ *
+ * 4. Every animation stops under prefers-reduced-motion. There are five
  *    running at once here — track lines, the thumb's pulse and scan, five
  *    floating particles and three spinning rings — and all of them are
  *    decoration on a control that reads perfectly well still.
@@ -43,13 +50,24 @@
 
 .toggle-input {
   position: absolute;
+  top: 0;
+  left: 0;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
+/*
+ * top/left are not decoration — see the note at the head of this file. The
+ * label is an inline box, so with no offsets its abspos static position is
+ * wherever the line box starts, and the booking section centres its text.
+ * The track was landing half its own width to the right of the wrap it is
+ * supposed to fill.
+ */
 .toggle-track {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background: rgba(18, 10, 34, 0.4);
@@ -312,6 +330,8 @@
 
 .toggle-data {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
@@ -444,6 +464,8 @@
 
 .interface-lines {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
@@ -529,6 +551,8 @@
 
 .holo-glow {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   border-radius: 30px;

@@ -359,7 +359,7 @@ export function Booking() {
           <Step
             number="04"
             title="Post it together?"
-            hint="Collab post with @coldchaintheory for better engagement — the reel goes out from both accounts at once and reaches both sets of followers. Optional, and it changes nothing about the work."
+            hint="Collab post with @coldchaintheory for better engagement — the reel goes out from both accounts at once and reaches both sets of followers."
           />
           <CollabToggle checked={collabPost} onChange={setCollabPost} />
         </div>
