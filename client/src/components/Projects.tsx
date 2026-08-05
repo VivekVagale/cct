@@ -3,7 +3,23 @@ import { projects, type Project } from "@/data/content";
 import { useTilt } from "@/hooks/useTilt";
 import { FoldHeading } from "@/components/FoldHeading";
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+/**
+ * The card has no entrance of its own.
+ *
+ * It used to carry Reveal's timing directly — an `initial`/`whileInView` pair
+ * on this element. Two things were wrong with that, and they were the same
+ * thing seen from two sides. The card is a direct child of `.scene-body`, so
+ * the deck was *already* staging it, and two systems animating one element's
+ * opacity on two different clocks is what made the grid appear, vanish and
+ * come back several seconds later. The other side: `whileInView` knows nothing
+ * about a scene having been read before, so every trip back to this section
+ * played the whole grid in again from nothing.
+ *
+ * The deck stages it now and only the deck. That gets the return visit right
+ * for free — a settled scene switches its staging off and the cards are simply
+ * there — and leaves this element's transform to the tilt alone.
+ */
+function ProjectCard({ project }: { project: Project }) {
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
     useTilt<HTMLAnchorElement>();
 
@@ -18,17 +34,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       onMouseLeave={onMouseLeave}
       whileTap={disabled ? undefined : { scale: 0.97 }}
       style={{ rotateX, rotateY, transformPerspective: 900 }}
-      /* Reveal's timing, applied here rather than by wrapping in it: the tilt
-         writes rotateX/rotateY to this same element, and a wrapper animating
-         y would be a second transform on a node that already has one. */
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{
-        duration: 1.1,
-        delay: (index % 4) * 0.1,
-        ease: [0.16, 1, 0.3, 1],
-      }}
       className={`group relative overflow-hidden rounded-sm border border-white/[0.1] bg-white/[0.02] transition-colors duration-300 hover:border-white/30 ${
         disabled ? "cursor-default" : "cursor-pointer"
       }`}
@@ -47,17 +52,19 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         <img
           src={project.image}
           alt={project.title}
-          /* Full strength, like the vehicle cards two sections down — those
-             carry no opacity at all and these were sitting at 0.6, so the same
-             kind of render looked washed out in one place and not the other.
-             The gradient below still fades the image into its caption.
+          /* A live card runs at full strength, like the vehicle cards two
+             sections down — those carry no opacity at all, and these were
+             sitting at 0.6, so the same kind of render looked washed out in
+             one place and not the other.
 
-             A coming-soon card is held back a little and desaturated rather
-             than dimmed to 0.4: it has a badge saying what it is, and at 0.4
-             the render it is advertising could not be read. */
+             A coming-soon card is grey. Fully desaturated and held back, and
+             it stays that way under the pointer — the colour is the signal,
+             and a card that finds its colour on hover is one that looks
+             available the moment anyone touches it. It lifts slightly so the
+             card still feels alive rather than disabled-and-dead. */
           className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
             disabled
-              ? "opacity-80 grayscale-[0.45] group-hover:opacity-100 group-hover:grayscale-0"
+              ? "opacity-55 grayscale group-hover:opacity-70"
               : "opacity-100"
           }`}
         />
@@ -121,9 +128,14 @@ export function Projects() {
           two words and the badge wrapped. The column count moves up a
           breakpoint the whole way rather than only at the bottom, so no width
           gets a card narrower than its own contents. */}
-      <div className="scene-body max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        {projects.map((project, i) => (
-          <ProjectCard key={project.id} project={project} index={i} />
+      {/* `scene-body--tight`, because this is a grid and not a reading order.
+          On the deck's ordinary cascade the seventh card started 3.95s in and
+          finished past five seconds — a long wait for a section whose whole
+          content is the cards. Cards a row apart still arrive a beat apart;
+          the beat is just shorter. */}
+      <div className="scene-body scene-body--tight max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {projects.map((project) => (
+          <ProjectCard key={project.id} project={project} />
         ))}
       </div>
     </section>

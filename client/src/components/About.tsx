@@ -9,6 +9,7 @@ import { AudienceMap } from "@/components/AudienceMap";
 import { headline, reachStats, reachWindow, topReels } from "@/data/reach";
 import { audienceTotals, audienceWindow } from "@/data/audience";
 import { FoldHeading } from "@/components/FoldHeading";
+import { useScene } from "@/components/SceneDeck";
 
 /**
  * What the studio is, argued with what the work did rather than with adjectives.
@@ -52,6 +53,27 @@ export function About() {
   const aboutMascotRef = useRef<HTMLDivElement>(null);
   const aboutMascotY = useParallax(aboutMascotRef, 70);
 
+  /*
+   * The page's entrance, as props, and nothing at all once the scene has been
+   * read.
+   *
+   * These two headings were the last pair on the page still writing an
+   * `initial`/`whileInView` out by hand. Everything else routes through Reveal
+   * or the deck's own staging, both of which know about `settled` — so on the
+   * way back up this section every element held its position except these two,
+   * which dropped 20 and 30 pixels and faded themselves in again.
+   */
+  const { settled } = useScene();
+  const entrance = (distance: number) =>
+    settled
+      ? {}
+      : {
+          initial: { opacity: 0, y: distance },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true, amount: 0.3 },
+          transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] as const },
+        };
+
   return (
     /* scroll-mt clears the fixed bar. The nav links are anchors, so without it a
        jump lands the section's own top at y=0 and the bar covers the first line
@@ -64,20 +86,14 @@ export function About() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           <div className="lg:col-span-8">
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              {...entrance(20)}
               className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-6 sm:mb-8"
             >
               About Us
             </motion.p>
 
             <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              {...entrance(30)}
               className="font-display text-3xl sm:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05] mb-4 sm:mb-6 max-w-4xl"
             >
               <FoldHeading

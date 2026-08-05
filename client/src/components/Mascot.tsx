@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { MASCOT_POSES, type MascotPose } from "@/data/mascot";
+import { useScene } from "@/components/SceneDeck";
 import { cn } from "@/lib/utils";
 
 interface MascotProps {
@@ -61,6 +62,12 @@ export function Mascot({
   animateIn = true,
   sizing = "width",
 }: MascotProps) {
+  // A pose on a scene already read is simply standing there. Its rise and fade
+  // belong to the first sighting, not to every return. The breathing loop on
+  // the image below is not an entrance and keeps running.
+  const { settled } = useScene();
+  const entering = animateIn && !settled;
+
   const ref = useRef<HTMLDivElement>(null);
   const mvX = useMotionValue(0);
   const mvY = useMotionValue(0);
@@ -117,8 +124,8 @@ export function Mascot({
     >
       <motion.div
         className="w-full h-full"
-        initial={animateIn ? { opacity: 0, y: 24 } : false}
-        animate={animateIn && !inView ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
+        initial={entering ? { opacity: 0, y: 24 } : false}
+        animate={entering && !inView ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
       <motion.img

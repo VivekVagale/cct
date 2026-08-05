@@ -152,6 +152,28 @@
   animation-delay: 3.95s;
 }
 
+/*
+ * A tighter cascade, for a block whose children are a grid rather than a
+ * sequence of paragraphs.
+ *
+ * The ordinary steps assume each child is a thing to be read before the next
+ * one matters. Seven project cards are not that — they are one object with
+ * seven parts, and stepping them 0.18s apart put the last one five seconds
+ * into the scene. Half the step, capped two rows in.
+ */
+.scene-body--tight > * {
+  animation-delay: 3.05s;
+}
+.scene-body--tight > *:nth-child(2) {
+  animation-delay: 3.14s;
+}
+.scene-body--tight > *:nth-child(3) {
+  animation-delay: 3.23s;
+}
+.scene-body--tight > *:nth-child(n + 4) {
+  animation-delay: 3.32s;
+}
+
 @keyframes scene-heading-in {
   from {
     opacity: 0;
