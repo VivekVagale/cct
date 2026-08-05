@@ -221,51 +221,29 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [scroller, setScroller] = useState<HTMLElement | null>(null);
 
-  /**
-   * Where each scene's inner scroll was when the visitor left it.
-   *
-   * A scene is remounted from nothing every time it comes back round, which
-   * means its scroller comes back at the top — and for the two scenes that are
-   * *scrubbed* by that scroll rather than merely scrolled, the top is frame
-   * one. Scrolling back up to the hero played the entire assembly again from
-   * the beginning, which is the one thing a deck that remembers its scenes
-   * must not do.
-   */
-  const scrollMemory = useRef<Map<string, number>>(new Map());
-
   /*
-   * Stable, and it ignores being detached.
+   * Every mounted scene's scroller, by scene id.
    *
-   * Two separate faults lived here. It was an inline arrow, which React treats
-   * as a new ref on every render — detach with null, attach with the element,
-   * every time — and since the callback sets state, each render queued
-   * another, forever.
+   * One element per scene and they all persist, so this is a lookup rather
+   * than the single moving target it used to be — which is what made it
+   * fragile. It was a lone ref, and the *outgoing* scene's unmount handed it a
+   * null most of a second after the incoming scene had set it: from then on
+   * `innerScrollHasRoom` said no to everything, so a section with content
+   * below the fold gave its wheel to the deck and got skipped instead of read,
+   * and `useScene().scroller` went null, which is what the hero's frame
+   * sequence and the process stages measure against.
    *
-   * The null is the worse half, and it survives a `useCallback`. Scenes
-   * overlap: the incoming one mounts and sets this, and then, most of a second
-   * later, the outgoing one finishes its exit and unmounts — handing this
-   * callback a null that wipes the *current* scene's scroller. From that
-   * moment `innerScrollHasRoom` said no to everything, so a section with
-   * content below the fold gave its wheel to the deck and was skipped past
-   * instead of read; and `useScene().scroller` went null, which is what
-   * `useScroll` needs to measure against, so the hero and the process stages
-   * fell back to a window that never moves and froze.
-   *
-   * A detach is therefore ignored outright. A scene leaving has nothing to say
-   * about which element is current — the one that has just arrived does.
+   * Nothing unmounts now, and the current scene's element is looked up rather
+   * than remembered.
    */
-  const attachScroller = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return;
-    scrollerRef.current = el;
-    setScroller(el);
-  }, []);
-
-  // Put a returning scene back where it was left, before the frame is drawn.
-  useLayoutEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    el.scrollTop = scrollMemory.current.get(el.id) ?? 0;
-  }, [index, scroller]);
+  const scrollers = useRef<Map<string, HTMLDivElement>>(new Map());
+  const attachScroller = useCallback(
+    (id: string, el: HTMLDivElement | null) => {
+      if (el) scrollers.current.set(id, el);
+      else scrollers.current.delete(id);
+    },
+    [],
+  );
 
   const count = scenes.length;
 
@@ -279,7 +257,74 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
    * partway through its own entrance and snap to the end of it.
    */
   const seen = useRef<Set<string>>(new Set());
-  const [settled, setSettled] = useState(false);
+
+  /**
+   * Every scene that has been reached, and is therefore still on the page.
+   *
+   * This is the difference between a deck and a slideshow that rebuilds itself.
+   * A scene used to be mounted when it became current and thrown away when it
+   * stopped being current, which meant going back a chapter reconstructed it
+   * from nothing: the DOM again, the WebGL context and its texture atlas again,
+   * the frame sequence's canvas again, every entrance from its first frame.
+   * Marking the animations as already-played only hid the cheapest part of
+   * that.
+   *
+   * A scene is built once, the first time it is reached, and stays built. Going
+   * back is a transition between two things that both already exist. Nothing is
+   * re-created, no timeline restarts, and the scene the visitor returns to is
+   * the scene they left — same scroll position, same canvas, same everything.
+   *
+   * Scenes ahead of the furthest point reached are *not* mounted: the deck
+   * would otherwise open by building the whole site at once, which is the cost
+   * this ordering exists to spread out.
+   */
+  const [mounted, setMounted] = useState<string[]>([scenes[0]?.id]);
+
+  /**
+   * Scenes that have finished leaving and are now stood down.
+   *
+   * A mounted scene that is not current still costs something — it is painted,
+   * it can be tabbed into, and anything inside it driving a canvas thinks it is
+   * on screen. Parking sets `content-visibility: hidden`, which skips its
+   * rendering entirely while keeping its state, and is what the sphere's and
+   * the warped type's intersection observers read to stop drawing.
+   *
+   * It cannot happen the moment a scene stops being current: it is still
+   * visible then, fading out. The exit animation says when.
+   */
+  const [parked, setParked] = useState<string[]>([]);
+  const unpark = useCallback(
+    (id: string) => setParked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p)),
+    [],
+  );
+
+  /*
+   * Stand every scene but the current one down, once the transition is over.
+   *
+   * On a timer rather than on the exit animation's completion callback: that
+   * callback does not fire when an animation is interrupted, and interrupting
+   * one is exactly what turning back mid-transition does. A scene that missed
+   * its callback would stay painted and, worse, would keep its canvases
+   * believing they were on screen — the sphere drawing at full rate behind a
+   * scene nobody is looking at.
+   */
+  useEffect(() => {
+    const currentId = scenes[index]?.id;
+    if (!currentId) return;
+    const timer = window.setTimeout(
+      () => setParked(mounted.filter((id) => id !== currentId)),
+      SCENE.transition * 1000 + 120,
+    );
+    return () => window.clearTimeout(timer);
+  }, [index, mounted, scenes]);
+
+  // Point the wheel logic and `useScene().scroller` at whichever scene is
+  // current. A layout effect, so it is true before the frame is painted.
+  useLayoutEffect(() => {
+    const el = scrollers.current.get(scenes[index]?.id) ?? null;
+    scrollerRef.current = el;
+    setScroller(el);
+  }, [index, scenes, mounted]);
 
   /**
    * How many scene changes have happened. Part of the key each scene is
@@ -374,10 +419,6 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
   /** Move to `target`, from any input. The one place scene state changes. */
   const jump = useCallback(
     (target: number, delta: number, dwell: number) => {
-      // Remember how far into this scene the visitor got, before it goes.
-      const leaving = scrollerRef.current;
-      if (leaving?.id) scrollMemory.current.set(leaving.id, leaving.scrollTop);
-
       lockedUntil.current = performance.now() + dwell * 1000;
       wheelAccumulator.current = 0;
       // Any move at all discharges a held one. A visitor who has just clicked
@@ -390,11 +431,14 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       }
       release();
       setDirection(delta);
-      setSettled(seen.current.has(scenes[target].id));
+      // Build it if this is the first time it has been reached; wake it if it
+      // is one we have already been through.
+      const id = scenes[target].id;
+      setMounted((m) => (m.includes(id) ? m : [...m, id]));
+      unpark(id);
       setIndex(target);
-      setVisit((n) => n + 1);
     },
-    [scenes, release],
+    [scenes, release, unpark],
   );
 
   /*
@@ -664,8 +708,6 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
     );
   }
 
-  const current = scenes[index];
-
   return (
     <div
       className="scene-deck"
@@ -678,54 +720,74 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
       aria-roledescription="carousel"
       aria-label="Cold Chain Theory, in scenes"
     >
-      <AnimatePresence custom={direction} initial={false} mode="sync">
-        <motion.div
-          className={`scene${settled ? " scene--settled" : ""}`}
-          custom={direction}
-          // Not the id alone — see `visit`.
-          key={`${current.id}#${visit}`}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          variants={SCENE_VARIANTS}
-          aria-roledescription="scene"
-          aria-label={`Scene ${index + 1} of ${count}`}
-        >
-          {/* The give lives on its own element inside the transition's, because
-              both want a transform and the outer one is driven by variants —
-              a style transform on the same node would be overwritten by the
-              animation the moment a scene changed. Two nodes, two timelines,
-              neither aware of the other. */}
+      {scenes.map((scene, i) => {
+        if (!mounted.includes(scene.id)) return null;
+        const isCurrent = i === index;
+        // A scene is stood down once it has finished leaving. Until then it is
+        // still on screen, fading out, and must stay drawn.
+        const isParked = !isCurrent && parked.includes(scene.id);
+
+        return (
           <motion.div
-            className="scene-push"
-            style={{ y: pushY, scale: pushScale, filter: pushDim }}
+            key={scene.id}
+            className="scene"
+            custom={direction}
+            variants={SCENE_VARIANTS}
+            // `enter` runs on the mount that first shows the scene and never
+            // again — a scene mounts once and stays.
+            initial="enter"
+            animate={isCurrent ? "center" : "exit"}
+            style={{
+              /* Parked scenes are not painted and cannot be reached: their
+                 contents are skipped by the renderer, which is also what tells
+                 the sphere's and the warped type's observers to stop drawing.
+                 State — including scroll position, a canvas's pixels and every
+                 timeline mid-flight — is kept. `visibility` is the fallback
+                 where content-visibility is not understood. */
+              contentVisibility: isParked ? "hidden" : "visible",
+              visibility: isParked ? "hidden" : "visible",
+              pointerEvents: isCurrent ? "auto" : "none",
+            }}
+            inert={!isCurrent}
+            aria-hidden={!isCurrent}
+            aria-roledescription="scene"
+            aria-label={`Scene ${i + 1} of ${count}`}
           >
-            {/* The scroller is handed down as state, not as the ref itself: a
-                ref is populated after the first render, and a scene reading it
-                during that render would measure against the window and stay
-                frozen there. Setting state on mount costs one extra render and
-                makes the element available on the one that matters. */}
-            <SceneContext.Provider
-              value={{
-                active: true,
-                index,
-                phase: settled ? "settled" : "playing",
-                settled,
-                push: pushSpring,
-                scroller,
-              }}
+            {/* The give lives on its own element inside the transition's,
+                because both want a transform and the outer one is driven by
+                variants — a style transform on the same node would be
+                overwritten by the animation the moment a scene changed. Two
+                nodes, two timelines, neither aware of the other. */}
+            <motion.div
+              className="scene-push"
+              style={
+                isCurrent
+                  ? { y: pushY, scale: pushScale, filter: pushDim }
+                  : undefined
+              }
             >
-              <div
-                className={current.scrolls ? "scene-scroller" : "scene-fixed"}
-                ref={attachScroller}
-                id={current.id}
+              <SceneContext.Provider
+                value={{
+                  active: isCurrent,
+                  index: i,
+                  phase: isCurrent ? "playing" : "settled",
+                  settled: false,
+                  push: pushSpring,
+                  scroller: isCurrent ? scroller : null,
+                }}
               >
-                {current.render()}
-              </div>
-            </SceneContext.Provider>
+                <div
+                  className={scene.scrolls ? "scene-scroller" : "scene-fixed"}
+                  ref={(el) => attachScroller(scene.id, el)}
+                  id={scene.id}
+                >
+                  {scene.render()}
+                </div>
+              </SceneContext.Provider>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </AnimatePresence>
+        );
+      })}
     </div>
   );
 }
@@ -748,21 +810,32 @@ const SCENE_VARIANTS = {
     scale: direction > 0 ? 0.94 : 1.06,
     filter: "blur(14px)",
   }),
-  center: {
+  center: (direction: number) => ({
     opacity: 1,
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: SCENE.transition,
+      /*
+       * Going forward is the story being told and takes the full push. Going
+       * back is navigation, and navigation should not be a production number:
+       * the scene being returned to is already built and already finished, so
+       * the only honest thing left to do is get out of its way. Three quarters
+       * of the time, and no blur to resolve — a returning scene that has to
+       * come into focus is pretending to be assembling itself, which is the
+       * exact impression this deck now exists to avoid.
+       */
+      duration: direction > 0 ? SCENE.transition : SCENE.transition * 0.55,
       ease: [0.16, 1, 0.3, 1] as const,
+      filter: { duration: direction > 0 ? SCENE.transition : 0.18 },
     },
-  },
+  }),
   exit: (direction: number) => ({
     opacity: 0,
     scale: direction > 0 ? 1.06 : 0.94,
     filter: "blur(14px)",
     transition: {
-      duration: SCENE.transition * 0.8,
+      duration:
+        direction > 0 ? SCENE.transition * 0.8 : SCENE.transition * 0.45,
       ease: [0.16, 1, 0.3, 1] as const,
     },
   }),
