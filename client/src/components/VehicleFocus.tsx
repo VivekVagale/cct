@@ -107,7 +107,11 @@ export function VehicleFocus({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute inset-0 bg-[#05070A]/80 backdrop-blur-md"
+        /* fixed, not absolute. The overlay around it scrolls when the card and
+           its colours are taller than the viewport, and an absolute scrim is
+           positioned against that scroll container — so it slid up with the
+           content and left the bottom of the page sharp behind the colours. */
+        className="fixed inset-0 bg-[#05070A]/80 backdrop-blur-md"
       />
 
       <div
