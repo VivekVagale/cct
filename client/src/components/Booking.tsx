@@ -3,7 +3,6 @@ import { Mascot } from "@/components/Mascot";
 import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
-import Cubes from "@/components/ui/Cubes";
 import { SparkleButton } from "@/components/SparkleButton";
 import { ThankYouCard } from "@/components/ThankYouCard";
 import { vehicles } from "@/data/vehicles";
@@ -157,26 +156,6 @@ export function Booking() {
             Tell us the story you want it to tell. We'll follow up to scope the
             shot list together.
           </p>
-
-          {/* Cubes.css sizes .default-animation at 50% of its parent, which
-              suits the full-width demo it ships with. This column is already
-              narrow, so halving it again leaves a 211px grid — the width is
-              overridden here rather than in the component, and the height comes
-              from the grid's own square aspect instead of a fixed 600px that
-              would leave most of the box empty. */}
-          <div className="hidden lg:block relative mt-12 cubes-fill">
-            <Cubes
-              gridSize={8}
-              maxAngle={45}
-              radius={3}
-              borderStyle="2px dashed #B497CF"
-              faceColor="#1a1a2e"
-              rippleColor="#ff6b6b"
-              rippleSpeed={1.5}
-              autoAnimate
-              rippleOnClick
-            />
-          </div>
         </div>
 
         <form

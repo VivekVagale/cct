@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { Mascot } from "@/components/Mascot";
 import { AnimatedText } from "@/components/AnimatedText";
 import { CountUp } from "@/components/CountUp";
-import { ViewsChart } from "@/components/ViewsChart";
+import Cubes from "@/components/ui/Cubes";
+import { ReelsBarChart } from "@/components/ReelsBarChart";
 import { headline, reachStats, reachWindow, topReels } from "@/data/reach";
 
 /**
@@ -86,7 +87,7 @@ export function About() {
 
         <div className="mt-16 sm:mt-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-7">
-            <ViewsChart reels={topReels} />
+            <ReelsBarChart reels={topReels} />
           </div>
 
           {/* The chart's table view. Same numbers, reachable without a pointer. */}
@@ -123,6 +124,31 @@ export function About() {
                 What theirs did is on the chart.
               </a>
             </p>
+
+            {/* Decoration, moved here from the booking form's copy column.
+                It says nothing about the numbers above it, so it is hidden
+                from assistive tech and takes no clicks — the ripple-on-click
+                it used to carry invited an interaction that leads nowhere.
+
+                Smaller than it was: six cubes rather than eight, at half
+                width, so it reads as a flourish at the foot of the column
+                instead of competing with the chart beside it. Desktop only,
+                where there is room to spare. */}
+            <div
+              aria-hidden
+              className="hidden lg:block relative mt-12 w-1/2 pointer-events-none cubes-fill"
+            >
+              <Cubes
+                gridSize={6}
+                maxAngle={45}
+                radius={3}
+                borderStyle="2px dashed #B497CF"
+                faceColor="#1a1a2e"
+                rippleColor="#ff6b6b"
+                rippleSpeed={1.5}
+                autoAnimate
+              />
+            </div>
           </div>
         </div>
       </div>

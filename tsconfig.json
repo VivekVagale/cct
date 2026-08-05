@@ -6,6 +6,10 @@
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
     "module": "ESNext",
+    // Absent, this defaults to ES5, which makes tsc reject iterating a Map even
+    // though `lib` and `module` are already esnext and vite emits modern output
+    // regardless. Nothing about the build changes — only what tsc will accept.
+    "target": "ESNext",
     "strict": true,
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "preserve",

@@ -213,6 +213,11 @@ export default defineConfig({
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
+    // The chart's @visx packages are CJS, so vite pre-bundles them into a dep
+    // chunk that carries its own React import. Without this the chunk resolves
+    // a second copy whose internals are null, and every visx hook throws
+    // "Cannot read properties of null (reading 'useRef')" on first render.
+    dedupe: ["react", "react-dom"],
   },
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),

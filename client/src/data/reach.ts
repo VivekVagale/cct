@@ -33,6 +33,8 @@ export interface ReelStat {
   /** What Instagram reported, and what the page shows. */
   viewsLabel: string;
   likes: string;
+  /** Column geometry only, same as `views`. Never rendered — `likes` is. */
+  likesValue: number;
   shares: string;
   /** Set only where the reel's caption credited a commissioning client. */
   client?: string;
@@ -75,6 +77,7 @@ export const topReels: ReelStat[] = [
     views: 1_600_000,
     viewsLabel: "1.6M",
     likes: "214K",
+    likesValue: 214_000,
     shares: "26K",
   },
   {
@@ -84,6 +87,7 @@ export const topReels: ReelStat[] = [
     views: 1_600_000,
     viewsLabel: "1.6M",
     likes: "147K",
+    likesValue: 147_000,
     shares: "23K",
     client: "@ruthvik_mayya",
   },
@@ -94,6 +98,7 @@ export const topReels: ReelStat[] = [
     views: 2_000_000,
     viewsLabel: "2M",
     likes: "303K",
+    likesValue: 303_000,
     shares: "35K",
     client: "@sravan.k.k",
   },
@@ -104,6 +109,7 @@ export const topReels: ReelStat[] = [
     views: 1_000_000,
     viewsLabel: "1M",
     likes: "137K",
+    likesValue: 137_000,
     shares: "16K",
     client: "@jainand.kk",
   },
