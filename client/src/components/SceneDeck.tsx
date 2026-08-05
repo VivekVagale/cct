@@ -280,11 +280,27 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
 
   useEffect(() => release, [release]);
 
+  /*
+   * One held instruction, for a push that arrived while the deck was busy.
+   * See `go`, which is the only place it is set.
+   */
+  const queued = useRef(0);
+  const queuedTimer = useRef<number | null>(null);
+  const goRef = useRef<(delta: number) => boolean>(() => false);
+
   /** Move to `target`, from any input. The one place scene state changes. */
   const jump = useCallback(
     (target: number, delta: number, dwell: number) => {
       lockedUntil.current = performance.now() + dwell * 1000;
       wheelAccumulator.current = 0;
+      // Any move at all discharges a held one. A visitor who has just clicked
+      // a nav link is not also asking for the scroll they abandoned to arrive
+      // on top of it.
+      queued.current = 0;
+      if (queuedTimer.current !== null) {
+        window.clearTimeout(queuedTimer.current);
+        queuedTimer.current = null;
+      }
       release();
       setDirection(delta);
       setSettled(seen.current.has(scenes[target].id));
@@ -293,18 +309,67 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
     [scenes, release],
   );
 
+  /*
+   * One held instruction, for a push that arrived while the deck was busy.
+   *
+   * A scene is locked for its dwell, and a fast scroll spends most of its life
+   * inside one of those locks — so every notch of it was being answered with
+   * nothing at all, and by the time the lock lifted the gesture was over and
+   * its charge had already relaxed away. Scrolling hard did less than
+   * scrolling gently, which is the wrong way round and reads as a dead page.
+   *
+   * A push that lands during a lock is remembered and played the moment the
+   * lock ends. Exactly one, never a queue: five notches into a locked scene is
+   * a visitor asking to move on, not asking to travel five scenes, and a deck
+   * that spends the next fifteen seconds working through a backlog has taken
+   * the page away from them.
+   */
   const go = useCallback(
     (delta: number) => {
       const now = performance.now();
-      if (now < lockedUntil.current) return false;
+
+      if (now < lockedUntil.current) {
+        const next = index + delta;
+        // Nothing to hold at either end of the deck — the push has nowhere to
+        // go when the lock lifts either.
+        if (next < 0 || next >= count) return false;
+
+        queued.current = Math.sign(delta);
+        if (queuedTimer.current !== null) {
+          window.clearTimeout(queuedTimer.current);
+        }
+        queuedTimer.current = window.setTimeout(
+          () => {
+            queuedTimer.current = null;
+            const held = queued.current;
+            queued.current = 0;
+            if (held !== 0) goRef.current(held);
+          },
+          // A few ms past the lock, not exactly on it: `performance.now` and
+          // the timer are not the same clock, and landing a millisecond early
+          // means the call is refused and the instruction is lost.
+          Math.max(0, lockedUntil.current - now) + 16,
+        );
+        return false;
+      }
 
       const next = index + delta;
       if (next < 0 || next >= count) return false;
 
+      queued.current = 0;
       jump(next, delta, scenes[next].dwell ?? SCENE.dwell);
       return true;
     },
     [index, count, jump, scenes],
+  );
+
+  goRef.current = go;
+
+  useEffect(
+    () => () => {
+      if (queuedTimer.current !== null) window.clearTimeout(queuedTimer.current);
+    },
+    [],
   );
 
   /*
@@ -333,9 +398,24 @@ export function SceneDeck({ scenes }: { scenes: SceneDefinition[] }) {
 
       e.preventDefault();
 
-      // Direction changes reset the run-up, or a flick down followed by a
-      // flick up would arrive already half-charged.
-      if (Math.sign(delta) !== Math.sign(wheelAccumulator.current)) {
+      /*
+       * A real direction change resets the run-up, or a flick down followed by
+       * a flick up would arrive already half-charged.
+       *
+       * "Real" is the part that matters. A fast scroll is not a clean run of
+       * same-signed deltas — a trackpad's inertia and a free-spinning wheel
+       * both emit the odd small opposite-signed event in the middle of one, and
+       * treating each of those as a change of mind zeroed the accumulator over
+       * and over. The harder the gesture, the more of them, so the deck was at
+       * its most likely to ignore a scroll exactly when the scroll was most
+       * emphatic. Anything under this is noise inside a gesture, not a reversal
+       * of it.
+       */
+      const REVERSAL_FLOOR = 12;
+      if (
+        Math.sign(delta) !== Math.sign(wheelAccumulator.current) &&
+        Math.abs(delta) > REVERSAL_FLOOR
+      ) {
         wheelAccumulator.current = 0;
       }
       wheelAccumulator.current += delta;
