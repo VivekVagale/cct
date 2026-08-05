@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import type { Experience } from "@/data/content";
+import type { Project } from "@/data/content";
 import { useTilt } from "@/hooks/useTilt";
 
 /**
- * The booking form's experience picker, as a card rather than a text chip.
+ * The booking form's project picker, as a card rather than a text chip.
  *
- * Visually this is the CGI Experiences card — 4:3 image, transparent caption —
+ * Visually this is the CGI Projects card — 4:3 image, transparent caption —
  * with the vehicle picker's selected treatment on top, because here it has to
  * read as a chosen option in a form rather than as a link out to one.
  *
@@ -13,19 +13,19 @@ import { useTilt } from "@/hooks/useTilt";
  * option that ignores the pointer entirely reads as broken rather than as
  * unavailable; the badge is what carries the state.
  */
-export function ExperienceOptionCard({
-  exp,
+export function ProjectOptionCard({
+  project,
   selected,
   onSelect,
 }: {
-  exp: Experience;
+  project: Project;
   selected: boolean;
   onSelect: () => void;
 }) {
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
     useTilt<HTMLButtonElement>();
 
-  const disabled = Boolean(exp.comingSoon);
+  const disabled = Boolean(project.comingSoon);
 
   return (
     <motion.button
@@ -56,7 +56,7 @@ export function ExperienceOptionCard({
 
       <div className="relative aspect-[4/3] overflow-hidden">
         <motion.img
-          src={exp.image}
+          src={project.image}
           alt=""
           className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
             disabled
@@ -76,10 +76,10 @@ export function ExperienceOptionCard({
             disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
           }`}
         >
-          {exp.title}
+          {project.title}
         </h4>
         <p className="text-xs text-[#B8C4D6] leading-relaxed normal-case tracking-normal">
-          {exp.description}
+          {project.description}
         </p>
         {disabled && (
           <span className="inline-block mt-3 text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]/70 border border-white/15 px-2.5 py-1 transition-colors duration-300 group-hover:border-white/30 group-hover:text-[#B8C4D6]">
@@ -90,7 +90,7 @@ export function ExperienceOptionCard({
 
       {selected && (
         <motion.div
-          layoutId="experience-selected-indicator"
+          layoutId="project-selected-indicator"
           className="absolute top-3 right-3 z-20 w-2 h-2 rounded-full bg-white"
         />
       )}

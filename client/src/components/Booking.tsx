@@ -2,18 +2,18 @@ import { useState, type FormEvent } from "react";
 import { Mascot } from "@/components/Mascot";
 import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
-import { ExperienceOptionCard } from "@/components/ExperienceOptionCard";
+import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import Cubes from "@/components/ui/Cubes";
 import { SparkleButton } from "@/components/SparkleButton";
 import { vehicles } from "@/data/vehicles";
-import { experiences } from "@/data/content";
+import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 export function Booking() {
   const [status, setStatus] = useState<Status>("idle");
-  const [experience, setExperience] = useState(experiences[0].title);
+  const [selectedProject, setSelectedProject] = useState(projects[0].title);
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [colorId, setColorId] = useState<string | null>(null);
 
@@ -38,7 +38,7 @@ export function Booking() {
       fullName: String(data.get("fullName") || ""),
       email: String(data.get("email") || ""),
       instagram: String(data.get("instagram") || ""),
-      projectType: experience,
+      projectType: selectedProject,
       vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
     }).catch(() => false);
@@ -181,22 +181,22 @@ export function Booking() {
               and this is a group of them. */}
           <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
             <legend className="text-xs tracking-[0.14em] uppercase text-[#B8C4D6] mb-3">
-              Experience
+              Project
             </legend>
-            {/* Same reasoning as the CGI Experiences grid: these are that card
+            {/* Same reasoning as the CGI Projects grid: these are that card
                 with a selected state, so they need the same column width to
                 hold the same title and description. */}
             <div
               role="radiogroup"
-              aria-label="Experience"
+              aria-label="Project"
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
             >
-              {experiences.map((exp) => (
-                <ExperienceOptionCard
-                  key={exp.id}
-                  exp={exp}
-                  selected={experience === exp.title}
-                  onSelect={() => setExperience(exp.title)}
+              {projects.map((project) => (
+                <ProjectOptionCard
+                  key={project.id}
+                  project={project}
+                  selected={selectedProject === project.title}
+                  onSelect={() => setSelectedProject(project.title)}
                 />
               ))}
             </div>

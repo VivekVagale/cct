@@ -1,4 +1,4 @@
-export interface Project {
+export interface ShowcaseItem {
   id: string;
   title: string;
   vehicle: string;
@@ -8,7 +8,7 @@ export interface Project {
   image: string;
 }
 
-export const projects: Project[] = [
+export const showcaseItems: ShowcaseItem[] = [
   {
     id: "midnight-run",
     title: "Midnight Run",

@@ -68,7 +68,7 @@ export function VehicleCard({
         <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
       </div>
 
-      {/* These stay two-up on a phone where the experience cards drop to one:
+      {/* These stay two-up on a phone where the project cards drop to one:
           the caption is a marque and a model name, not a sentence, so it still
           reads in a ~156px column. It does need the smaller step of the scale
           to do it — at text-xl in that width the longer names broke to three

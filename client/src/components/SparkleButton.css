@@ -147,7 +147,7 @@
 @supports(selector(:has(:is(+ *)))) {
   /* Scoped to .sparkle-button. As supplied this reads `body:has(button:is(...))`
      — any button anywhere on the page. This page has many: hovering a vehicle
-     card or an experience card would set --active on <body>, which inherits
+     card or a project card would set --active on <body>, which inherits
      into .particle-pen (it reads var(--active, 0) and declares none of its own)
      and fire this button's particles from across the page. */
   body:has(.sparkle-button:is(:hover, :focus-visible)) {

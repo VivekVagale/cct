@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import InfiniteMenu, { type MenuItem } from "@/components/ui/InfiniteMenu";
-import { projects } from "@/data/projects";
-import { experiences } from "@/data/content";
+import { showcaseItems } from "@/data/showcase";
+import { projects } from "@/data/content";
 
 /**
  * Replaces the scrolling image marquee with a draggable sphere of work.
  *
  * The marquee was a passive strip you could only watch go past; this is
  * something the visitor turns, which suits a studio whose product is motion.
- * Items are the studio's own projects and experiences — not the component's
+ * Items are the studio's own showcase work and projects — not the component's
  * placeholder imagery — and each links to the section it belongs to.
  */
 /**
@@ -64,13 +64,13 @@ export function WorkShowcase() {
 
   const items = useMemo<MenuItem[]>(
     () => [
-      ...projects.map((p) => ({
+      ...showcaseItems.map((p) => ({
         image: p.image,
-        link: "#experiences",
+        link: "#projects",
         title: p.title,
         description: `${p.vehicle} — ${p.category}`,
       })),
-      ...experiences
+      ...projects
         .filter((e) => !e.comingSoon)
         .map((e) => ({
           image: e.image,

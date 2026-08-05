@@ -5,7 +5,7 @@ import { GlowButton } from "@/components/GlowButton";
 const LINKS = [
   { label: "About", href: "#about" },
   { label: "Process", href: "#process" },
-  { label: "Experiences", href: "#experiences" },
+  { label: "Projects", href: "#projects" },
   { label: "Book", href: "#booking" },
 ];
 

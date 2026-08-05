@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import { experiences, type Experience } from "@/data/content";
+import { projects, type Project } from "@/data/content";
 import { useTilt } from "@/hooks/useTilt";
 
-function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
+function ProjectCard({ project, index }: { project: Project; index: number }) {
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
     useTilt<HTMLAnchorElement>();
 
-  const disabled = Boolean(exp.comingSoon);
+  const disabled = Boolean(project.comingSoon);
 
   return (
     <motion.a
@@ -37,8 +37,8 @@ function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
 
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
-          src={exp.image}
-          alt={exp.title}
+          src={project.image}
+          alt={project.title}
           className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
             disabled
               ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
@@ -58,11 +58,11 @@ function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
             disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
           }`}
         >
-          {exp.title}
+          {project.title}
         </h3>
 
         <p className="text-xs text-[#B8C4D6] leading-relaxed mb-3">
-          {exp.description}
+          {project.description}
         </p>
 
         {disabled ? (
@@ -79,10 +79,10 @@ function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
   );
 }
 
-export function CGIExperiences() {
+export function Projects() {
   return (
     <section
-      id="experiences"
+      id="projects"
       className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
     >
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-24">
@@ -90,7 +90,7 @@ export function CGIExperiences() {
           What We Build
         </p>
         <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
-          CGI Experiences
+          CGI Projects
         </h2>
       </div>
 
@@ -106,8 +106,8 @@ export function CGIExperiences() {
           breakpoint the whole way rather than only at the bottom, so no width
           gets a card narrower than its own contents. */}
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        {experiences.map((exp, i) => (
-          <ExperienceCard key={exp.id} exp={exp} index={i} />
+        {projects.map((project, i) => (
+          <ProjectCard key={project.id} project={project} index={i} />
         ))}
       </div>
     </section>

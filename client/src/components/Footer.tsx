@@ -18,7 +18,7 @@ export function Footer() {
           {/* Wraps rather than overflowing: four uppercase links with this much
               tracking are wider than a 375px viewport's content box. */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            <a href="#experiences" className="hover:text-[#F5F7FA] transition-colors duration-300">
+            <a href="#projects" className="hover:text-[#F5F7FA] transition-colors duration-300">
               Work
             </a>
             <a href="#about" className="hover:text-[#F5F7FA] transition-colors duration-300">

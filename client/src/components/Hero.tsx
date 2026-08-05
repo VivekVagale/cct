@@ -345,7 +345,7 @@ export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) 
             </GlowButton>
           </Magnet>
           <a
-            href="#experiences"
+            href="#projects"
             className="text-xs tracking-[0.14em] uppercase text-[#F5F7FA] border-b border-white/30 pb-1 hover:border-white transition-colors duration-300"
           >
             See What We Build

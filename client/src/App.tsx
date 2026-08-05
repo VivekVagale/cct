@@ -6,7 +6,7 @@ import { Hero } from "./components/Hero";
 import { WorkShowcase } from "./components/WorkShowcase";
 import { About } from "./components/About";
 import { CreativeProcess } from "./components/CreativeProcess";
-import { CGIExperiences } from "./components/CGIExperiences";
+import { Projects } from "./components/Projects";
 import { Booking } from "./components/Booking";
 import { Testimonials } from "./components/Testimonials";
 import { FAQ } from "./components/FAQ";
@@ -56,7 +56,7 @@ function App() {
 
               <About />
               <CreativeProcess />
-              <CGIExperiences />
+              <Projects />
 
               <CinematicLine text="READY TO TURN YOUR MACHINE INTO CINEMA" />
 

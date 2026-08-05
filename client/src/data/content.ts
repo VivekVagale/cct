@@ -46,7 +46,7 @@ export const processStages: ProcessStage[] = [
   },
 ];
 
-export interface Experience {
+export interface Project {
   id: string;
   title: string;
   description: string;
@@ -54,24 +54,24 @@ export interface Experience {
   comingSoon?: boolean;
 }
 
-export const experiences: Experience[] = [
+export const projects: Project[] = [
   {
     id: "bike-free-fall",
-    title: "Bike Free Fall",
+    title: "Project Free Fall",
     description: "Suspended motion, gravity rendered with intent.",
     image:
       "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "jet-escort",
-    title: "Jet Escort",
+    title: "Project Jet Mist",
     description: "Formation flight alongside your machine, to scale.",
     image:
       "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "water-impact",
-    title: "Water Impact",
+    title: "Project Water Impact",
     description: "The instant of contact, held a beat past real time.",
     image:
       "https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=1200&auto=format&fit=crop",
@@ -79,7 +79,7 @@ export const experiences: Experience[] = [
   },
   {
     id: "space-ride",
-    title: "Space Ride",
+    title: "Project Space Ride",
     description: "Zero gravity, full detail — a machine off-world.",
     image:
       "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
@@ -87,7 +87,7 @@ export const experiences: Experience[] = [
   },
   {
     id: "firestorm",
-    title: "Firestorm",
+    title: "Project Firestorm",
     description: "Volumetric heat and light, simulated frame by frame.",
     image:
       "https://images.unsplash.com/photo-1495954380655-01ec3939a26f?q=80&w=1200&auto=format&fit=crop",
@@ -95,10 +95,18 @@ export const experiences: Experience[] = [
   },
   {
     id: "drone-chase",
-    title: "Drone Chase",
+    title: "Project Drone Chase",
     description: "A pursuit shot with no crew, no rig, no limit.",
     image:
       "https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=1200&auto=format&fit=crop",
+    comingSoon: true,
+  },
+  {
+    id: "re-9",
+    title: "Project RE 9",
+    description: "Nine frames of a single machine, built end to end.",
+    image:
+      "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?q=80&w=1200&auto=format&fit=crop",
     comingSoon: true,
   },
   {
