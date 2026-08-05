@@ -118,7 +118,12 @@ export function Booking() {
           first field. It reads at the same width as What We Build, on the same
           gutter as every other band here, so the left edge line runs unbroken
           down the section even though the layout underneath it changes. */}
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-16 flex items-end justify-between gap-8">
+      {/* items-start, not items-end. Bottom-aligned, the mascot's own height
+          carried it up past the heading and out of the band it belongs to —
+          it read as floating above the section rather than standing beside the
+          step. Aligned at the top it starts level with the Step 01 line and
+          hangs down the side of the copy instead. */}
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-16 flex items-start justify-between gap-8">
         <div>
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
             Step 01 — Configure
@@ -144,7 +149,16 @@ export function Booking() {
         onSelectColor={setColorId}
       />
 
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mt-20 sm:mt-32 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+      {/* The form is the whole band, not the right-hand column of it.
+          Step 04 is the section's last word and has to centre on the page; as
+          a child of the eight-column half it could only ever centre on that
+          half, which put it a sixth of the page right of where it looked like
+          it should be. The two-column split now lives inside the form and
+          stops above the button. */}
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-[1600px] mx-auto px-6 sm:px-10 mt-20 sm:mt-32 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12"
+      >
         <div className="lg:col-span-4">
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
             Start a Project
@@ -158,10 +172,7 @@ export function Booking() {
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="lg:col-span-8 flex flex-col gap-8 sm:gap-10"
-        >
+        <div className="lg:col-span-8 flex flex-col gap-8 sm:gap-10">
           {/* One field per row rather than two across.
               A single column gives every field the same left edge and one
               reading order, which is what makes a form scannable — and the
@@ -246,24 +257,26 @@ export function Booking() {
             </fieldset>
           </div>
 
-          {/* Centred on the form column, which is where the eye already is
-              after a column of centred cards — left-aligned it sat under the
-              first card with three cards' width of empty space beside it. */}
-          <div className="flex flex-col items-center gap-4">
-            <Step number="04" title="Send it." />
-            <Magnet padding={40} strength={5}>
-              <SparkleButton type="submit" disabled={status === "submitting"}>
-                {status === "submitting" ? "Sending..." : "Submit Request"}
-              </SparkleButton>
-            </Magnet>
-            {status === "error" && (
-              <span className="text-xs text-[#FF4444]">
-                Something went wrong — please email us directly.
-              </span>
-            )}
-          </div>
-        </form>
-      </div>
+        </div>
+
+        {/* text-center as well as items-center: items-center centres the
+            block, and the block is only as wide as its widest line, so "Step
+            04" was still setting flush to the left edge of "Send it." above a
+            button that was centred on something else again. */}
+        <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-4 text-center">
+          <Step number="04" title="Send it." />
+          <Magnet padding={40} strength={5}>
+            <SparkleButton type="submit" disabled={status === "submitting"}>
+              {status === "submitting" ? "Sending..." : "Submit Request"}
+            </SparkleButton>
+          </Magnet>
+          {status === "error" && (
+            <span className="text-xs text-[#FF4444]">
+              Something went wrong — please email us directly.
+            </span>
+          )}
+        </div>
+      </form>
     </section>
   );
 }

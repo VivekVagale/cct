@@ -84,7 +84,11 @@ export function AudienceMap() {
             height={8}
             width={8}
             orientation={["diagonal"]}
-            stroke="var(--chart-5)"
+            /* Off the ramp on purpose. The hatch means "no viewers", and any
+               step of the scale would give the empty countries a reading on a
+               scale they are not on — --chart-5 in particular is now the fill
+               India carries. Same violet family, well below its darkest step. */
+            stroke="#2A1B4A"
             strokeWidth={1}
           />
         }

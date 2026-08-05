@@ -47,17 +47,21 @@ export function ReelsBarChart({ reels }: { reels: ReelStat[] }) {
       aspectRatio="16 / 9"
     >
       <Grid horizontal />
+      {/* Two ends of the violet ramp rather than two neighbours on it: the
+          likes bar sits at about a seventh of the views bar, and adjacent
+          steps would leave the short one reading as a shadow of the tall one
+          instead of a series in its own right. */}
       <Bar
         dataKey="views"
         lineCap="round"
-        fill="var(--chart-1)"
+        fill="var(--chart-4)"
         fadedOpacity={0.3}
         groupGap={4}
       />
       <Bar
         dataKey="likes"
         lineCap="round"
-        fill="var(--chart-2)"
+        fill="var(--chart-1)"
         fadedOpacity={0.3}
         groupGap={4}
       />

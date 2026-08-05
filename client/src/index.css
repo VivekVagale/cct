@@ -79,11 +79,16 @@
   --primary-foreground: #05070A;
   --sidebar-primary: #FFFFFF;
   --sidebar-primary-foreground: #05070A;
-  --chart-1: #FFFFFF;
-  --chart-2: #5FC8FF;
-  --chart-3: #3DB8FF;
-  --chart-4: #1BA8FF;
-  --chart-5: #0098FF;
+  /* The logo's violet, run out into a five-step ramp.
+     The blue this replaces was the only family on the page that appeared
+     nowhere else in the brand — the badge, the sparkle button and the mascot's
+     bloom all sit around hsl(261-267), and the charts now sit with them.
+     Ordered palest to deepest; #7A44E0 at the far end is the logo body itself. */
+  --chart-1: #F3E8FF;
+  --chart-2: #DBC2FB;
+  --chart-3: #BE99F7;
+  --chart-4: #9F6EF2;
+  --chart-5: #7A44E0;
   --radius: 0.65rem;
   --background: #05070A;
   --foreground: #F5F7FA;
@@ -153,11 +158,11 @@
   --border: #1A1F2E;
   --input: #0D1117;
   --ring: #FFFFFF;
-  --chart-1: #FFFFFF;
-  --chart-2: #5FC8FF;
-  --chart-3: #3DB8FF;
-  --chart-4: #1BA8FF;
-  --chart-5: #0098FF;
+  --chart-1: #F3E8FF;
+  --chart-2: #DBC2FB;
+  --chart-3: #BE99F7;
+  --chart-4: #9F6EF2;
+  --chart-5: #7A44E0;
   --sidebar: #05070A;
   --sidebar-foreground: #F5F7FA;
   --sidebar-accent: #FFFFFF;

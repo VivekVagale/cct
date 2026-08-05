@@ -105,7 +105,9 @@ export function VehicleFocus({
         onClick={onDismiss}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        // Out faster than in. The scrim is the last thing holding the overlay
+        // mounted, so its duration is how long the dismissal takes.
+        exit={{ opacity: 0, transition: { duration: 0.2, ease: "linear" } }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         /* fixed, not absolute. The overlay around it scrolls when the card and
            its colours are taller than the viewport, and an absolute scrim is
@@ -127,7 +129,10 @@ export function VehicleFocus({
           {vehicle.manufacturer} {vehicle.name} — choose a colour
         </p>
 
-        <div className="flex justify-end pb-3">
+        <motion.div
+          className="flex justify-end pb-3"
+          exit={{ opacity: 0, transition: { duration: 0.14 } }}
+        >
           <button
             type="button"
             onClick={onDismiss}
@@ -136,7 +141,7 @@ export function VehicleFocus({
           >
             <X className="h-4 w-4" />
           </button>
-        </div>
+        </motion.div>
 
         {/* The travelling element. layoutId pairs it with the empty slot left
             behind in the grid, and Framer interpolates between the two boxes —
@@ -152,10 +157,17 @@ export function VehicleFocus({
           <VehicleCard vehicle={vehicle} selected onSelect={() => {}} tilt={false} />
         </motion.div>
 
+        {/* The colours stagger in behind the card and leave all at once.
+            Without the exit they had no exit animation at all, so they stayed
+            at full opacity for the whole of the scrim's fade — the blur lifted,
+            the card flew home, and the colour row hung over an unblurred page
+            until AnimatePresence finally unmounted it. Shorter than the scrim
+            so they are gone before the background is sharp again. */}
         <motion.div
           className="pt-5"
           initial="hidden"
           animate="show"
+          exit={{ opacity: 0, y: 6, transition: { duration: 0.14 } }}
           variants={{
             hidden: {},
             show: {

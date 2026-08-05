@@ -127,30 +127,6 @@ export function About() {
               </a>
             </p>
 
-            {/* Decoration, moved here from the booking form's copy column.
-                It says nothing about the numbers above it, so it is hidden
-                from assistive tech and takes no clicks — the ripple-on-click
-                it used to carry invited an interaction that leads nowhere.
-
-                Smaller than it was: six cubes rather than eight, at half
-                width, so it reads as a flourish at the foot of the column
-                instead of competing with the chart beside it. Desktop only,
-                where there is room to spare. */}
-            <div
-              aria-hidden
-              className="hidden lg:block relative mt-12 w-1/2 pointer-events-none cubes-fill"
-            >
-              <Cubes
-                gridSize={6}
-                maxAngle={45}
-                radius={3}
-                borderStyle="2px dashed #B497CF"
-                faceColor="#1a1a2e"
-                rippleColor="#ff6b6b"
-                rippleSpeed={1.5}
-                autoAnimate
-              />
-            </div>
           </div>
         </div>
 
@@ -169,6 +145,31 @@ export function About() {
 
           {/* The map's table view, same as the chart has one. */}
           <div className="lg:col-span-4">
+            {/* Decoration, and only that. It carries no reading of the numbers
+                under it, so it is hidden from assistive tech and takes no
+                clicks — the ripple-on-click it used to have invited an
+                interaction that leads nowhere.
+
+                Full column width rather than the half it sat at beside the
+                bar chart: here it heads the country table, and a grid at half
+                width above a list at full width reads as a mistake. Desktop
+                only, where there is room to spare. */}
+            <div
+              aria-hidden
+              className="hidden lg:block relative mb-10 w-full pointer-events-none cubes-fill"
+            >
+              <Cubes
+                gridSize={6}
+                maxAngle={45}
+                radius={3}
+                borderStyle="2px dashed #B497CF"
+                faceColor="#1a1a2e"
+                rippleColor="#ff6b6b"
+                rippleSpeed={1.5}
+                autoAnimate
+              />
+            </div>
+
             <ul className="divide-y divide-white/[0.08] border-t border-white/[0.08]">
               {audienceShares.slice(0, 8).map((row) => (
                 <li
