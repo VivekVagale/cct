@@ -239,50 +239,24 @@ export function Booking() {
         onSubmit={handleSubmit}
         className="max-w-[1600px] mx-auto px-6 sm:px-10 mt-20 sm:mt-32 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12"
       >
-        <div className="lg:col-span-4">
-          <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
-            Start a Project
-          </p>
-          <h2 className="font-display text-3xl sm:text-5xl text-[#F5F7FA] leading-[1.05] mb-6 sm:mb-8 max-w-md">
-            <FoldHeading text="Ready to turn your machine into cinema." />
-          </h2>
-          <p className="text-sm sm:text-base text-[#B8C4D6] leading-relaxed max-w-sm mb-0 lg:mb-10">
-            Tell us the story you want it to tell. We'll follow up to scope the
-            shot list together.
-          </p>
+        {/* A figure beside the fields, where a column of studio copy used to
+            be. That copy said the section's heading again in a longer form and
+            then asked for the story — which is what the description field two
+            steps down already asks for. Deleting it left the left third of the
+            band empty for the height of the form, so each step gets a pose
+            instead.
 
-          {/* Decoration under the copy, filling the column the copy leaves
-              empty — the left side of this band ends a long way above the form
-              beside it.
-
-              The pointer reaches it, which is the whole point: the grid tilts
-              its cubes toward the cursor and that is the only thing it does.
-              The click ripple stays off, because a click here leads nowhere and
-              an element that answers a click is claiming otherwise. Hidden from
-              assistive tech for the same reason — there is nothing in it to
-              announce.
-
-              Desktop only. On a phone this column is stacked directly above the
-              first field, where a decorative grid is something to scroll past
-              on the way to the form. */}
-          <div
-            aria-hidden
-            className="hidden lg:block relative mt-2 w-full cubes-fill"
-          >
-            <Cubes
-              gridSize={6}
-              maxAngle={45}
-              radius={3}
-              borderStyle="2px dashed #B497CF"
-              faceColor="#1a1a2e"
-              rippleColor="#ff6b6b"
-              rippleSpeed={1.5}
-              autoAnimate
-            />
+            Sticky, so the pose stays level with whichever part of the step is
+            on screen rather than scrolling off at the first field. Desktop
+            only: stacked on a phone this is a screen of mascot between the
+            visitor and the input they came for. */}
+        <div className="hidden lg:flex lg:col-span-4 justify-center items-start">
+          <div className="sticky top-28">
+            <Mascot pose="neutral" size="lg" parallax />
           </div>
         </div>
 
-        <div className="lg:col-span-8 flex flex-col gap-8 sm:gap-10">
+        <div className="lg:col-span-8">
           {/* One field per row rather than two across.
               A single column gives every field the same left edge and one
               reading order, which is what makes a form scannable — and the
@@ -332,7 +306,34 @@ export function Booking() {
               </label>
             </div>
           </div>
+        </div>
 
+        {/* The second pose, and the cubes under it. Step 03 is the tallest
+            part of the form — a description field and seven project cards — so
+            this column has the room for both where step 02's does not.
+
+            The pointer reaches the cubes: the grid tilts toward the cursor and
+            that is all it does. The click ripple stays off, because a click
+            there leads nowhere. */}
+        <div className="hidden lg:flex lg:col-span-4 flex-col items-center gap-10">
+          <div className="sticky top-28 flex flex-col items-center gap-10">
+            <Mascot pose="fistPump" size="lg" parallax />
+            <div aria-hidden className="w-full cubes-fill">
+              <Cubes
+                gridSize={6}
+                maxAngle={45}
+                radius={3}
+                borderStyle="2px dashed #B497CF"
+                faceColor="#1a1a2e"
+                rippleColor="#ff6b6b"
+                rippleSpeed={1.5}
+                autoAnimate
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-8">
           <div>
             <Step
               number="03"
