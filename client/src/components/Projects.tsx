@@ -112,7 +112,12 @@ export function Projects() {
         <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
           What We Build
         </p>
-        <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
+        {/* A section heading is the loudest thing on its scene now. In a
+            document a 6xl heading is large; on a screen of its own with a
+            title card either side of it, it read as a label on a slide. The
+            measure widens with it, or the type only gets taller and the line
+            breaks in the same three places. */}
+        <h2 className="font-display text-5xl sm:text-8xl lg:text-9xl text-[#F5F7FA] max-w-4xl leading-[0.98]">
           <FoldHeading text="CGI Projects" />
         </h2>
       </div>

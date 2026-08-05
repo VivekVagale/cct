@@ -60,7 +60,10 @@ export function CreativeProcess() {
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-3 sm:mb-4">
             How We Work
           </p>
-          <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] leading-[1.05]">
+          {/* Held under the others: this one shares its screen with a stage
+              heading and a five-figure step number, and at 9xl the two
+              headings were competing for the same eye. */}
+          <h2 className="font-display text-5xl sm:text-7xl lg:text-8xl text-[#F5F7FA] leading-[0.98]">
             <FoldHeading text="Creative Process" />
           </h2>
         </motion.div>
@@ -128,7 +131,7 @@ function Stage({
           <span className="font-display text-[#F5F7FA]/20 leading-none text-5xl sm:text-8xl md:text-[10rem] lg:text-[13rem]">
             {stage.index}
           </span>
-          <h3 className="font-display text-2xl sm:text-5xl md:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05]">
+          <h3 className="font-display text-3xl sm:text-6xl md:text-7xl lg:text-8xl text-[#F5F7FA] leading-[1.0]">
             {stage.title}
           </h3>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#B8C4D6] leading-relaxed max-w-lg md:max-w-xl">

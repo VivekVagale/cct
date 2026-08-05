@@ -208,7 +208,7 @@ export function Booking() {
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
             Step 01 — Configure
           </p>
-          <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
+          <h2 className="font-display text-5xl sm:text-8xl lg:text-9xl text-[#F5F7FA] max-w-4xl leading-[0.98]">
             <FoldHeading text="Pick your machine." />
           </h2>
           <p className="text-sm sm:text-base text-[#B8C4D6] mt-4 sm:mt-5 max-w-md">

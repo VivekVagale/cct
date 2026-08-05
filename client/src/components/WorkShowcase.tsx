@@ -146,7 +146,10 @@ export function WorkShowcase() {
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-2 sm:mb-3">
             Selected Work
           </p>
-          <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] leading-[1.05] max-w-xl">
+          {/* Stops a step short of the other sections' 9xl: this one floats
+              over the sphere rather than sitting above its own content, and at
+              the full size it started eating the top of the globe. */}
+          <h2 className="font-display text-5xl sm:text-7xl lg:text-8xl text-[#F5F7FA] leading-[0.98] max-w-3xl">
             <FoldHeading text="Turn it over." />
           </h2>
         </div>

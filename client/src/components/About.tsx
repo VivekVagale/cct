@@ -94,7 +94,11 @@ export function About() {
 
             <motion.h2
               {...entrance(30)}
-              className="font-display text-3xl sm:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05] mb-4 sm:mb-6 max-w-4xl"
+              /* Two figures and two words, so it is already the longest line
+                 on the page — a step under the one-or-two-word headings, and
+                 the measure goes with it so it still breaks after the first
+                 figure rather than mid-number. */
+              className="font-display text-5xl sm:text-7xl lg:text-8xl text-[#F5F7FA] leading-[0.98] mb-4 sm:mb-6 max-w-5xl"
             >
               <FoldHeading
                 text={`${headline.followers} followers. ${headline.views} views.`}
@@ -202,7 +206,7 @@ export function About() {
             <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4">
               {audienceWindow.label}
             </p>
-            <h3 className="font-display text-2xl sm:text-4xl text-[#F5F7FA] leading-[1.05] mb-6">
+            <h3 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] leading-[1.0] mb-6">
               <FoldHeading text="Where it landed." />
             </h3>
             <AudienceMap hoveredCountry={hoveredCountry} />
