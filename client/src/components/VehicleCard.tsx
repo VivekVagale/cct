@@ -41,9 +41,12 @@ export function VehicleCard({
       style={tilt ? { rotateX, rotateY, transformPerspective: 900 } : undefined}
       role="radio"
       aria-checked={selected}
-      className={`group relative w-full text-left overflow-hidden rounded-sm border transition-colors duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
+      /* Not transition-all: the tilt writes to transform on this same element,
+         and a CSS transition on transform fights the frame-by-frame value
+         framer is setting there. */
+      className={`group relative w-full text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
         selected
-          ? "border-white/70 bg-white/[0.04]"
+          ? "selected-glow bg-[#7A44E0]/[0.07]"
           : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
       }`}
     >

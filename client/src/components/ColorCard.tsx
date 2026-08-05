@@ -29,12 +29,14 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
       aria-checked={selected}
       className="group relative h-full text-left rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
     >
-      {/* Monochrome glow ring */}
+      {/* The ring, violet once chosen. Same two custom properties the vehicle
+          and project cards use, so the three pickers in this flow cannot drift
+          apart — a colour is as chosen as the machine it belongs to. */}
       <div
         className="absolute -inset-px rounded-sm transition-all duration-300"
         style={{
           boxShadow: selected
-            ? "0 0 0 1px rgba(255,255,255,0.35), 0 0 24px rgba(255,255,255,0.12)"
+            ? "var(--selected-ring), var(--selected-bloom)"
             : "0 0 0 1px rgba(255,255,255,0.10)",
         }}
       />
@@ -72,7 +74,7 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white flex items-center justify-center z-10"
+          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#9F6EF2] flex items-center justify-center z-10"
         >
           <Check className="w-3 h-3 text-[#05070A]" strokeWidth={3} />
         </motion.div>

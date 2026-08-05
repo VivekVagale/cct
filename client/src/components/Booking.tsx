@@ -6,7 +6,7 @@ import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import { SparkleButton } from "@/components/SparkleButton";
 import { CollabToggle } from "@/components/CollabToggle";
 import { ThankYouCard } from "@/components/ThankYouCard";
-import { vehicles } from "@/data/vehicles";
+import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
 
@@ -45,6 +45,74 @@ function Step({
   );
 }
 
+/**
+ * What the visitor picked in step 01, repeated where they fill the form in.
+ *
+ * The configurator is a long way up the page by the time anyone reaches Full
+ * Name, and its selection is only visible as a glow on a card that has since
+ * scrolled off. Without this the form asks for a name, an email and a
+ * description of a machine it never names — and a client who picked the wrong
+ * colour has no way to find that out before the request is sent.
+ *
+ * It states what is missing as plainly as what is chosen. A vehicle with no
+ * colour yet is a half-made decision, and saying so here is cheaper than a
+ * validation error after the submit.
+ */
+function ChosenMachine({
+  vehicle,
+  color,
+}: {
+  vehicle?: Vehicle;
+  color?: VehicleColor;
+}) {
+  if (!vehicle) {
+    return (
+      <p className="text-sm text-[#B8C4D6] normal-case tracking-normal">
+        No machine picked yet.{" "}
+        <a
+          href="#booking"
+          className="text-[#F5F7FA] border-b border-white/30 transition-colors duration-300 hover:border-white"
+        >
+          Step 01 is at the top of this section.
+        </a>{" "}
+        You can send the form without one.
+      </p>
+    );
+  }
+
+  return (
+    <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
+      <img
+        src={color?.image ?? vehicle.image}
+        alt=""
+        className="h-14 w-20 shrink-0 rounded-sm object-cover sm:h-16 sm:w-24"
+      />
+      <div className="min-w-0 normal-case tracking-normal">
+        <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]">
+          {vehicle.manufacturer}
+        </p>
+        <p className="font-display text-base sm:text-lg text-[#F5F7FA]">
+          {vehicle.name}
+        </p>
+        {color ? (
+          <p className="mt-1 flex items-center gap-2 text-xs text-[#B8C4D6]">
+            <span
+              aria-hidden
+              className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/20"
+              style={{ backgroundColor: color.swatch }}
+            />
+            {color.name}
+          </p>
+        ) : (
+          <p className="mt-1 text-xs text-[#B8C4D6]">
+            No colour chosen — tap the card above to pick one.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function Booking() {
   const [status, setStatus] = useState<Status>("idle");
   const [selectedProject, setSelectedProject] = useState(projects[0].title);
@@ -53,6 +121,11 @@ export function Booking() {
   // Off by default. A collab post puts the reel in the client's own feed under
   // both names, and that is theirs to opt into rather than to notice and undo.
   const [collabPost, setCollabPost] = useState(false);
+
+  // Resolved once here rather than in two places: the summary above the form
+  // and the label sent with the request must never name different machines.
+  const chosenVehicle = vehicles.find((v) => v.id === vehicleId);
+  const chosenColor = chosenVehicle?.colors.find((c) => c.id === colorId);
 
   function handleSelectVehicle(id: string) {
     setVehicleId(id);
@@ -65,10 +138,10 @@ export function Booking() {
     const form = e.currentTarget;
     const data = new FormData(form);
 
-    const vehicle = vehicles.find((v) => v.id === vehicleId);
-    const color = vehicle?.colors.find((c) => c.id === colorId);
-    const vehicleLabel = vehicle
-      ? `${vehicle.manufacturer} ${vehicle.name}${color ? ` — ${color.name}` : ""}`
+    const vehicleLabel = chosenVehicle
+      ? `${chosenVehicle.manufacturer} ${chosenVehicle.name}${
+          chosenColor ? ` — ${chosenColor.name}` : ""
+        }`
       : "";
 
     const ok = await submitBookingForm({
@@ -193,6 +266,14 @@ export function Booking() {
               hint="Name and email are all we need. The handles below are how we reply."
             />
             <div className="flex flex-col gap-5 sm:gap-6 max-w-xl">
+              {/* Before the first field rather than after the last: it is the
+                  answer to "am I filling this in for the right bike", and that
+                  question is asked on the way in, not on the way out. */}
+              <ChosenMachine
+                vehicle={chosenVehicle}
+                color={chosenColor}
+              />
+
               <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
                 Full Name
                 <input name="fullName" required className={fieldClass} />
@@ -223,15 +304,20 @@ export function Booking() {
           <div>
             <Step
               number="03"
-              title="Tell us about the shot."
-              hint="Describe it in your own words first, then pick the closest kind of build."
+              title="Tell us about your machine."
+              hint="The card above says what it is. This is where you say what you have done to it, then pick the closest kind of build."
             />
+            {/* The old prompt here described a finished shot — wet streets,
+                headlight flare, no rider — and got shot briefs back. The
+                render is built from the bike, so what is needed first is the
+                bike: the parts on it, the paint, anything that would be wrong
+                if we modelled it from the catalogue photo. */}
             <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6] max-w-xl mb-8 sm:mb-10">
-              Project Description
+              Your Build
               <textarea
                 name="description"
                 rows={4}
-                placeholder="A night ride through wet city streets, headlight flare, no rider."
+                placeholder="Aftermarket exhaust, crash guards, custom decals, a respray that isn't the stock colour — and anything you want the shot to do with it."
                 className={`${fieldClass} resize-none placeholder:text-[#B8C4D6]/40`}
               />
             </label>

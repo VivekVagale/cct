@@ -40,11 +40,11 @@ export function ProjectOptionCard({
       onMouseLeave={onMouseLeave}
       whileTap={disabled ? undefined : { scale: 0.97 }}
       style={{ rotateX, rotateY, transformPerspective: 900 }}
-      className={`group relative text-left overflow-hidden rounded-sm border transition-colors duration-300 ${
+      className={`group relative text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 ${
         disabled ? "cursor-default" : "cursor-pointer"
       } ${
         selected
-          ? "border-white/70 bg-white/[0.04]"
+          ? "selected-glow bg-[#7A44E0]/[0.07]"
           : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
       }`}
     >
@@ -91,7 +91,7 @@ export function ProjectOptionCard({
       {selected && (
         <motion.div
           layoutId="project-selected-indicator"
-          className="absolute top-3 right-3 z-20 w-2 h-2 rounded-full bg-white"
+          className="absolute top-3 right-3 z-20 w-2 h-2 rounded-full bg-[#9F6EF2] shadow-[0_0_10px_rgba(159,110,242,0.9)]"
         />
       )}
     </motion.button>

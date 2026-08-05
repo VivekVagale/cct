@@ -256,7 +256,7 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #5FC8FF;
+    background: #9F6EF2;
   }
 }
 
@@ -266,4 +266,33 @@
    which is kept exactly as vendored. */
 .cubes-fill .default-animation {
   width: 100%;
+}
+
+/*
+ * What the visitor has chosen, in the brand violet.
+ *
+ * Three pickers in the booking flow — the vehicle, its colour, the project —
+ * all said "selected" with a white hairline, which is the same treatment the
+ * unselected cards use at a lower opacity. A choice that reads as a slightly
+ * brighter version of not-choosing is not feedback.
+ *
+ * box-shadow rather than the search field's blurred pseudo-element. That
+ * technique needs the glow to paint behind its own parent at a negative
+ * z-index, which fails twice here: these cards clip their contents, and the
+ * two that tilt carry a transform, so each one is a stacking context the glow
+ * cannot escape. Three stacked shadows give the same read — a tight ring, a
+ * near bloom, a wide one — and none of them are clipped by overflow.
+ *
+ * The colour cards set this through an inset ring element of their own, so the
+ * values are exposed as custom properties rather than being written twice.
+ */
+:root {
+  --selected-ring: 0 0 0 1px rgba(159, 110, 242, 0.55);
+  --selected-bloom: 0 0 18px rgba(122, 68, 224, 0.5),
+    0 0 44px rgba(122, 68, 224, 0.2);
+}
+
+.selected-glow {
+  border-color: #9f6ef2;
+  box-shadow: var(--selected-ring), var(--selected-bloom);
 }
