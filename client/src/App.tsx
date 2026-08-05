@@ -26,13 +26,6 @@ function App() {
   // the starfield arriving is what makes the reveal land.
   const galaxyOpacity = useMotionValue(0);
 
-  // How far through its dissolve the hero's stage is. The nav bar's glass waits
-  // on this rather than on the starfield: the stars come up behind a mascot
-  // that is still there, and a bar that puts a plate on at that moment is
-  // drawing an edge across the helmet — which is the thing the bar has always
-  // refused to do.
-  const heroExit = useMotionValue(0);
-
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
@@ -55,8 +48,8 @@ function App() {
             </motion.div>
 
             <div className="relative z-10 pointer-events-none">
-              <Navigation heroExit={heroExit} />
-              <Hero galaxyOpacity={galaxyOpacity} heroExit={heroExit} />
+              <Navigation />
+              <Hero galaxyOpacity={galaxyOpacity} />
               <WorkShowcase />
 
               <CinematicLine text="EVERY FRAME TELLS A STORY" />

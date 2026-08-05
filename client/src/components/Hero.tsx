@@ -22,47 +22,10 @@ import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
  * changing a phase meant re-deriving all the others by hand. Lengths compose,
  * and the section height falls out of them.
  */
-const REVEAL_VH = 0; // starfield up behind the frames, CTA in — paid for inside the scrub
-const HOLD_VH = 0; // final frame breathing over stars
-const EXIT_VH = 20; // the final frame dissolving away
+const REVEAL_VH = 50; // starfield up behind the frames, CTA in
+const HOLD_VH = 42; // final frame breathing over stars
+const EXIT_VH = 100; // the final frame dissolving away
 const STAGE_VH = 100; // the sticky stage itself
-
-/**
- * How much of the assembly the reveal starts inside.
- *
- * The reveal used to begin where the frames stopped, which is what made the
- * tail expensive: every vh of stars-rising and CTA-arriving was a vh of scroll
- * bought after the animation was already over.
- *
- * It is now paid for entirely out of the scrub — the last 10%, about 66vh of
- * the 660 — which is why REVEAL_VH is zero. The mascot is settling rather than
- * assembling through that stretch, and the stars and the buttons arriving over
- * it costs the section nothing at all.
- */
-const REVEAL_LEAD = 0.1;
-
-/*
- * The tail was 192vh, then 90, then 50, and is now 20.
- *
- * The three phases after the assembly originally ran 50 + 42 + 100 — two full
- * screens in which nothing happened but a mascot slowly going transparent over
- * a starfield.
- *
- * Two of the three are now zero, and neither was cut: both were moved inside
- * the scrub. REVEAL_LEAD puts the stars and the CTA in the last 10% of the
- * assembly, where the mascot is settling rather than building, so the reveal
- * costs the section nothing. The hold existed only to let the CTA settle
- * before the dissolve began, and a CTA that finished arriving at the last
- * frame has already settled.
- *
- * That leaves the exit, which is the one thing that genuinely has to cost
- * scroll: it is a dissolve, and a dissolve with nothing under it is a cut. 20vh
- * is about two notches of a wheel.
- *
- * Selected Work is `h-[100svh]` with no top padding, so it arrives full-screen
- * the moment the stage releases — which is now two notches after the last
- * frame lands.
- */
 
 /**
  * ASSEMBLY_VH is how fast the sequence scrubs, and it is the only number to
@@ -168,9 +131,10 @@ const MOBILE_BUDGET = 180 * 1024 * 1024;
  * the starfield — that pose is gone, and with it the visible handover between
  * two different renders.
  *
- * The section ends by dissolving that final frame away, so the mascot fades
- * into the starfield instead of sliding off the top. Only opacity changes,
- * which is why it holds up while two WebGL contexts are already on the page.
+ * The section ends by dissolving that final frame away over a full screen of
+ * scroll, so the mascot fades into the starfield instead of sliding off the
+ * top. Only opacity changes, which is why it holds up while two WebGL contexts
+ * are already on the page.
  *
  * A camera push into the dark under the helmet's chin was built here first and
  * pulled. Two reasons, and they are worth knowing before anyone rebuilds it.
@@ -183,20 +147,7 @@ const MOBILE_BUDGET = 180 * 1024 * 1024;
  * and chain at a 3-9x upscale. Anyone reviving it needs an answer to the second
  * point, not just the first.
  */
-export function Hero({
-  galaxyOpacity,
-  /**
-   * How far through its dissolve the stage is: 0 while the mascot is up, 1
-   * once it has gone. The nav bar reads it to decide when to put its glass on,
-   * which has to be as the hero leaves rather than when the starfield arrives —
-   * those are two different moments and only the second one clears the space
-   * under the bar.
-   */
-  heroExit,
-}: {
-  galaxyOpacity: MotionValue<number>;
-  heroExit: MotionValue<number>;
-}) {
+export function Hero({ galaxyOpacity }: { galaxyOpacity: MotionValue<number> }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [alive, setAlive] = useState(false);
@@ -278,23 +229,17 @@ export function Hero({
   // carries it, so the buttons and the mascot leave as one image rather than as
   // two elements fading on separate curves. Nothing overlays the assembly
   // before it: the sequence plays clean.
-  //
-  // It starts before the frames finish. The last 6% of the scrub is the
-  // mascot settling rather than assembling, and putting the buttons' arrival
-  // there costs the section nothing — where starting it at assemblyEnd meant
-  // buying every vh of it after the animation was already over.
-  const revealStart = assemblyEnd * (1 - REVEAL_LEAD);
-  const ctaOpacity = useTransform(scrollYProgress, [revealStart, revealEnd], [0, 1]);
+  const ctaOpacity = useTransform(scrollYProgress, [assemblyEnd, revealEnd], [0, 1]);
+
 
   // The starfield rises behind the frames rather than replacing them. The
   // frames are keyed, so their backdrop is already clear — the stars appear
-  // through it and the final frame stays exactly where it is. Same lead as the
-  // CTA: they are one beat and must not arrive on two different curves.
-  const galaxyReveal = useTransform(scrollYProgress, [revealStart, revealEnd], [0, 1]);
+  // through it and the final frame stays exactly where it is.
+  const galaxyReveal = useTransform(scrollYProgress, [assemblyEnd, revealEnd], [0, 1]);
 
   // The exit: the whole stage dissolves across EXIT_VH, so the mascot fades
-  // into the starfield that is already behind it. Spread across the phase
-  // rather than snapped at the end, so it stays gradual under the hand.
+  // into the starfield that is already behind it. Spread over a full screen of
+  // scroll rather than snapped at the end, so it stays gradual under the hand.
   const stageOpacity = useTransform(scrollYProgress, [holdEnd, 1], [1, 0]);
 
   // Written straight to a MotionValue the App reads — routing it through state
@@ -304,12 +249,6 @@ export function Hero({
     galaxyOpacity.set(galaxyReveal.get());
     return galaxyReveal.on("change", (v) => galaxyOpacity.set(v));
   }, [galaxyReveal, galaxyOpacity]);
-
-  // The same arrangement for the exit, inverted: 1 means the stage has gone.
-  useEffect(() => {
-    heroExit.set(1 - stageOpacity.get());
-    return stageOpacity.on("change", (v) => heroExit.set(1 - v));
-  }, [stageOpacity, heroExit]);
 
   return (
     <section
