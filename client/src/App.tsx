@@ -50,10 +50,6 @@ function App() {
   // refused to do.
   const heroExit = useMotionValue(0);
 
-  // The sphere's twelve renders, fetched during the hero rather than during the
-  // transition onto them. See preloadShowcase.
-  useEffect(preloadShowcase, []);
-
   /*
    * The starfield belongs to the page, not to the hero.
    *
@@ -78,7 +74,13 @@ function App() {
    * of holes, which is the exact hiccup the curtain is there to remove.
    */
   const [ready, setReady] = useState(false);
-  const handleReady = useCallback(() => setReady(true), []);
+  const handleReady = useCallback(() => {
+    setReady(true);
+    // The sphere's renders and the project cards, warmed the moment the hero's
+    // frames are in and the network is free. See preloadShowcase — at idle
+    // priority these were measured as still not requested at all.
+    preloadShowcase();
+  }, []);
 
   const handleSceneChange = useCallback(
     (index: number) => {

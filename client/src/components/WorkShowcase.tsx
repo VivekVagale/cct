@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import InfiniteMenu, { type MenuItem } from "@/components/ui/InfiniteMenu";
 import { showcaseItems } from "@/data/showcase";
+import { projects } from "@/data/content";
 import { FoldHeading } from "@/components/FoldHeading";
 import { useScene } from "@/components/SceneDeck";
 
@@ -35,28 +36,45 @@ const NARROW_QUERY = "(max-width: 640px)";
  * the transition into it: a black frame for as long as the network took, on
  * the section that is supposed to be the studio's work.
  *
- * Called once at startup, off the critical path. Idle if the browser has the
- * callback, a timeout if not — this must never compete with the hero.
+ * Called once, the moment the loading curtain lifts.
+ *
+ * It used to run at `requestIdleCallback`, at low fetch priority, which sounds
+ * responsible and meant the images were still not on the wire two seconds
+ * after load — idle time on a page that is decoding a frame sequence and
+ * running three WebGL contexts is not a thing that reliably arrives, and a
+ * browser is entitled to defer an idle callback indefinitely while it does.
+ * The measurement that caught this found zero showcase requests had been made
+ * at all.
+ *
+ * Now it is deliberate work, started at a deliberate moment: the hero's frames
+ * are already in, the curtain is going up, and the network is free. Ordinary
+ * priority, because these are wanted in about four seconds and nothing else is
+ * competing for the connection by then.
  */
 let preloaded = false;
 export function preloadShowcase() {
   if (preloaded || typeof window === "undefined") return;
   preloaded = true;
 
-  const run = () => {
-    for (const item of showcaseItems) {
-      const img = new Image();
-      // Low, deliberately: these are wanted eventually, not now. The hero's
-      // frame sequence is the thing that must not be starved.
-      img.fetchPriority = "low";
-      img.decoding = "async";
-      img.src = item.image;
-    }
-  };
+  /*
+   * The project cards go with them.
+   *
+   * They were in exactly the same position and worse: five of the seven are
+   * remote, so arriving at that section started a cross-origin connection
+   * *and* a download, behind a scene transition, with nothing on the cards
+   * until both finished. Warming them here costs nothing anyone can see and
+   * removes the wait entirely.
+   */
+  const sources = [
+    ...showcaseItems.map((i) => i.image),
+    ...projects.map((p) => p.image),
+  ];
 
-  const idle = window.requestIdleCallback as typeof window.requestIdleCallback | undefined;
-  if (idle) idle(run, { timeout: 4000 });
-  else window.setTimeout(run, 1200);
+  for (const src of new Set(sources)) {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = src;
+  }
 }
 
 export function WorkShowcase() {

@@ -954,7 +954,15 @@ export function SceneDeck({
               className="scene-push"
               style={
                 isCurrent
-                  ? { y: pushY, scale: pushScale, filter: pushDim }
+                  ? {
+                      y: pushY,
+                      scale: pushScale,
+                      filter: pushDim,
+                      // Published as a CSS variable so the scene's own type can
+                      // drift against the frame it sits in. See
+                      // `.scene-heading` in SceneDeck.css.
+                      ["--push" as string]: pushSpring,
+                    }
                   : undefined
               }
             >

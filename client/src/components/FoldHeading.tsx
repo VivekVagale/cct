@@ -55,7 +55,20 @@ export function FoldHeading({
       // wide heading swings far enough to read as falling off the line rather
       // than folding down onto it.
       perspective={1100}
-      creaseShading={0.4}
+      /*
+       * No crease shading, for the same reason the heading no longer blurs.
+       *
+       * The crease is a `::after` on every word carrying a gradient and
+       * `mix-blend-mode: multiply`, with its opacity driven by a CSS custom
+       * property that GSAP writes each frame. A blended layer cannot be
+       * composited on its own, and a custom property is a style recalculation
+       * rather than a compositor value — so a nine-word heading was nine
+       * blended repaints per frame, arriving in the same moment as the scene
+       * transition and the fold itself. Losing it costs a shadow along a
+       * folding edge that is only visible for a fraction of a second; keeping
+       * it cost the smoothness of the one moment every scene is judged on.
+       */
+      creaseShading={0}
       className={`!leading-[1.05] !tracking-normal ${className}`.trim()}
     />
   );

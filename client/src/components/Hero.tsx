@@ -23,23 +23,32 @@ import { useScene } from "@/components/SceneDeck";
  * changing a phase meant re-deriving all the others by hand. Lengths compose,
  * and the section height falls out of them.
  */
-const REVEAL_VH = 50; // starfield up behind the frames, CTA in
-const HOLD_VH = 42; // final frame breathing over stars
-const EXIT_VH = 100; // the final frame dissolving away
+const REVEAL_VH = 36; // starfield up behind the frames, CTA in
+const HOLD_VH = 28; // final frame breathing over stars
+const EXIT_VH = 70; // the final frame dissolving away
 const STAGE_VH = 100; // the sticky stage itself
 
 /**
  * ASSEMBLY_VH is how fast the sequence scrubs, and it is the only number to
- * touch to change that. 298 frames across 660vh is ~20px of scroll per frame at
- * a 900px viewport, so an ordinary wheel notch advances about five frames. At
- * the 327.6vh this used to be it was ~9.9px per frame — ten frames a notch,
- * which read as flicking through the animation rather than playing it.
+ * touch to change that.
  *
- * The cost is page length: spending less scroll per frame means spending more
- * scroll overall. There is no way around that trade, only a choice of where to
- * sit on it.
+ * It was 660, which is ~20px of scroll per frame at a 900px viewport — about
+ * five frames per wheel notch, and 6,134px of scrolling before the deck would
+ * move on. Fifty-one notches to get past the first screen of the site.
+ *
+ * The reason it was that long no longer holds. The note it replaces rejected
+ * ~10px per frame because "a notch jumped ten frames and read as flicking
+ * through the animation" — which was true when a notch was applied to the
+ * scroller in a single step. It is not applied that way any more: the deck
+ * damps every scroll, so one notch is a glide of about a quarter-second and the
+ * sequence is fed a continuous sweep of positions rather than one jump. Ten
+ * frames delivered across fifteen rendered frames is the animation playing, not
+ * a flick.
+ *
+ * So the length can come back down to something a visitor will actually sit
+ * through: ~9px per frame, and roughly a third of the scrolling.
  */
-const ASSEMBLY_VH = 660;
+const ASSEMBLY_VH = 300;
 
 /**
  * The scrub is shorter on phones — 400vh rather than 660.
@@ -51,14 +60,12 @@ const ASSEMBLY_VH = 660;
  * of section is around nine flicks on a phone against a scroll wheel's steady
  * turn, and it is all before the first word of the page.
  *
- * 400vh at a ~700px viewport is ~9.4px of scroll per frame. That figure was
- * rejected for the wheel — at 9.9px a notch jumped ten frames and read as
- * flicking through the animation rather than playing it. It does not carry the
- * same cost here, because a swipe was never going to advance one frame at a
- * time: it covers 40-80 either way, so what the number actually changes on
- * touch is how long the section lasts, not how smooth it looks.
+ * A swipe was never going to advance one frame at a time — it covers 40-80
+ * either way — so what this number changes on touch is how long the section
+ * lasts, not how smooth it looks. Which makes it purely a question of patience,
+ * and 400vh was around nine flicks before the first word of the page.
  */
-const MOBILE_ASSEMBLY_VH = 400;
+const MOBILE_ASSEMBLY_VH = 240;
 
 /**
  * The phase geometry, derived from whichever scrub length applies.

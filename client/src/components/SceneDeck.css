@@ -20,15 +20,17 @@
  * Every scene occupies the whole frame and they stack in the same place, so
  * one can dissolve into the next without the frame ever going empty.
  *
- * `will-change` is on because the transition animates filter, and a blur that
- * is promoted mid-animation visibly re-rasterises on the first frame.
+ * `will-change` names only what is actually animated. It used to include
+ * `filter`, which promoted every scene as a blur surface for the whole of its
+ * life — a standing cost on a subtree containing WebGL canvases, paid whether
+ * or not anything was blurring.
  */
 .scene {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 /*
@@ -222,6 +224,39 @@
   animation-delay: 0.55s;
 }
 
+/*
+ * The heading lifts against the scroll.
+ *
+ * `--push` is the deck's own give, -1 to 1, published onto the scene by the
+ * component and already sprung — so this needs no transition of its own and
+ * cannot fight the spring by adding a second one. The scene moves 7px under a
+ * push and the heading moves 5 further, which is the whole trick: two layers
+ * at different rates is what reads as depth, where one layer moving reads only
+ * as the page shifting.
+ *
+ * It applies after the entrance, not during. The entrance animation owns
+ * transform while it runs and its fill mode is `backwards`, so it hands the
+ * property back the moment it finishes rather than holding it forever.
+ */
+.scene-heading,
+.scene-body {
+  transform: translate3d(0, calc(var(--push, 0) * -5px), 0);
+}
+
+.scene-body {
+  /* Half the heading's travel. The supporting content is nearer the plane the
+     scene itself is on; if it moved as far as the heading the two would read
+     as one object again. */
+  transform: translate3d(0, calc(var(--push, 0) * -2.5px), 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-heading,
+  .scene-body {
+    transform: none;
+  }
+}
+
 /* Each child of a body block follows the one before it. Six is enough for any
    section here; past that they share the last step rather than drifting ever
    later, since a seventh element arriving four seconds in has been waited for
@@ -269,16 +304,25 @@
   animation-delay: 3.32s;
 }
 
+/*
+ * Opacity and transform only — no blur.
+ *
+ * A blur is not a compositor job. Every frame of `filter: blur(6px)` on a
+ * heading at this size is a fresh rasterisation of the type, and it lands at
+ * exactly the moment the scene behind it is also being blurred and a dozen
+ * word-pieces are folding. That pile-up is what the stutter on an arriving
+ * heading was. Opacity and transform are handed to the compositor and cost
+ * effectively nothing, and at 22px of travel over 1.9s nobody can tell which
+ * of the two versions they are looking at.
+ */
 @keyframes scene-heading-in {
   from {
     opacity: 0;
     transform: translate3d(0, 22px, 0);
-    filter: blur(6px);
   }
   to {
     opacity: 1;
     transform: none;
-    filter: blur(0);
   }
 }
 

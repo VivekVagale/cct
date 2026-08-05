@@ -40,6 +40,22 @@ const CRITICAL_FRAMES = 48;
  */
 const MIN_VISIBLE_MS = 900;
 
+/**
+ * The longest the curtain is allowed to wait, whatever is still outstanding.
+ *
+ * A loading screen that can hang forever is worse than anything it was put
+ * there to hide, and this one had two ways to do it. `document.fonts.ready`
+ * does not resolve while the document is hidden, so opening the site in a
+ * background tab left it behind the curtain indefinitely — and since the deck
+ * is deliberately deaf while the curtain is up, the whole page was inert on
+ * arrival. An image that never resolves would do the same.
+ *
+ * Past this the story starts regardless. A hero missing a few frames is a
+ * worse opening than a complete one; it is a far better one than a black
+ * screen that never goes away.
+ */
+const MAX_WAIT_MS = 6000;
+
 export function Preloader({ onDone }: { onDone: () => void }) {
   const reduceMotion = useReducedMotion();
   const [progress, setProgress] = useState(0);
@@ -80,7 +96,12 @@ export function Preloader({ onDone }: { onDone: () => void }) {
 
     const fonts = (document.fonts?.ready ?? Promise.resolve()).then(tick);
 
-    Promise.all([...frames.map(settle), fonts]).then(() => {
+    const everything = Promise.all([...frames.map(settle), fonts]);
+    const deadline = new Promise<void>((resolve) =>
+      window.setTimeout(resolve, MAX_WAIT_MS),
+    );
+
+    Promise.race([everything, deadline]).then(() => {
       if (!live) return;
       const held = performance.now() - startedAt;
       window.setTimeout(
