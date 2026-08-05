@@ -89,6 +89,12 @@
   --chart-3: #BE99F7;
   --chart-4: #9F6EF2;
   --chart-5: #7A44E0;
+  /* The logo violet, by name rather than as the last step of a chart ramp.
+     Anything that wants "the brand colour" — the chapter rail, the loading
+     line — should ask for this and not for --chart-5, which is a scale that
+     happens to end here and could be re-tuned for a chart's sake. */
+  --brand: #9F6EF2;
+  --brand-deep: #7A44E0;
   --radius: 0.65rem;
   --background: #05070A;
   --foreground: #F5F7FA;

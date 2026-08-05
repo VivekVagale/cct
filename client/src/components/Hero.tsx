@@ -403,9 +403,13 @@ export function Hero({
               Start a Project
             </GlowButton>
           </Magnet>
+          {/* `py-3 -my-3` again: the underline stays exactly where it is and
+              the target grows from 21px to 44px. This sits beside a full-height
+              button, so the two read as a pair while only one of them was
+              actually reachable with a thumb. */}
           <a
             href="#projects"
-            className="text-xs tracking-[0.14em] uppercase text-[#F5F7FA] border-b border-white/30 pb-1 hover:border-white transition-colors duration-300"
+            className="inline-block py-3 -my-3 text-xs tracking-[0.14em] uppercase text-[#F5F7FA] border-b border-white/30 hover:border-white transition-colors duration-300"
           >
             See What We Build
           </a>

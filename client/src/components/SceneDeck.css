@@ -32,6 +32,101 @@
 }
 
 /*
+ * The chapter rail: the scrollbar this deck took away, rebuilt as chapters.
+ *
+ * Right edge, vertically centred, above every scene. Deliberately quiet — it
+ * is a position readout, not a menu, and it must never compete with the scene
+ * it is sitting on top of.
+ */
+.scene-rail {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  gap: 4px;
+  padding: 20px 10px;
+}
+
+.scene-rail-tick {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  /* The padding is the hit area, and it is the whole reason these numbers are
+     what they are. Each tick draws a 2px line; the target around it is 26px
+     tall and 40px wide, comfortably past the 24px minimum and as close to 44
+     as eleven of them can get without the rail running off a phone screen —
+     eleven 44px targets is 484px of column before any gaps. */
+  padding: 12px 0;
+  width: 40px;
+  cursor: pointer;
+  display: block;
+}
+
+/* The mark itself, drawn inside the target rather than being it. */
+.scene-rail-tick::before {
+  content: "";
+  display: block;
+  margin-left: auto;
+  height: 2px;
+  width: 12px;
+  background: rgba(245, 247, 250, 0.28);
+  transition:
+    width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Read, but not where you are: still lit, so the rail shows the distance
+   travelled and not just the current position. */
+.scene-rail-tick.is-read::before {
+  background: rgba(245, 247, 250, 0.5);
+}
+
+.scene-rail-tick.is-current::before {
+  width: 26px;
+  background: var(--brand, #7a44e0);
+}
+
+.scene-rail-tick:hover::before {
+  width: 20px;
+  background: rgba(245, 247, 250, 0.8);
+}
+
+/* Never remove the ring — the rail is one of the few things here that is
+   genuinely keyboard-operable and it has to show where focus is. */
+.scene-rail-tick:focus-visible {
+  outline: 2px solid var(--brand, #7a44e0);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .scene-rail {
+    gap: 0;
+    padding: 12px 6px;
+  }
+  .scene-rail-tick {
+    padding: 10px 0;
+    width: 32px;
+  }
+  .scene-rail-tick::before {
+    width: 8px;
+  }
+  .scene-rail-tick.is-current::before {
+    width: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-rail-tick::before {
+    transition: none;
+  }
+}
+
+/*
  * The layer that takes the give — a few pixels of lean under a scroll that
  * moves nothing else. Separate from `.scene` because that one's transform
  * belongs to the scene transition, and the two must not share a node.

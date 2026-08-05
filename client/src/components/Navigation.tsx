@@ -152,7 +152,14 @@ export function Navigation({
             <li key={link.href}>
               <a
                 href={link.href}
-                className={`text-xs tracking-[0.14em] uppercase text-[#B8C4D6] hover:text-[#F5F7FA] transition-colors duration-300 ${HALO}`}
+                /* `py-3 -my-3` is hit area, not layout. The type is 12px on a
+                   single line, which gave these links a 15px-tall target — under
+                   half the 44px a finger needs, and the bar is the one thing on
+                   the page a visitor reaches for on purpose. The negative margin
+                   takes the height back out of the flow, so the bar is exactly
+                   as tall as it was and the links are three times easier to
+                   hit. */
+                className={`block py-3 -my-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6] hover:text-[#F5F7FA] transition-colors duration-300 ${HALO}`}
               >
                 {link.label}
               </a>

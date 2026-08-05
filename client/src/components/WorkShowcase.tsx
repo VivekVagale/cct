@@ -159,7 +159,12 @@ export function WorkShowcase() {
       {/* The gesture differs by input: a mouse drags in any direction, a finger
           only has the horizontal axis here because the vertical one belongs to
           the page. Naming the wrong one is worse than naming none. */}
-      <p className="absolute inset-x-0 bottom-6 sm:bottom-8 z-10 text-center text-[10px] tracking-[0.3em] uppercase text-[#B8C4D6]/50 pointer-events-none">
+      {/* 11px at full-ish strength rather than 10px at half. This is the only
+          thing on the screen that says the sphere can be turned at all — at 50%
+          on a near-black backdrop it was under 2:1 against the page and
+          effectively invisible, which makes the whole section look like a
+          picture rather than a control. */}
+      <p className="absolute inset-x-0 bottom-6 sm:bottom-8 z-10 text-center text-[11px] tracking-[0.3em] uppercase text-[#B8C4D6]/85 pointer-events-none">
         <span className="sm:hidden">Swipe sideways to explore</span>
         <span className="hidden sm:inline">Drag to explore</span>
       </p>
