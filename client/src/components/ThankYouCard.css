@@ -1,0 +1,99 @@
+/*
+ * The confirmation card. Adapted from a hover-reveal product card, with one
+ * deliberate change: the message is never hidden.
+ *
+ * The original holds .textBox at opacity 0 until :hover. A confirmation is the
+ * one piece of copy on the page that must be readable the instant it arrives —
+ * and on a touchscreen there is no hover to reveal it with, so the visitor
+ * would submit the form and be told nothing at all. The mascot is blurred and
+ * floating from the start instead, and hover keeps the flourish it was there
+ * for: the card lifts and the pose grows behind the type.
+ */
+
+.thankyou-card {
+  position: relative;
+  width: min(420px, 100%);
+  min-height: 285px;
+  padding: 2rem 1.75rem;
+  background: #313131;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: transform 0.2s ease-in-out;
+}
+
+.thankyou-mascot {
+  position: absolute;
+  height: 65%;
+  width: auto;
+  filter: blur(7px);
+  z-index: 1;
+  animation: thankyou-float 3s infinite;
+  transition: height 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.thankyou-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 15px;
+}
+
+.thankyou-head {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.thankyou-body {
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.thankyou-text > span {
+  font-size: 12px;
+  color: lightgrey;
+}
+
+.thankyou-card:hover {
+  transform: scale(1.04) rotate(-1deg);
+}
+
+.thankyou-card:hover .thankyou-mascot {
+  height: 78%;
+}
+
+@keyframes thankyou-float {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* The float is decoration on top of a message that is already legible, so it
+   is the first thing to go — the same contract CountUp and ViewsChart keep. */
+.thankyou-card--still .thankyou-mascot {
+  animation: none;
+}
+
+.thankyou-card--still:hover {
+  transform: none;
+}

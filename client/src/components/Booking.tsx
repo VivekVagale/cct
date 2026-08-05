@@ -5,11 +5,45 @@ import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import Cubes from "@/components/ui/Cubes";
 import { SparkleButton } from "@/components/SparkleButton";
+import { ThankYouCard } from "@/components/ThankYouCard";
 import { vehicles } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
 
 type Status = "idle" | "submitting" | "success" | "error";
+
+const fieldClass =
+  "bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors";
+
+/**
+ * The numbered heading above each part of the request.
+ *
+ * The section asks for four separate things across two layouts — a vehicle
+ * grid, a column of fields, a card grid, a button — and without a running
+ * count there is nothing telling a visitor how much is left, or that the
+ * machine they picked at the top belongs to the form at the bottom at all.
+ */
+function Step({
+  number,
+  title,
+  hint,
+}: {
+  number: string;
+  title: string;
+  hint?: string;
+}) {
+  return (
+    <div className="mb-5 sm:mb-6">
+      <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-2">
+        Step {number}
+      </p>
+      <h3 className="font-display text-xl sm:text-2xl text-[#F5F7FA] leading-tight">
+        {title}
+      </h3>
+      {hint && <p className="text-sm text-[#B8C4D6] mt-2 max-w-md">{hint}</p>}
+    </div>
+  );
+}
 
 export function Booking() {
   const [status, setStatus] = useState<Status>("idle");
@@ -38,6 +72,7 @@ export function Booking() {
       fullName: String(data.get("fullName") || ""),
       email: String(data.get("email") || ""),
       instagram: String(data.get("instagram") || ""),
+      whatsapp: String(data.get("whatsapp") || ""),
       projectType: selectedProject,
       vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
@@ -52,14 +87,8 @@ export function Booking() {
         id="booking"
         className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
       >
-        <div className="max-w-2xl mx-auto px-6 text-center flex flex-col items-center">
-          <Mascot pose="fistPump" size="xl" />
-          <h2 className="font-display text-2xl sm:text-4xl text-[#F5F7FA] mt-8 mb-4">
-            Request received.
-          </h2>
-          <p className="text-sm sm:text-base text-[#B8C4D6]">
-            We'll be in touch within two business days to talk through your project.
-          </p>
+        <div className="max-w-2xl mx-auto px-6 flex justify-center">
+          <ThankYouCard />
         </div>
       </section>
     );
@@ -93,11 +122,15 @@ export function Booking() {
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-16 flex items-end justify-between gap-8">
         <div>
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
-            Configure
+            Step 01 — Configure
           </p>
           <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
             Pick your machine.
           </h2>
+          <p className="text-sm sm:text-base text-[#B8C4D6] mt-4 sm:mt-5 max-w-md">
+            Choose the vehicle, then its colour. Four steps in all — this is the
+            only one that needs a decision from you before the form.
+          </p>
         </div>
         {/* Moved up from the copy column below. Two mascots in one section is
             clutter, and this is where the visitor is actually being asked to
@@ -150,68 +183,95 @@ export function Booking() {
           onSubmit={handleSubmit}
           className="lg:col-span-8 flex flex-col gap-8 sm:gap-10"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-            <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-              Full Name
-              <input
-                name="fullName"
-                required
-                className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-              Email
-              <input
-                name="email"
-                type="email"
-                required
-                className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-              Instagram
-              <input
-                name="instagram"
-                className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors"
-              />
-            </label>
+          {/* One field per row rather than two across.
+              A single column gives every field the same left edge and one
+              reading order, which is what makes a form scannable — and the
+              pairs it replaces put Email beside Full Name at desktop width
+              and stacked them anyway on a phone, so the two-column version
+              was only ever the desktop's layout. Capped rather than run to
+              the column's full width: an underline five hundred pixels long
+              reads as a rule across the page, not as a field. */}
+          <div>
+            <Step
+              number="02"
+              title="Tell us who you are."
+              hint="Name and email are all we need. The handles below are how we reply."
+            />
+            <div className="flex flex-col gap-5 sm:gap-6 max-w-xl">
+              <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+                Full Name
+                <input name="fullName" required className={fieldClass} />
+              </label>
+              <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+                Email
+                <input name="email" type="email" required className={fieldClass} />
+              </label>
+              <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+                Your Instagram @handle
+                <input
+                  name="instagram"
+                  placeholder="@yourhandle"
+                  className={`${fieldClass} placeholder:text-[#B8C4D6]/40`}
+                />
+              </label>
+              <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
+                WhatsApp @handle/number (optional)
+                <input
+                  name="whatsapp"
+                  placeholder="+91 98765 43210"
+                  className={`${fieldClass} placeholder:text-[#B8C4D6]/40`}
+                />
+              </label>
+            </div>
           </div>
 
-          {/* A fieldset rather than a label: a label may caption one control,
-              and this is a group of them. */}
-          <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
-            <legend className="text-xs tracking-[0.14em] uppercase text-[#B8C4D6] mb-3">
-              Project
-            </legend>
-            {/* Same reasoning as the CGI Projects grid: these are that card
-                with a selected state, so they need the same column width to
-                hold the same title and description. */}
-            <div
-              role="radiogroup"
-              aria-label="Project"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-            >
-              {projects.map((project) => (
-                <ProjectOptionCard
-                  key={project.id}
-                  project={project}
-                  selected={selectedProject === project.title}
-                  onSelect={() => setSelectedProject(project.title)}
-                />
-              ))}
-            </div>
-          </fieldset>
-
-          <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            Project Description
-            <textarea
-              name="description"
-              rows={4}
-              className="bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal resize-none transition-colors"
+          <div>
+            <Step
+              number="03"
+              title="Tell us about the shot."
+              hint="Describe it in your own words first, then pick the closest kind of build."
             />
-          </label>
+            <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6] max-w-xl mb-8 sm:mb-10">
+              Project Description
+              <textarea
+                name="description"
+                rows={4}
+                placeholder="A night ride through wet city streets, headlight flare, no rider."
+                className={`${fieldClass} resize-none placeholder:text-[#B8C4D6]/40`}
+              />
+            </label>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+            {/* A fieldset rather than a label: a label may caption one control,
+                and this is a group of them. */}
+            <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
+              <legend className="text-xs tracking-[0.14em] uppercase text-[#B8C4D6] mb-3">
+                Project
+              </legend>
+              {/* Same reasoning as the CGI Projects grid: these are that card
+                  with a selected state, so they need the same column width to
+                  hold the same title and description. */}
+              <div
+                role="radiogroup"
+                aria-label="Project"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+              >
+                {projects.map((project) => (
+                  <ProjectOptionCard
+                    key={project.id}
+                    project={project}
+                    selected={selectedProject === project.title}
+                    onSelect={() => setSelectedProject(project.title)}
+                  />
+                ))}
+              </div>
+            </fieldset>
+          </div>
+
+          {/* Centred on the form column, which is where the eye already is
+              after a column of centred cards — left-aligned it sat under the
+              first card with three cards' width of empty space beside it. */}
+          <div className="flex flex-col items-center gap-4">
+            <Step number="04" title="Send it." />
             <Magnet padding={40} strength={5}>
               <SparkleButton type="submit" disabled={status === "submitting"}>
                 {status === "submitting" ? "Sending..." : "Submit Request"}

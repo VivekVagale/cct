@@ -2,6 +2,8 @@ export interface BookingFormData {
   fullName: string;
   email: string;
   instagram: string;
+  /** Optional — a handle or a number, whichever the client gave. */
+  whatsapp: string;
   projectType: string;
   vehicle: string;
   description: string;
