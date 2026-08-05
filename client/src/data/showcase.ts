@@ -6,6 +6,16 @@ export interface ShowcaseItem {
   year: string;
   description: string;
   image: string;
+  /**
+   * Where the sphere takes its square crop from, vertically. 0 top, 1 bottom,
+   * omitted means the middle.
+   *
+   * The discs are circles cut from a square, so a 9:16 export loses 44% of its
+   * height before it is even masked. Set this per image rather than
+   * re-exporting: a bike low in a reel frame wants about 0.65, a helmet high in
+   * one wants about 0.3.
+   */
+  focusY?: number;
 }
 
 export const showcaseItems: ShowcaseItem[] = [

@@ -568,6 +568,17 @@ export interface MenuItem {
   link: string;
   title: string;
   description: string;
+  /**
+   * Where the square crop is taken from, vertically. 0 is the top edge, 1 the
+   * bottom, 0.5 the middle — which is the default and what every image used to
+   * get.
+   *
+   * It exists for portrait sources. A 9:16 frame loses about 44% of its height
+   * to the square, and on a reel the subject is rarely dead centre: a bike sits
+   * low, a rider's helmet sits high. Without this the only way to fix a badly
+   * framed disc was to re-export the file.
+   */
+  focusY?: number;
 }
 
 type ActiveItemCallback = (index: number) => void;
@@ -826,15 +837,21 @@ class InfiniteGridMenu {
         if (!img) return;
         const x = (i % this.atlasSize) * cellSize;
         const y = Math.floor(i / this.atlasSize) * cellSize;
-        // Crop a centred square out of the source rather than squeezing the
-        // whole image into the square cell. The shader samples each cell as a
-        // unit square, so anything non-square written in flat would render
+        // Crop a square out of the source rather than squeezing the whole
+        // image into the square cell. The shader samples each cell as a unit
+        // square, so anything non-square written in flat would render
         // stretched on the disc — a 16:9 photo squashed to 1:1.
+        //
+        // Horizontally always centred; vertically wherever the item says. The
+        // default is the middle, which is what this always did. A 9:16 source
+        // loses 44% of its height here, and which 44% is a decision the file
+        // cannot make for itself.
         const side = Math.min(img.width, img.height);
+        const focusY = Math.min(Math.max(this.items[i]?.focusY ?? 0.5, 0), 1);
         ctx.drawImage(
           img,
           (img.width - side) / 2,
-          (img.height - side) / 2,
+          (img.height - side) * focusY,
           side,
           side,
           x,

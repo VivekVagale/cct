@@ -69,6 +69,7 @@ export function WorkShowcase() {
         link: "#projects",
         title: p.title,
         description: `${p.vehicle} — ${p.category}`,
+        focusY: p.focusY,
       })),
       ...projects
         .filter((e) => !e.comingSoon)
