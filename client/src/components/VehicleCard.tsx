@@ -6,9 +6,22 @@ interface VehicleCardProps {
   vehicle: Vehicle;
   selected: boolean;
   onSelect: () => void;
+  /**
+   * Off while the card is held at centre stage.
+   *
+   * The tilt is a hover affordance for a tile in a grid — something to invite
+   * the pointer. A card the visitor is already reading, with its colours laid
+   * out beneath it, should not wobble under the cursor while they choose.
+   */
+  tilt?: boolean;
 }
 
-export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
+export function VehicleCard({
+  vehicle,
+  selected,
+  onSelect,
+  tilt = true,
+}: VehicleCardProps) {
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
     useTilt<HTMLButtonElement>();
 
@@ -17,22 +30,31 @@ export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
       ref={ref}
       type="button"
       onClick={onSelect}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
+      onMouseMove={tilt ? onMouseMove : undefined}
+      onMouseLeave={tilt ? onMouseLeave : undefined}
       whileTap={{ scale: 0.97 }}
-      style={{ rotateX, rotateY, transformPerspective: 900 }}
-      className={`group relative text-left overflow-hidden rounded-sm border transition-colors duration-300 ${
+      /* The rotation lives here and nowhere else. Framer's layout projection
+         measures a rendered box, and a rotated box measures wrong — so the
+         flight to centre stage is animated by a plain wrapper above this
+         element rather than by this element itself. Keeping the two on
+         separate nodes is what stops the promotion from skewing. */
+      style={tilt ? { rotateX, rotateY, transformPerspective: 900 } : undefined}
+      role="radio"
+      aria-checked={selected}
+      className={`group relative w-full text-left overflow-hidden rounded-sm border transition-colors duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
         selected
           ? "border-white/70 bg-white/[0.04]"
           : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
       }`}
     >
       {/* Cursor-follow highlight */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ background: glowBackground }}
-      />
+      {tilt && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ background: glowBackground }}
+        />
+      )}
 
       <div className="relative aspect-[4/3] overflow-hidden">
         <motion.img
@@ -40,7 +62,7 @@ export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
           alt={vehicle.name}
           className="w-full h-full object-cover"
           animate={{ scale: selected ? 1.06 : 1 }}
-          whileHover={{ scale: 1.08, y: -4 }}
+          whileHover={tilt ? { scale: 1.08, y: -4 } : undefined}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
@@ -63,13 +85,6 @@ export function VehicleCard({ vehicle, selected, onSelect }: VehicleCardProps) {
         )}
         <h4 className="font-display text-base sm:text-xl text-[#F5F7FA]">{vehicle.name}</h4>
       </motion.div>
-
-      {selected && (
-        <motion.div
-          layoutId="vehicle-selected-indicator"
-          className="absolute top-4 right-4 w-2 h-2 rounded-full bg-white"
-        />
-      )}
     </motion.button>
   );
 }

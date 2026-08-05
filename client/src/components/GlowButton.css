@@ -59,7 +59,16 @@
   transition: filter 0.4s ease;
 }
 
-.glow-button:hover::before {
+/*
+ * Focus lights the glow as well as hover.
+ *
+ * The search field needs it — a text input that dims the moment you start
+ * typing into it reads as having lost focus. It applies to the button too,
+ * which previously had no focus indicator at all, so a keyboard visitor now
+ * gets the same bloom a mouse visitor gets on hover.
+ */
+.glow-button:hover::before,
+.glow-button:focus-within::before {
   background: linear-gradient(90deg, #03a9f4, #f441a5);
   filter: blur(1.2em);
 }
@@ -79,5 +88,27 @@
   background-color: #000;
   color: #fff;
   cursor: pointer;
+  box-shadow: 2px 2px 3px #000000b4;
+}
+
+/*
+ * The same face, holding a control rather than a label.
+ *
+ * It shares the ring, the bloom and the concentric radius by construction: the
+ * wrapper draws both, and the radius is still derived from the same two custom
+ * properties, so a field and a button set side by side cannot drift apart. Only
+ * the inside differs — a row rather than a block, since this holds an icon, an
+ * input and a clear button.
+ *
+ * The pill shape a search field wants comes from overriding --glow-radius at
+ * the call site; nothing here needs to know about it.
+ */
+.glow-button__field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: calc(var(--glow-radius) - var(--glow-ring));
+  background-color: #000;
+  color: #fff;
   box-shadow: 2px 2px 3px #000000b4;
 }

@@ -1,7 +1,9 @@
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { vehicles } from "@/data/vehicles";
+import { vehicles, type Vehicle } from "@/data/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
-import { ColorCard } from "@/components/ColorCard";
+import { VehicleFocus } from "@/components/VehicleFocus";
+import { VehicleSearch } from "@/components/VehicleSearch";
 
 interface VehicleConfiguratorProps {
   selectedVehicleId: string | null;
@@ -16,49 +18,134 @@ export function VehicleConfigurator({
   onSelectVehicle,
   onSelectColor,
 }: VehicleConfiguratorProps) {
-  const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId) ?? null;
+  const [query, setQuery] = useState("");
+
+  /*
+   * Which vehicle is held at centre stage, as distinct from which one is
+   * selected. Dismissing the overlay must not throw away the choice — the
+   * visitor picked a bike and a colour, and closing the panel they picked them
+   * in is not them changing their mind. Tapping the card again re-opens it.
+   */
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+
+  /*
+   * Two lists, because a pinned selection must not be mistaken for a match.
+   *
+   * `matched` is what the query actually found; `shown` is what gets rendered,
+   * which also keeps the selected vehicle on screen even when it does not match.
+   * Letting a filter hide the current selection would make the colour step
+   * vanish mid-configuration — the exact failure this section was rebuilt to get
+   * rid of. Counting them separately is what lets a query that finds nothing
+   * still say so, instead of silently leaving one unrelated card on screen.
+   *
+   * The marque is matched as well as the model: someone typing "kawasaki" wants
+   * the two Ninjas, and the marque is printed on the card, so a name-only match
+   * would read as broken rather than strict.
+   */
+  const { matched, shown } = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return { matched: vehicles, shown: vehicles };
+    const matches = (v: Vehicle) =>
+      `${v.manufacturer} ${v.name}`.toLowerCase().includes(q);
+    const matched = vehicles.filter(matches);
+    const pinned = vehicles.filter(
+      (v) => v.id === selectedVehicleId && !matches(v),
+    );
+    return { matched, shown: [...matched, ...pinned] };
+  }, [query, selectedVehicleId]);
+
+  const focusedVehicle = vehicles.find((v) => v.id === focusedId) ?? null;
+
+  const handleSelectVehicle = (id: string) => {
+    onSelectVehicle(id);
+    setFocusedId(id);
+  };
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">Vehicle</p>
+    <div className="max-w-[1600px] mx-auto px-6 sm:px-10">
+      <VehicleSearch
+        value={query}
+        onChange={setQuery}
+        resultCount={matched.length}
+        className="mb-8 sm:mb-10"
+      />
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        {vehicles.map((vehicle) => (
-          <VehicleCard
-            key={vehicle.id}
-            vehicle={vehicle}
-            selected={vehicle.id === selectedVehicleId}
-            onSelect={() => onSelectVehicle(vehicle.id)}
-          />
-        ))}
-      </div>
-
-      <AnimatePresence mode="wait" initial={false}>
-        {selectedVehicle && (
-          <motion.div
-            key={selectedVehicle.id}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
+      {matched.length === 0 && (
+        <p className="mb-8 text-sm text-[#B8C4D6]">
+          No machines match “{query.trim()}”.{" "}
+          {shown.length > 0 && "Still showing your current pick. "}
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className="border-b border-white/30 text-[#F5F7FA] transition-colors duration-300 hover:border-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
-            <div className="pt-2 pb-1 border-t border-white/[0.08]">
-              <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6] mt-4 mb-3">
-                Colour — {selectedVehicle.manufacturer} {selectedVehicle.name}
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {selectedVehicle.colors.map((color) => (
-                  <ColorCard
-                    key={color.id}
-                    color={color}
-                    selected={color.id === selectedColorId}
-                    onSelect={() => onSelectColor(color.id)}
-                  />
-                ))}
+            Show all
+          </button>
+        </p>
+      )}
+
+      {shown.length > 0 && (
+        /* The What We Build ladder, one step short at the bottom. That section
+           drops to a single column on phones because its cards carry a
+           sentence of description that broke to two-word lines in half a
+           narrow viewport; these carry a marque and a model name, which
+           survive the same width — and five vehicles stacked one-up is a very
+           long scroll to reach a form. */
+        <div
+          role="radiogroup"
+          aria-label="Vehicle"
+          className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+        >
+          {shown.map((vehicle) => (
+            <div key={vehicle.id} className="relative">
+              {/* Holds the cell open while the card is away at centre stage.
+                  Without it the grid reflows the moment the card leaves and
+                  reflows back as it returns, so the card flies home to a slot
+                  that is still moving. `invisible` also takes its buttons out
+                  of the tab order, which a copy of a real card must not keep. */}
+              <div aria-hidden className="invisible rounded-sm border border-transparent">
+                <div className="aspect-[4/3]" />
+                <div className="p-3.5 sm:p-5">
+                  <p className="text-[10px] tracking-[0.18em] uppercase mb-1">
+                    {vehicle.manufacturer}
+                  </p>
+                  <h4 className="font-display text-base sm:text-xl">{vehicle.name}</h4>
+                </div>
               </div>
+
+              {focusedId !== vehicle.id && (
+                <motion.div
+                  layoutId={`vehicle-focus-${vehicle.id}`}
+                  className="absolute inset-0"
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <VehicleCard
+                    vehicle={vehicle}
+                    selected={vehicle.id === selectedVehicleId}
+                    onSelect={() => handleSelectVehicle(vehicle.id)}
+                  />
+                </motion.div>
+              )}
             </div>
-          </motion.div>
+          ))}
+        </div>
+      )}
+
+      <AnimatePresence>
+        {focusedVehicle && (
+          <VehicleFocus
+            key={focusedVehicle.id}
+            vehicle={focusedVehicle}
+            selectedColorId={selectedColorId}
+            onSelectColor={(colorId) => {
+              onSelectColor(colorId);
+              // Choosing a colour finishes the job the panel was opened for, so
+              // it closes itself rather than leaving the visitor to work out
+              // how to get back to the form.
+              setFocusedId(null);
+            }}
+            onDismiss={() => setFocusedId(null)}
+          />
         )}
       </AnimatePresence>
     </div>
