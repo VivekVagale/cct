@@ -21,8 +21,9 @@ const LINKS = [
  * because every one of those draws an edge across the viewport — and while the
  * sequence plays that edge lands straight across the mascot's helmet. A halo on
  * the text reads over both the bright hoodie and the starfield without putting
- * a line anywhere. It stays on after the glass arrives: the tint is 55%, not a
- * plate, and the type still has starfield showing through behind it.
+ * a line anywhere. The glass only arrives once that mascot is dissolving, and
+ * the halo stays on under it: the tint is 55%, not a plate, and the type still
+ * has starfield showing through behind it.
  *
  * Blurred rather than offset: an offset shadow reads as cheap, a halo reads as
  * depth.
@@ -31,14 +32,18 @@ const HALO = "[text-shadow:0_1px_10px_rgba(5,7,10,0.85)]";
 
 export function Navigation({
   /**
-   * The hero's reveal, 0 through the assembly and 1 once the starfield is up.
-   * The bar's glass rides the same beat — the objection to a background was
-   * always the edge across the mascot, and by the time this reaches 1 there is
-   * no mascot under it.
+   * How far through its dissolve the hero's stage is: 0 while the mascot is up,
+   * 1 once it has gone.
+   *
+   * Not the starfield's opacity, which was the first thing tried. The stars
+   * rise behind a mascot that is still fully there, so a bar that puts its
+   * plate on at that moment draws its edge straight across the helmet — the
+   * one thing this bar has always refused to do. The space under it clears
+   * when the hero leaves, not when the background arrives.
    */
-  revealProgress,
+  heroExit,
 }: {
-  revealProgress: MotionValue<number>;
+  heroExit: MotionValue<number>;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -50,11 +55,16 @@ export function Navigation({
    * re-blur the whole bar on every frame of the scrub, over a sequence that is
    * already the most expensive thing on the page. Crossing the threshold is one
    * re-render in each direction, and the glass simply does not exist before it.
+   *
+   * A third of the way through the dissolve, not the start of it. At 0 the
+   * glass would begin arriving while the mascot is still at full opacity, and
+   * the two would cross-fade — which is the same edge-across-the-helmet
+   * problem in slow motion. By 0.35 the hero is visibly leaving.
    */
-  const [glass, setGlass] = useState(() => revealProgress.get() > 0.02);
+  const [glass, setGlass] = useState(() => heroExit.get() > 0.35);
 
-  useMotionValueEvent(revealProgress, "change", (v) => {
-    const next = v > 0.02;
+  useMotionValueEvent(heroExit, "change", (v) => {
+    const next = v > 0.35;
     setGlass((prev) => (prev === next ? prev : next));
   });
 
