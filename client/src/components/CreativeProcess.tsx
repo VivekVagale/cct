@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring, type MotionValue } from "framer-motion";
 import { processStages, type ProcessStage } from "@/data/content";
 import { Mascot } from "@/components/Mascot";
+import { FoldHeading } from "@/components/FoldHeading";
 
 /**
  * A vertical cinematic journey: the section pins once and each stage occupies
@@ -52,7 +53,7 @@ export function CreativeProcess() {
             How We Work
           </p>
           <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] leading-[1.05]">
-            Creative Process
+            <FoldHeading text="Creative Process" />
           </h2>
         </motion.div>
 

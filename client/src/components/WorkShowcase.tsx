@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import InfiniteMenu, { type MenuItem } from "@/components/ui/InfiniteMenu";
 import { showcaseItems } from "@/data/showcase";
+import { FoldHeading } from "@/components/FoldHeading";
 
 /**
  * Replaces the scrolling image marquee with a draggable sphere of work.
@@ -102,7 +103,7 @@ export function WorkShowcase() {
             Selected Work
           </p>
           <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] leading-[1.05] max-w-xl">
-            Turn it over.
+            <FoldHeading text="Turn it over." />
           </h2>
         </div>
       </div>

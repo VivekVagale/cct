@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { projects, type Project } from "@/data/content";
 import { useTilt } from "@/hooks/useTilt";
+import { FoldHeading } from "@/components/FoldHeading";
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
@@ -97,7 +98,7 @@ export function Projects() {
           What We Build
         </p>
         <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
-          CGI Projects
+          <FoldHeading text="CGI Projects" />
         </h2>
       </div>
 

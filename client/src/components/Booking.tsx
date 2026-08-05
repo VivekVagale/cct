@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Mascot } from "@/components/Mascot";
+import Cubes from "@/components/ui/Cubes";
 import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
@@ -9,6 +10,7 @@ import { ThankYouCard } from "@/components/ThankYouCard";
 import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
+import { FoldHeading } from "@/components/FoldHeading";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -207,7 +209,7 @@ export function Booking() {
             Step 01 — Configure
           </p>
           <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
-            Pick your machine.
+            <FoldHeading text="Pick your machine." />
           </h2>
           <p className="text-sm sm:text-base text-[#B8C4D6] mt-4 sm:mt-5 max-w-md">
             Choose the vehicle, then its colour. Five steps in all — this is the
@@ -242,12 +244,42 @@ export function Booking() {
             Start a Project
           </p>
           <h2 className="font-display text-3xl sm:text-5xl text-[#F5F7FA] leading-[1.05] mb-6 sm:mb-8 max-w-md">
-            Ready to turn your machine into cinema.
+            <FoldHeading text="Ready to turn your machine into cinema." />
           </h2>
           <p className="text-sm sm:text-base text-[#B8C4D6] leading-relaxed max-w-sm mb-0 lg:mb-10">
             Tell us the story you want it to tell. We'll follow up to scope the
             shot list together.
           </p>
+
+          {/* Decoration under the copy, filling the column the copy leaves
+              empty — the left side of this band ends a long way above the form
+              beside it.
+
+              The pointer reaches it, which is the whole point: the grid tilts
+              its cubes toward the cursor and that is the only thing it does.
+              The click ripple stays off, because a click here leads nowhere and
+              an element that answers a click is claiming otherwise. Hidden from
+              assistive tech for the same reason — there is nothing in it to
+              announce.
+
+              Desktop only. On a phone this column is stacked directly above the
+              first field, where a decorative grid is something to scroll past
+              on the way to the form. */}
+          <div
+            aria-hidden
+            className="hidden lg:block relative mt-2 w-full cubes-fill"
+          >
+            <Cubes
+              gridSize={6}
+              maxAngle={45}
+              radius={3}
+              borderStyle="2px dashed #B497CF"
+              faceColor="#1a1a2e"
+              rippleColor="#ff6b6b"
+              rippleSpeed={1.5}
+              autoAnimate
+            />
+          </div>
         </div>
 
         <div className="lg:col-span-8 flex flex-col gap-8 sm:gap-10">

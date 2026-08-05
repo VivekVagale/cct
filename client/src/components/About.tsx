@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useParallax } from "@/components/Reveal";
 import { Mascot } from "@/components/Mascot";
 import { AnimatedText } from "@/components/AnimatedText";
 import { StatCounter } from "@/components/StatCounter";
-import Cubes from "@/components/ui/Cubes";
 import { ReelsBarChart } from "@/components/ReelsBarChart";
 import { AudienceMap } from "@/components/AudienceMap";
 import { headline, reachStats, reachWindow, topReels } from "@/data/reach";
 import { audienceShares, audienceWindow } from "@/data/audience";
+import { FoldHeading } from "@/components/FoldHeading";
 
 /**
  * What the studio is, argued with what the work did rather than with adjectives.
@@ -40,6 +41,17 @@ export function About() {
   const [hoveredReel, setHoveredReel] = useState<string | null>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
+  /*
+   * Depth, from two layers moving at different rates.
+   *
+   * The mascot lags the page as it passes, so it sits behind the copy beside
+   * it rather than on the same flat plane. Small on purpose: past about 120px
+   * the parallax stops reading as depth and starts reading as the element being
+   * in the wrong place.
+   */
+  const aboutMascotRef = useRef<HTMLDivElement>(null);
+  const aboutMascotY = useParallax(aboutMascotRef, 70);
+
   return (
     /* scroll-mt clears the fixed bar. The nav links are anchors, so without it a
        jump lands the section's own top at y=0 and the bar covers the first line
@@ -68,7 +80,9 @@ export function About() {
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="font-display text-3xl sm:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05] mb-4 sm:mb-6 max-w-4xl"
             >
-              {headline.followers} followers. {headline.views} views.
+              <FoldHeading
+                text={`${headline.followers} followers. ${headline.views} views.`}
+              />
             </motion.h2>
 
             <p className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-[#B8C4D6]/60 mb-8 sm:mb-10">
@@ -81,9 +95,18 @@ export function About() {
             />
           </div>
 
-          <div className="lg:col-span-4 flex justify-center lg:justify-end">
+          {/* Scroll parallax on top of the mascot's own pointer parallax, and
+              they do not fight: the pose drifts a few px toward the cursor
+              inside its box, this moves the box itself against the page. The
+              column lags the copy beside it, which is what puts the two at
+              different depths instead of on one flat plane. */}
+          <motion.div
+            ref={aboutMascotRef}
+            style={{ y: aboutMascotY }}
+            className="lg:col-span-4 flex justify-center lg:justify-end"
+          >
             <Mascot pose="armsCrossed" size="xl" parallax />
-          </div>
+          </motion.div>
         </div>
 
         {/* Engagement, not reach. The follower-to-view ratio above is the reach
@@ -164,45 +187,17 @@ export function About() {
               {audienceWindow.label}
             </p>
             <h3 className="font-display text-2xl sm:text-4xl text-[#F5F7FA] leading-[1.05] mb-6">
-              Where it landed.
+              <FoldHeading text="Where it landed." />
             </h3>
             <AudienceMap hoveredCountry={hoveredCountry} />
           </div>
 
-          {/* The map's table view, same as the chart has one. */}
-          <div className="lg:col-span-4">
-            {/* Decoration, and only that. It carries no reading of the numbers
-                under it, so it is hidden from assistive tech and takes no
-                clicks — the ripple-on-click it used to have invited an
-                interaction that leads nowhere.
-
-                Full column width rather than the half it sat at beside the
-                bar chart: here it heads the country table, and a grid at half
-                width above a list at full width reads as a mistake. Desktop
-                only, where there is room to spare.
-
-                The pointer reaches it. It used to carry pointer-events-none,
-                which killed the tilt-under-the-cursor the grid exists for —
-                the cubes only ever ran their idle animation and never
-                responded to anything. Hover is back; the click ripple stays
-                off, because a click here leads nowhere and an element that
-                answers a click is claiming otherwise. */}
-            <div
-              aria-hidden
-              className="hidden lg:block relative mb-10 w-full cubes-fill"
-            >
-              <Cubes
-                gridSize={6}
-                maxAngle={45}
-                radius={3}
-                borderStyle="2px dashed #B497CF"
-                faceColor="#1a1a2e"
-                rippleColor="#ff6b6b"
-                rippleSpeed={1.5}
-                autoAnimate
-              />
-            </div>
-
+          {/* The map's table view, same as the chart has one.
+              Centred against the map rather than starting at the top of the
+              band: the map column carries an eyebrow and a heading above the
+              chart, so a list flush to the top of its own column sat a
+              heading's height higher than the thing it describes. */}
+          <div className="lg:col-span-4 flex flex-col justify-center">
             <ul className="divide-y divide-white/[0.08] border-t border-white/[0.08]">
               {audienceShares.slice(0, 8).map((row) => (
                 <li
