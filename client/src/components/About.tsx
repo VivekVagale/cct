@@ -55,7 +55,7 @@ export function About() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-6 sm:mb-8"
             >
               About Us
@@ -65,7 +65,7 @@ export function About() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="font-display text-3xl sm:text-6xl lg:text-7xl text-[#F5F7FA] leading-[1.05] mb-4 sm:mb-6 max-w-4xl"
             >
               {headline.followers} followers. {headline.views} views.

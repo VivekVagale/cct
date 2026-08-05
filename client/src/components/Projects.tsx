@@ -17,10 +17,17 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       onMouseLeave={onMouseLeave}
       whileTap={disabled ? undefined : { scale: 0.97 }}
       style={{ rotateX, rotateY, transformPerspective: 900 }}
-      initial={{ opacity: 0, y: 30 }}
+      /* Reveal's timing, applied here rather than by wrapping in it: the tilt
+         writes rotateX/rotateY to this same element, and a wrapper animating
+         y would be a second transform on a node that already has one. */
+      initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.7, delay: (index % 4) * 0.08 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{
+        duration: 1.1,
+        delay: (index % 4) * 0.1,
+        ease: [0.16, 1, 0.3, 1],
+      }}
       className={`group relative overflow-hidden rounded-sm border border-white/[0.1] bg-white/[0.02] transition-colors duration-300 hover:border-white/30 ${
         disabled ? "cursor-default" : "cursor-pointer"
       }`}

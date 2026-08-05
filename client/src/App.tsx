@@ -14,9 +14,23 @@ import { Footer } from "./components/Footer";
 import { CinematicLine } from "./components/CinematicLine";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
-import { motion, useMotionValue } from "framer-motion";
+import { motion, useMotionValue, useReducedMotion } from "framer-motion";
+import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 
 function App() {
+  /*
+   * Inertial scrolling for the whole page.
+   *
+   * Everything on this page is driven by scroll position, and scroll position
+   * was arriving in ~100px steps from a wheel notch. Every animation was
+   * smooth and the thing playing them was not — which is what made a page full
+   * of motion feel static.
+   *
+   * Off entirely under prefers-reduced-motion rather than slowed down. Someone
+   * who has asked for less motion has not asked for gentler motion.
+   */
+  useSmoothScroll(!useReducedMotion());
+
   // The starfield is faded up by the Hero as its assembly finishes, so the page
   // opens on flat black and the stars arrive with the reveal.
   //

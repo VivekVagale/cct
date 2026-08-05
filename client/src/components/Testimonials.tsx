@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
 import { testimonials } from "@/data/content";
+import { Reveal } from "@/components/Reveal";
 import { TestimonialTicket, TicketBumpFilter } from "@/components/TestimonialTicket";
 
 export function Testimonials() {
@@ -23,15 +23,12 @@ export function Testimonials() {
             up a breakpoint earlier and two across arrives at sm. */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-12 justify-items-center">
           {testimonials.map((t, i) => (
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-            >
+            // Same wrapper, so no layout changes — only the curve, which is
+            // now the one every other entrance on the page uses. `scale`
+            // because a ticket is an object arriving, not a paragraph.
+            <Reveal delay={i * 0.12} key={t.name} scale>
               <TestimonialTicket t={t} />
-            </motion.div>
+            </Reveal>
           ))}
         </div>
       </div>

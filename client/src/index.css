@@ -236,9 +236,20 @@
     }
   }
 
-  /* Smooth scrolling */
   html {
-    scroll-behavior: smooth;
+    /*
+     * No `scroll-behavior: smooth` here any more — useSmoothScroll owns it.
+     *
+     * The two are separate smooth-scroll implementations competing for the
+     * same property: the native one wins the anchor jumps, and for everything
+     * else it stutters against the interpolated position Lenis is writing. It
+     * also had a second cost worth remembering — `scrollIntoView()` anywhere on
+     * the page walked its ancestors and smooth-scrolled the whole document.
+     *
+     * Under prefers-reduced-motion the hook does not run at all, and scrolling
+     * falls back to the browser's own instant behaviour, which is the right
+     * answer for that setting rather than a degraded version of this one.
+     */
 
     /*
      * Nothing on this page is meant to be reachable sideways, so the page
