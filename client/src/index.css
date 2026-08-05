@@ -239,11 +239,40 @@
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+
+    /*
+     * Nothing on this page is meant to be reachable sideways, so the page
+     * cannot scroll sideways.
+     *
+     * A horizontal scrollbar was appearing along the bottom of wide viewports.
+     * It takes only a fraction of a pixel of overflow to summon one, and the
+     * likeliest source is the one every layout has: a vertical scrollbar takes
+     * width out of the viewport that percentage widths know about and
+     * viewport-relative lengths do not. Rather than hunt each candidate down
+     * one viewport at a time, the document simply refuses the axis.
+     *
+     * clip, not hidden. `overflow-x: hidden` on the root makes the document a
+     * scroll container, and position: sticky does not survive one — the hero's
+     * pinned stage, the showcase and the process section are all sticky. `clip`
+     * creates no scroll container and leaves the vertical axis alone.
+     */
+    overflow-x: clip;
   }
 
-  /* Custom scrollbar */
+  /*
+   * The scrollbar, in the site's own colours rather than the browser's.
+   *
+   * The thumb was #FFFFFF, which on a #05070A page is the brightest thing on
+   * screen and reads as a white bar rather than as a scrollbar — most of all
+   * on the horizontal one, which runs the full width of the viewport. Dim
+   * violet at rest, the brand violet under the pointer.
+   *
+   * Both axes are styled: ::-webkit-scrollbar's `width` only sizes the
+   * vertical bar, and a horizontal one takes its `height`.
+   */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -251,12 +280,19 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #FFFFFF;
+    background: #3B2568;
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
     background: #9F6EF2;
+  }
+
+  /* Firefox has no ::-webkit- pseudo-elements and was showing the default
+     light thumb on a black page. */
+  html {
+    scrollbar-color: #3b2568 #05070a;
+    scrollbar-width: thin;
   }
 }
 
@@ -295,4 +331,37 @@
 .selected-glow {
   border-color: #9f6ef2;
   box-shadow: var(--selected-ring), var(--selected-bloom);
+}
+
+/*
+ * A row in a table that drives a chart.
+ *
+ * The reel list and the country list are the table views of the two charts
+ * beside them, and hovering a row now highlights the bar or the country it
+ * names. That link is invisible unless the row says it is hoverable, so it
+ * lights: a violet wash, a violet edge down the left, and the type coming up
+ * to full white.
+ *
+ * The edge is an inset box-shadow rather than a border, so it costs no layout
+ * and the rows do not shift sideways by a pixel as the pointer crosses them.
+ */
+.chart-row {
+  cursor: default;
+  transition:
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.chart-row:hover,
+.chart-row:focus-within {
+  background-color: rgba(122, 68, 224, 0.1);
+  box-shadow:
+    inset 2px 0 0 0 #9f6ef2,
+    0 0 22px rgba(122, 68, 224, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-row {
+    transition: none;
+  }
 }

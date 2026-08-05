@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mascot } from "@/components/Mascot";
 import { AnimatedText } from "@/components/AnimatedText";
@@ -25,6 +26,20 @@ import { audienceShares, audienceWindow } from "@/data/audience";
  * is reachable only by hovering.
  */
 export function About() {
+  /*
+   * Which row of each table the pointer is on, held here because the chart and
+   * its table are siblings. Both charts take it as a prop and set their own
+   * hover from it, so a row and the shape it names highlight together — the
+   * table stops being a static copy of the chart and starts being a way to
+   * read it.
+   *
+   * Focus counts as well as hover: the rows are reachable with a keyboard, and
+   * a link that only works for a pointer is a link half the visitors do not
+   * have.
+   */
+  const [hoveredReel, setHoveredReel] = useState<string | null>(null);
+  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+
   return (
     /* scroll-mt clears the fixed bar. The nav links are anchors, so without it a
        jump lands the section's own top at y=0 and the bar covers the first line
@@ -89,7 +104,7 @@ export function About() {
 
         <div className="mt-16 sm:mt-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-7">
-            <ReelsBarChart reels={topReels} />
+            <ReelsBarChart reels={topReels} hoveredTitle={hoveredReel} />
           </div>
 
           {/* The chart's table view. Same numbers, reachable without a pointer. */}
@@ -98,7 +113,15 @@ export function About() {
               {[...topReels]
                 .sort((a, b) => b.views - a.views)
                 .map((reel) => (
-                  <li key={reel.postedAt} className="py-4 flex items-baseline justify-between gap-4">
+                  <li
+                    key={reel.postedAt}
+                    tabIndex={0}
+                    onMouseEnter={() => setHoveredReel(reel.title)}
+                    onMouseLeave={() => setHoveredReel(null)}
+                    onFocus={() => setHoveredReel(reel.title)}
+                    onBlur={() => setHoveredReel(null)}
+                    className="chart-row py-4 px-3 -mx-3 flex items-baseline justify-between gap-4 focus:outline-none"
+                  >
                     <div className="min-w-0">
                       <p className="text-sm text-[#F5F7FA]">
                         {reel.vehicle} {reel.title}
@@ -140,7 +163,7 @@ export function About() {
             <h3 className="font-display text-2xl sm:text-4xl text-[#F5F7FA] leading-[1.05] mb-6">
               Where it landed.
             </h3>
-            <AudienceMap />
+            <AudienceMap hoveredCountry={hoveredCountry} />
           </div>
 
           {/* The map's table view, same as the chart has one. */}
@@ -153,10 +176,17 @@ export function About() {
                 Full column width rather than the half it sat at beside the
                 bar chart: here it heads the country table, and a grid at half
                 width above a list at full width reads as a mistake. Desktop
-                only, where there is room to spare. */}
+                only, where there is room to spare.
+
+                The pointer reaches it. It used to carry pointer-events-none,
+                which killed the tilt-under-the-cursor the grid exists for —
+                the cubes only ever ran their idle animation and never
+                responded to anything. Hover is back; the click ripple stays
+                off, because a click here leads nowhere and an element that
+                answers a click is claiming otherwise. */}
             <div
               aria-hidden
-              className="hidden lg:block relative mb-10 w-full pointer-events-none cubes-fill"
+              className="hidden lg:block relative mb-10 w-full cubes-fill"
             >
               <Cubes
                 gridSize={6}
@@ -174,7 +204,12 @@ export function About() {
               {audienceShares.slice(0, 8).map((row) => (
                 <li
                   key={row.country}
-                  className="py-3 flex items-baseline justify-between gap-4"
+                  tabIndex={0}
+                  onMouseEnter={() => setHoveredCountry(row.country)}
+                  onMouseLeave={() => setHoveredCountry(null)}
+                  onFocus={() => setHoveredCountry(row.country)}
+                  onBlur={() => setHoveredCountry(null)}
+                  className="chart-row py-3 px-3 -mx-3 flex items-baseline justify-between gap-4 focus:outline-none"
                 >
                   <span className="text-sm text-[#F5F7FA]">{row.country}</span>
                   <span className="shrink-0 text-sm text-[#B8C4D6] [font-variant-numeric:tabular-nums]">

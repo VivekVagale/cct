@@ -5,6 +5,7 @@ import {
   ChoroplethFeatureComponent,
   ChoroplethGraticule,
   ChoroplethTooltip,
+  useChoropleth,
 } from "@/components/charts/choropleth";
 import { PatternLines } from "@/components/charts/visx-pattern";
 import { audienceFor, shareBucket } from "@/data/audience";
@@ -35,7 +36,37 @@ const FILLS = [
 const getShare = (feature: { properties?: { name?: string } | null }) =>
   audienceFor(feature.properties?.name ?? undefined)?.share;
 
-export function AudienceMap() {
+/**
+ * Lets the country list beside the map drive the map's hover.
+ *
+ * The map dims every feature but the hovered one off a single index, so that
+ * index is the whole of what a country name has to set — the highlight the
+ * pointer produces and the highlight the list produces are then the same
+ * thing rather than two treatments that drift apart.
+ *
+ * Renders nothing; it is a child only to be inside the chart's provider.
+ */
+function ListHoverBridge({ country }: { country: string | null }) {
+  const { features, setHoveredFeatureIndex } = useChoropleth();
+
+  useEffect(() => {
+    if (!country) {
+      setHoveredFeatureIndex(null);
+      return;
+    }
+    const index = features.findIndex((f) => f.properties?.name === country);
+    setHoveredFeatureIndex(index === -1 ? null : index);
+  }, [country, features, setHoveredFeatureIndex]);
+
+  return null;
+}
+
+export function AudienceMap({
+  /** Country the list beside the map is hovering, if any. */
+  hoveredCountry = null,
+}: {
+  hoveredCountry?: string | null;
+}) {
   const reduceMotion = useReducedMotion();
   const [geo, setGeo] = useState<ChoroplethData | null>(null);
   const [failed, setFailed] = useState(false);
@@ -109,6 +140,8 @@ export function AudienceMap() {
         formatValue={(value) => `${value.toFixed(2)}%`}
         valueLabel="Share of views"
       />
+
+      <ListHoverBridge country={hoveredCountry} />
     </ChoroplethChart>
   );
 }

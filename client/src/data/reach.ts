@@ -71,8 +71,8 @@ export const reachStats: ReachStat[] = [
  */
 export const topReels: ReelStat[] = [
   {
-    title: "Flying Superbike",
-    vehicle: "Vacuo",
+    title: "Himalayan 450",
+    vehicle: "Royal Enfield",
     postedAt: "2026-02-08",
     views: 1_600_000,
     viewsLabel: "1.6M",
