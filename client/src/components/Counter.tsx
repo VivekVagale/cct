@@ -41,14 +41,31 @@ function getValueRoundedToPlace(value: number, place: number): number {
   return Math.floor(normalizeNearInteger(scaled));
 }
 
+/**
+ * How the reel rolls.
+ *
+ * Local addition, not upstream — re-adding this component from the registry
+ * drops it. The stock spring is framer's default, which settles a digit in
+ * about half a second: quick enough that a row of five figures is over before
+ * the eye has found the first one. See DEFAULT_SPRING.
+ */
+export type CounterSpring = {
+  stiffness?: number;
+  damping?: number;
+  mass?: number;
+};
+
+const DEFAULT_SPRING: CounterSpring = { stiffness: 100, damping: 20, mass: 1 };
+
 interface DigitProps {
   place: PlaceValue;
   value: number;
   height: number;
   digitStyle?: React.CSSProperties;
+  spring: CounterSpring;
 }
 
-function Digit({ place, value, height, digitStyle }: DigitProps) {
+function Digit({ place, value, height, digitStyle, spring }: DigitProps) {
   if (place === '.') {
     return (
       <span className="counter-digit" style={{ height, ...digitStyle, width: 'fit-content' }}>
@@ -58,7 +75,7 @@ function Digit({ place, value, height, digitStyle }: DigitProps) {
   }
 
   const valueRoundedToPlace = getValueRoundedToPlace(value, place);
-  const animatedValue = useSpring(valueRoundedToPlace);
+  const animatedValue = useSpring(valueRoundedToPlace, spring);
 
   useEffect(() => {
     animatedValue.set(valueRoundedToPlace);
@@ -97,6 +114,8 @@ interface CounterProps {
   gradientTo?: string;
   topGradientStyle?: React.CSSProperties;
   bottomGradientStyle?: React.CSSProperties;
+  /** See CounterSpring. Local addition. */
+  spring?: CounterSpring;
 }
 
 export default function Counter({
@@ -126,7 +145,8 @@ export default function Counter({
   gradientFrom = 'black',
   gradientTo = 'transparent',
   topGradientStyle,
-  bottomGradientStyle
+  bottomGradientStyle,
+  spring = DEFAULT_SPRING
 }: CounterProps) {
   const height = fontSize + padding;
 
@@ -155,7 +175,14 @@ export default function Counter({
     <span className="counter-container" style={containerStyle}>
       <span className="counter-counter" style={{ ...defaultCounterStyle, ...counterStyle }}>
         {places.map(place => (
-          <Digit key={place} place={place} value={value} height={height} digitStyle={digitStyle} />
+          <Digit
+            key={place}
+            place={place}
+            value={value}
+            height={height}
+            digitStyle={digitStyle}
+            spring={spring}
+          />
         ))}
       </span>
       <span className="gradient-container">

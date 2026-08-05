@@ -100,6 +100,16 @@ export function StatCounter({
         horizontalPadding={0}
         padding={0}
         places={places}
+        // A long roll, not a flick.
+        //
+        // On the stock spring a figure was at rest in about half a second —
+        // the reel had barely become a reel before it stopped being one, and
+        // in a row of five the last of them had settled before the eye
+        // reached it. Soft and heavy: roughly two and a half seconds to
+        // settle, and the high damping against that low stiffness is what
+        // stops a slow spring from overshooting and rocking on the final
+        // digit.
+        spring={{ stiffness: 26, damping: 26, mass: 1.4 }}
         textColor="#F5F7FA"
         value={value}
       />
