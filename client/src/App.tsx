@@ -35,6 +35,7 @@ function App() {
             {/* Fixed, page-wide starfield — sits behind every section */}
             <motion.div style={{ opacity: galaxyOpacity }} className="fixed inset-0 z-0">
               <Galaxy
+                opacity={galaxyOpacity}
                 density={0.8}
                 glowIntensity={0.4}
                 saturation={0}

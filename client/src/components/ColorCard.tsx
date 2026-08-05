@@ -13,12 +13,21 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
     <motion.button
       type="button"
       onClick={onSelect}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
+      /* Variants rather than a fixed initial/animate pair, so the parent owns
+         the timing. The colours are meant to arrive after the card has finished
+         travelling — two motions competing for the eye is what makes a
+         transition like this read as cheap — and only the parent knows when
+         that is. */
+      variants={{
+        hidden: { opacity: 0, y: 10 },
+        show: { opacity: 1, y: 0 },
+      }}
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative text-left"
+      role="radio"
+      aria-checked={selected}
+      className="group relative h-full text-left rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
     >
       {/* Monochrome glow ring */}
       <div
@@ -29,8 +38,11 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
             : "0 0 0 1px rgba(255,255,255,0.10)",
         }}
       />
+      {/* Full height with the caption pushed to the bottom, so a two-line
+          colour name makes its own card no taller than its neighbour — the
+          grid stretches both and the caption bars stay on one line together. */}
       <div
-        className="relative overflow-hidden rounded-sm transition-transform duration-300 group-hover:scale-[0.98]"
+        className="relative flex h-full flex-col overflow-hidden rounded-sm transition-transform duration-300 group-hover:scale-[0.98]"
       >
         <div className="aspect-[4/3] overflow-hidden">
           <motion.img
@@ -41,7 +53,7 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
             transition={{ duration: 0.4 }}
           />
         </div>
-        <div className="px-3 py-2.5 sm:px-4 sm:py-3 bg-[#0D1117] flex items-center gap-2 sm:gap-2.5">
+        <div className="mt-auto px-3 py-2.5 sm:px-4 sm:py-3 bg-[#0D1117] flex items-center gap-2 sm:gap-2.5">
           <span
             className="w-2.5 h-2.5 rounded-full border border-white/20 flex-shrink-0"
             style={{ backgroundColor: color.swatch }}

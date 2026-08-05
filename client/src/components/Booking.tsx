@@ -86,7 +86,33 @@ export function Booking() {
       id="booking"
       className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20 overflow-x-clip"
     >
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
+      {/* The configurator is the section's opening act rather than the form's
+          first field. It reads at the same width as What We Build, on the same
+          gutter as every other band here, so the left edge line runs unbroken
+          down the section even though the layout underneath it changes. */}
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-16 flex items-end justify-between gap-8">
+        <div>
+          <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
+            Configure
+          </p>
+          <h2 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] max-w-xl leading-[1.05]">
+            Pick your machine.
+          </h2>
+        </div>
+        {/* Moved up from the copy column below. Two mascots in one section is
+            clutter, and this is where the visitor is actually being asked to
+            do something. */}
+        <Mascot pose="projectReady" size="lg" className="hidden lg:block shrink-0" />
+      </div>
+
+      <VehicleConfigurator
+        selectedVehicleId={vehicleId}
+        selectedColorId={colorId}
+        onSelectVehicle={handleSelectVehicle}
+        onSelectColor={setColorId}
+      />
+
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mt-20 sm:mt-32 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
         <div className="lg:col-span-4">
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
             Start a Project
@@ -95,10 +121,9 @@ export function Booking() {
             Ready to turn your machine into cinema.
           </h2>
           <p className="text-sm sm:text-base text-[#B8C4D6] leading-relaxed max-w-sm mb-0 lg:mb-10">
-            Configure the vehicle, tell us the story you want it to tell. We'll
-            follow up to scope the shot list together.
+            Tell us the story you want it to tell. We'll follow up to scope the
+            shot list together.
           </p>
-          <Mascot pose="pointing" size="lg" className="hidden lg:block" />
 
           {/* Cubes.css sizes .default-animation at 50% of its parent, which
               suits the full-width demo it ships with. This column is already
@@ -125,13 +150,6 @@ export function Booking() {
           onSubmit={handleSubmit}
           className="lg:col-span-8 flex flex-col gap-8 sm:gap-10"
         >
-          <VehicleConfigurator
-            selectedVehicleId={vehicleId}
-            selectedColorId={colorId}
-            onSelectVehicle={handleSelectVehicle}
-            onSelectColor={setColorId}
-          />
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
             <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
               Full Name
