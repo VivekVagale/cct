@@ -128,22 +128,49 @@ function Stage({
           </p>
         </motion.div>
 
+        {/* Bottom-aligned and taller than the space it has.
+
+            The poses are cut off square at the waist, and at a height that fit
+            inside the stage that cut edge — plus the soft rectangle of shadow
+            under it — sat in open frame, which reads as a badly masked PNG
+            rather than as a figure. Grown past the stage and anchored to its
+            bottom, the cut falls below the sticky stage's edge and is clipped
+            by the `overflow-hidden` on it, so the figure runs off the bottom of
+            the screen the way a person standing close to camera would.
+
+            `items-end` rather than the row's `items-center`: centred, the extra
+            height would have hung off the top as well and taken the helmet with
+            it. */}
         <motion.div
           style={{ y, scale }}
-          className="order-1 md:order-2 md:w-[50%] flex justify-center md:justify-end pointer-events-none"
+          className="order-1 md:order-2 md:w-[50%] flex items-end justify-center md:justify-end md:self-stretch pointer-events-none"
         >
           {/* Height-sized, so width is intrinsic and a wide pose can overrun a
               narrow viewport: laptop and thumbsUp are near-square, and at the
               42vh this used to be that is ~378px across on a 375px phone. The
               vw term caps the width by capping the height that produces it —
               the image itself cannot carry a max-width, because with a fixed
-              height that would constrain both axes and render it fill-stretched. */}
+              height that would constrain both axes and render it fill-stretched.
+
+              Past 100vh from md up, which is what puts the cut edge off the
+              bottom of the stage. The phone step grows far less: there the
+              layout is stacked and the copy sits directly underneath, so a
+              pose tall enough to bury its own hem would bury the description
+              with it. */}
           <Mascot
             pose={stage.pose}
             animateIn={false}
             parallax
             sizing="height"
-            className="h-[min(34vh,68vw)] sm:h-[46vh] md:h-[74vh] lg:h-[82vh]"
+            /* The -12vh is the drift's allowance, and it has to be a margin
+               rather than a translate class: the wrapper's transform is written
+               by framer for the y and the scale, and a Tailwind translate on
+               this element would be a second transform on the same node. The
+               stage drifts each pose from 8vh down to -8vh as it crosses, so at
+               the top of that travel a hem sitting exactly on the stage's edge
+               would rise 8vh into frame — the whole cut edge, back again. 12
+               keeps it under by 4 at the worst moment. */
+            className="h-[min(38vh,74vw)] sm:h-[52vh] md:h-[104vh] md:-mb-[12vh] lg:h-[116vh]"
           />
         </motion.div>
       </div>
