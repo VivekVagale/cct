@@ -19,10 +19,19 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
 import { animate, motion, useMotionValue, useReducedMotion } from "framer-motion";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
+import { useIsPhone } from "@/hooks/useIsPhone";
 import { useScrollReveals } from "@/hooks/useScrollReveals";
 
 function App() {
   const reduceMotion = useReducedMotion();
+  /*
+   * A phone runs a cut-down version of the page, and it is not a matter of
+   * taste — a device was measured getting hot enough to notice while sitting on
+   * this site. The costs that matter are the ones that run for the whole
+   * session rather than the ones tied to a section, so what goes is the
+   * permanent WebGL: the starfield behind every scene, and Lenis's frame loop.
+   */
+  const isPhone = useIsPhone();
 
   /*
    * Inertial scrolling, for everyone.
@@ -33,7 +42,13 @@ function App() {
    * the people who had asked for less of it. Off under reduced motion, where
    * interpolating someone's scroll is the opposite of what they requested.
    */
-  useSmoothScroll(!reduceMotion);
+  /*
+   * Not on a phone. A touch device already has momentum scrolling tuned by the
+   * platform, Lenis is explicitly not syncing touch here anyway (`syncTouch:
+   * false`), so all it contributed was a rAF loop running for the life of the
+   * page and a scroll position being interpolated that nothing on touch reads.
+   */
+  useSmoothScroll(!reduceMotion && !isPhone);
 
   // Every section's heading and content block, revealed as it is scrolled to
   // rather than on the deck's old fixed clock. See useScrollReveals.
@@ -175,7 +190,25 @@ function App() {
             {/* The one thing that does not change between scenes. A fixed
                 camera needs a fixed background, and this is it — the deck
                 dissolves its scenes in front of a starfield that never cuts. */}
+            {/* The starfield is desktop-only.
+            
+                It is a full-screen WebGL canvas that rotates, twinkles and
+                tracks the pointer, and it draws every frame from first paint to
+                the footer — the single largest continuous cost on the page, for
+                something that is a backdrop. On a phone it is replaced by the
+                still gradient below, which the eye reads as the same dark sky
+                and which costs nothing at all. */}
             <motion.div style={{ opacity: galaxyOpacity }} className="fixed inset-0 z-0">
+              {isPhone ? (
+                <div
+                  aria-hidden
+                  className="h-full w-full"
+                  style={{
+                    background:
+                      "radial-gradient(120% 80% at 50% 0%, #10131c 0%, #05070A 60%)",
+                  }}
+                />
+              ) : (
               <Galaxy
                 opacity={galaxyOpacity}
                 density={0.8}
@@ -187,6 +220,7 @@ function App() {
                 twinkleIntensity={0.35}
                 rotationSpeed={0.05}
               />
+              )}
             </motion.div>
 
             {/* Above the deck, not inside it: the bar is the one element that

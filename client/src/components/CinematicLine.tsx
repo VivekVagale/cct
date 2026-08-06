@@ -3,6 +3,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import WarpText from "@/components/WarpText";
 import { useScene } from "@/components/SceneDeck";
 import { cn } from "@/lib/utils";
+import { useIsPhone } from "@/hooks/useIsPhone";
 
 interface CinematicLineProps {
   text: string;
@@ -40,6 +41,17 @@ export function CinematicLine({ text, className, id }: CinematicLineProps) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   /*
+   * A phone gets the type, not the shader.
+   *
+   * WarpText is a WebGL context that rasterises the line and pushes it through
+   * a noise field every frame. There are two of these on the page, and while
+   * each stops when it scrolls out of view, "in view" on a phone is most of the
+   * screen. The same fallback reduced motion already uses: the words, at the
+   * same size, without the drift.
+   */
+  const isPhone = useIsPhone();
+  const plainType = reduceMotion || isPhone;
+  /*
    * In the deck this line is a title card on a screen of its own, and its
    * entrance is the deck's — `.scene-heading` fades and unblurs it on the
    * scene's own clock.
@@ -74,10 +86,10 @@ export function CinematicLine({ text, className, id }: CinematicLineProps) {
       )}
     >
       <motion.div
-        style={reduceMotion || inDeck ? undefined : { opacity, y }}
+        style={plainType || inDeck ? undefined : { opacity, y }}
         className="scene-heading w-full max-w-[88vw]"
       >
-        {reduceMotion ? (
+        {plainType ? (
           // No canvas at all under reduced motion. The shader's whole output is
           // drift, refraction and a ripple — there is nothing left of it to
           // keep, so this falls back to the type it is made of.

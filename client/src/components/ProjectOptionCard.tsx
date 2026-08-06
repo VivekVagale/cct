@@ -70,9 +70,9 @@ export function ProjectOptionCard({
       </div>
 
       {/* Transparent caption, so the starfield reads through the card. */}
-      <div className="relative z-10 p-4">
+      <div className="relative z-10 p-3 sm:p-4">
         <h4
-          className={`font-display text-base sm:text-lg normal-case tracking-normal mb-1 ${
+          className={`font-display text-sm sm:text-lg normal-case tracking-normal mb-1 ${
             disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
           }`}
         >

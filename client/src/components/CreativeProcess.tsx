@@ -5,6 +5,7 @@ import { Mascot } from "@/components/Mascot";
 import { useScene } from "@/components/SceneDeck";
 import { FoldHeading } from "@/components/FoldHeading";
 import DepthText from "@/components/DepthText";
+import { useIsPhone } from "@/hooks/useIsPhone";
 
 /**
  * A vertical cinematic journey: the section pins once and each stage occupies
@@ -103,6 +104,7 @@ function Stage({
   index: number;
   progress: MotionValue<number>;
 }) {
+  const isPhone = useIsPhone();
   const count = processStages.length;
   // Each stage owns a slice of the scroll, with the window reaching into its
   // neighbours so the crossfades overlap instead of butting up against each other.
@@ -167,10 +169,13 @@ function Stage({
               fontWeight={400}
               faceColor="#F5F7FA"
               depthColor="#9F6EF2"
-              layers={14}
+              /* Half the layers and no pointer tracking on a phone: each
+                 layer is another draw of the same word, and there is no cursor
+                 on a touch screen for the tracking to follow. */
+              layers={isPhone ? 7 : 14}
               depth={5}
               tilt={9}
-              pointerTracking
+              pointerTracking={!isPhone}
               shadow
             />
           </h3>

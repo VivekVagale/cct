@@ -11,6 +11,7 @@ import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
 import DepthText from "@/components/DepthText";
+import { useIsPhone } from "@/hooks/useIsPhone";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -134,6 +135,7 @@ function ChosenMachine({
 }
 
 export function Booking() {
+  const isPhone = useIsPhone();
   const [status, setStatus] = useState<Status>("idle");
   const [selectedProject, setSelectedProject] = useState(projects[0].title);
   const [vehicleId, setVehicleId] = useState<string | null>(null);
@@ -256,10 +258,13 @@ export function Booking() {
               fontWeight={400}
               faceColor="#F5F7FA"
               depthColor="#9F6EF2"
-              layers={14}
+              /* Half the layers and no pointer tracking on a phone: each
+                 layer is another draw of the same word, and there is no cursor
+                 on a touch screen for the tracking to follow. */
+              layers={isPhone ? 7 : 14}
               depth={5}
               tilt={9}
-              pointerTracking
+              pointerTracking={!isPhone}
               shadow
             />
           </h2>
@@ -438,7 +443,15 @@ export function Booking() {
               <div
                 role="radiogroup"
                 aria-label="Project"
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+                /* Two up on a phone, not one.
+                
+                   A single column gave each card the full width of the form,
+                   which at a 4:3 image is most of the screen per option — nine
+                   of them became a very long scroll through very large pictures
+                   for what is a pick-one control. Two up halves the height of
+                   every card and lets a visitor see several at once, which is
+                   what makes a set of options comparable. */
+                className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3"
               >
                 {projects.map((project) => (
                   <ProjectOptionCard
