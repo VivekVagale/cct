@@ -85,6 +85,13 @@ export const showcaseItems: ShowcaseItem[] = [
     description:
       "Two flying wings and a twin, all at the same altitude and all built to the same tolerances.",
     image: "/showcase/stealth-bombers.webp",
+    /* The bombers are the picture, and the top one runs from about a twentieth
+       to a third of the way down — a centred crop cut it off and left a bike on
+       an empty sky. A square taken from a 9:16 source covers 0.5625 of the
+       height, so from the very top it holds the whole upper bomber and the
+       bike's tank and engine under it. The second bomber, bottom right, cannot
+       be in the same square as the first; the legible one wins. */
+    focusY: 0,
   },
   {
     id: "braking-power",
@@ -123,8 +130,11 @@ export const showcaseItems: ShowcaseItem[] = [
     description:
       "Sand paint under prayer flags, with the front wheel catching the last of the light off the snow.",
     image: "/showcase/tibetan-flags.webp",
-    // The bike sits low; the flags own the top of the frame.
-    focusY: 0.55,
+    /* The flags are strung across the top-left corner, roughly the first
+       fifteenth of the frame — at the 0.55 this used to be they were cropped
+       away entirely and the disc showed a front wheel. From the top the square
+       keeps the flags, the headlight and most of the front end. */
+    focusY: 0,
   },
   {
     id: "it-say-grrr",
