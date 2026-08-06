@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
-import { VehicleCard } from "@/components/VehicleCard";
+import { VehicleCard, VEHICLE_NAME_CLASS } from "@/components/VehicleCard";
 import { VehicleFocus } from "@/components/VehicleFocus";
 import { VehicleSearch } from "@/components/VehicleSearch";
 
@@ -109,7 +109,9 @@ export function VehicleConfigurator({
                   <p className="text-[10px] tracking-[0.18em] uppercase mb-1">
                     {vehicle.manufacturer}
                   </p>
-                  <h4 className="font-display text-base sm:text-xl">{vehicle.name}</h4>
+                  {/* Same metric the real caption uses, from the same constant
+                      — this box is what actually sizes the grid cell. */}
+                  <h4 className={VEHICLE_NAME_CLASS}>{vehicle.name}</h4>
                 </div>
               </div>
 

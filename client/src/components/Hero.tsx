@@ -14,6 +14,10 @@ import { GlowButton } from "@/components/GlowButton";
 import { ScrollCue } from "@/components/ScrollCue";
 import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
 import { useScene } from "@/components/SceneDeck";
+import {
+  useStableViewportHeight,
+  useStableScrollProgress,
+} from "@/hooks/useStableViewport";
 
 /**
  * The pin's phases, in vh of scroll rather than as fractions of the section.
@@ -254,11 +258,32 @@ export function Hero({
   // page, so it always speaks. Guarding on `active` alone left the starfield
   // at zero for the whole document.
   activeRef.current = inDeck ? active : true;
-  const { scrollYProgress } = useScroll({
+  /*
+   * The section's height, and the scroll maths that reads it, both in pixels
+   * taken from a viewport height that browser chrome cannot move.
+   *
+   * In `vh` this section is 692vh on a phone. `vh` is re-resolved whenever the
+   * layout viewport changes, and the soft keyboard changes it: focus the
+   * booking form's name field and this section lost around 2,000px while the
+   * scroll position stayed put, which slid the whole page up and left the
+   * reader in the reviews. The URL bar sliding back in on an upward scroll is
+   * the same defect at a tenth the size, felt as the scrub stuttering.
+   *
+   * See useStableViewport for why framer's own `useScroll` cannot be left to
+   * measure this: its divisor is read live and moves with the bar even when the
+   * section does not.
+   */
+  const viewportHeight = useStableViewportHeight();
+  const stableProgress = useStableScrollProgress(wrapperRef, viewportHeight);
+  const { scrollYProgress: deckProgress } = useScroll({
     target: wrapperRef,
     container: scroller ? { current: scroller } : undefined,
     offset: ["start start", "end end"],
   });
+  /* The deck keeps framer's measurement: it scrolls an element rather than the
+     window, which is what `container` is for and what the hook above does not
+     do. Nothing reaches that branch while the deck is off. */
+  const scrollYProgress = scroller ? deckProgress : stableProgress;
 
   // Keeps breathing through the dissolve — better than freezing a beat before
   // the mascot disappears.
@@ -356,12 +381,20 @@ export function Hero({
     <section
       id="top"
       ref={wrapperRef}
-      style={{ height: `${totalVh}vh` }}
+      style={{
+        height: viewportHeight
+          ? `${Math.round((totalVh / 100) * viewportHeight)}px`
+          : `${totalVh}vh`,
+      }}
       className="relative pointer-events-auto"
     >
       {/* Height has to be an inline style rather than an h-[...] class: it is
           derived from the phase lengths at runtime, and Tailwind's JIT only
-          sees class names it can find in the source. */}
+          sees class names it can find in the source.
+
+          Resolved to pixels here rather than left in `vh`, which is the unit
+          that made this section change height under the keyboard. The `vh`
+          fallback is for the one render before a viewport height exists. */}
       <motion.div
         onMouseMove={handlePointer}
         style={{ opacity: stageOpacity }}

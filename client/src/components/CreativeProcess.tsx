@@ -4,6 +4,10 @@ import { processStages, type ProcessStage } from "@/data/content";
 import { Mascot } from "@/components/Mascot";
 import { useScene } from "@/components/SceneDeck";
 import { useIsPhone } from "@/hooks/useIsPhone";
+import {
+  useStableViewportHeight,
+  useStableScrollProgress,
+} from "@/hooks/useStableViewport";
 import { FoldHeading } from "@/components/FoldHeading";
 import DepthText from "@/components/DepthText";
 
@@ -47,11 +51,18 @@ export function CreativeProcess() {
   // Measured against the scene's scroller — see the same note in Hero. In the
   // deck the window never moves, so the five stages would all sit on stage one.
   const { scroller } = useScene();
-  const { scrollYProgress } = useScroll({
+  /* Pixels from a frozen viewport height, for the reason spelled out in
+     useStableViewport and again in Hero: `vh` moves when browser chrome does,
+     and this section is five viewports tall. A portrait tablet is not a phone
+     by the test above, so it keeps the pin — and it has a URL bar. */
+  const viewportHeight = useStableViewportHeight();
+  const stableProgress = useStableScrollProgress(ref, viewportHeight);
+  const { scrollYProgress: deckProgress } = useScroll({
     target: ref,
     container: scroller ? { current: scroller } : undefined,
     offset: ["start start", "end end"],
   });
+  const scrollYProgress = scroller ? deckProgress : stableProgress;
 
   const progress = useSpring(scrollYProgress, {
     stiffness: 180,
@@ -70,7 +81,15 @@ export function CreativeProcess() {
       id="process"
       ref={ref}
       className="relative pointer-events-auto"
-      style={isPhone ? undefined : { height: `${processStages.length * 100}vh` }}
+      style={
+        isPhone
+          ? undefined
+          : {
+              height: viewportHeight
+                ? `${processStages.length * viewportHeight}px`
+                : `${processStages.length * 100}vh`,
+            }
+      }
     >
       <div
         className={
@@ -79,9 +98,19 @@ export function CreativeProcess() {
             : "sticky top-0 h-[100svh] w-full overflow-hidden"
         }
       >
+        {/* Absolute only while the stage is pinned, where it is laid over a
+            fixed screen. Unpinned it was still absolute, and the nearest
+            positioned ancestor is the section — so on a phone it hung over the
+            top eighth of all five stacked stages, fading out against whichever
+            stage happened to be under it. Stacked, it is simply the block that
+            comes first, and the page's own reveal brings it in. */}
         <motion.div
-          style={{ opacity: headingOpacity, y: headingY }}
-          className="scene-heading absolute inset-x-0 top-[12%] sm:top-[16%] z-20 px-6 sm:px-10 max-w-[1600px] mx-auto pointer-events-none"
+          style={isPhone ? undefined : { opacity: headingOpacity, y: headingY }}
+          className={`scene-heading z-20 px-6 sm:px-10 max-w-[1600px] mx-auto pointer-events-none ${
+            isPhone
+              ? "relative pt-16 pb-10"
+              : "absolute inset-x-0 top-[12%] sm:top-[16%]"
+          }`}
         >
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-3 sm:mb-4">
             How We Work

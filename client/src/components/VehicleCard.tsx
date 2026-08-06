@@ -2,6 +2,22 @@ import { motion } from "framer-motion";
 import type { Vehicle } from "@/data/vehicles";
 import { useTilt } from "@/hooks/useTilt";
 
+/**
+ * The model name's type and the height it is given, exported because the grid
+ * renders an invisible copy of this caption to hold each cell open while a card
+ * is away at centre stage — see VehicleConfigurator. Two elements deciding one
+ * measurement in two places is how they came apart: the card was restyled, the
+ * spacer was not, and the cell was then sized by neither.
+ *
+ * Two lines are reserved whether or not the name needs them. "Super Meteor 650"
+ * is the only name that wraps in a two-up phone column, and an unreserved
+ * second line made its cell 24px taller than the row — the grid stretched its
+ * neighbour to match, so one card ran long and the card beside it gained dead
+ * space under its caption. At 1.15 line-height, 2.3em is exactly two lines.
+ */
+export const VEHICLE_NAME_CLASS =
+  "font-display text-base sm:text-xl leading-[1.15] min-h-[2.3em]";
+
 interface VehicleCardProps {
   vehicle: Vehicle;
   selected: boolean;
@@ -86,7 +102,7 @@ export function VehicleCard({
             {vehicle.manufacturer}
           </p>
         )}
-        <h4 className="font-display text-base sm:text-xl text-[#F5F7FA]">{vehicle.name}</h4>
+        <h4 className={`${VEHICLE_NAME_CLASS} text-[#F5F7FA]`}>{vehicle.name}</h4>
       </motion.div>
     </motion.button>
   );
