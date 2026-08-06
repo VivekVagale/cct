@@ -28,7 +28,11 @@ export const processStages: ProcessStage[] = [
     title: "Production",
     pose: "clapperboard",
     description:
-      "Full CAD-accurate modeling and scene build. Every material, every surface imperfection, considered against real-world reference.",
+      /* Blender, named. The line said "CAD-accurate", which described neither
+         the tool nor the work — CAD is what a manufacturer hands over, not what
+         this studio models in. What the claim was reaching for is the accuracy,
+         and that survives the correction. */
+      "Modelled and built in Blender — every panel, every material, every surface imperfection, measured against real-world reference until the machine is right.",
   },
   {
     index: "04",
