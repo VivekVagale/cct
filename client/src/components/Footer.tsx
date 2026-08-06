@@ -8,7 +8,7 @@ export function Footer() {
           </p>
           <a
             href="mailto:coldchaintheory@gmail.com"
-            className="text-[#B8C4D6] hover:text-[#F5F7FA] transition-colors duration-300 text-sm"
+            className="inline-block py-2 -my-2 text-[#B8C4D6] hover:text-[#F5F7FA] transition-colors duration-300 text-sm"
           >
             coldchaintheory@gmail.com
           </a>
@@ -18,16 +18,16 @@ export function Footer() {
           {/* Wraps rather than overflowing: four uppercase links with this much
               tracking are wider than a 375px viewport's content box. */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
-            <a href="#projects" className="hover:text-[#F5F7FA] transition-colors duration-300">
+            <a href="#projects" className="inline-block py-2 -my-2 hover:text-[#F5F7FA] transition-colors duration-300">
               Work
             </a>
-            <a href="#about" className="hover:text-[#F5F7FA] transition-colors duration-300">
+            <a href="#about" className="inline-block py-2 -my-2 hover:text-[#F5F7FA] transition-colors duration-300">
               About
             </a>
-            <a href="#booking" className="hover:text-[#F5F7FA] transition-colors duration-300">
+            <a href="#booking" className="inline-block py-2 -my-2 hover:text-[#F5F7FA] transition-colors duration-300">
               Book
             </a>
-            <a href="#" className="hover:text-[#F5F7FA] transition-colors duration-300">
+            <a href="#" className="inline-block py-2 -my-2 hover:text-[#F5F7FA] transition-colors duration-300">
               Instagram
             </a>
           </div>

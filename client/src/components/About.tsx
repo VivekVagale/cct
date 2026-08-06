@@ -217,7 +217,10 @@ export function About() {
               What your machine does here depends on the work.{" "}
               <a
                 href="#booking"
-                className="text-[#F5F7FA] border-b border-white/30 hover:border-white transition-colors duration-300"
+                /* inline-block with vertical padding taken back out: an inline
+                   link inherits the line's 18px and is a poor thumb target, and
+                   this one is the section's only route to the form. */
+                className="inline-block py-1.5 -my-1.5 text-[#F5F7FA] border-b border-white/30 hover:border-white transition-colors duration-300"
               >
                 What theirs did is on the chart.
               </a>

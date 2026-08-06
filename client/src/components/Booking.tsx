@@ -244,7 +244,12 @@ export function Booking() {
           <h2 className="font-display text-[#F5F7FA] max-w-4xl leading-[0.98]">
             <DepthText
               text="Pick your machine."
-              fontSize="clamp(2.5rem, 9vw, 8rem)"
+              /* 2rem at the floor, not 2.5. The extrusion is drawn to the
+                 right of the type, so the box is always wider than the words —
+                 measured at 393px against a 375px viewport, which the
+                 document's horizontal clip was hiding by cutting the last
+                 letter's depth off. */
+              fontSize="clamp(2rem, 8vw, 8rem)"
               fontWeight={400}
               faceColor="#F5F7FA"
               depthColor="#9F6EF2"
