@@ -118,8 +118,8 @@ export const projects: Project[] = [
     comingSoon: true,
   },
   {
-    id: "battlegrounds",
-    title: "Project Battlegrounds",
+    id: "drop-zone",
+    title: "Project Drop Zone",
     description:
       "Two machines, a drop zone and a lot of smoke — game-key art staging, rendered as stills.",
     /* A real render of the studio's own, standing in until this one is shot.
@@ -130,8 +130,8 @@ export const projects: Project[] = [
     comingSoon: true,
   },
   {
-    id: "ghost-rider",
-    title: "Project Ghost Rider",
+    id: "hellfire",
+    title: "Project Hellfire",
     description: "A rider wreathed in fire — volumetric flame and heat haze, simulated frame by frame.",
     image:
       "https://images.unsplash.com/photo-1495954380655-01ec3939a26f?q=80&w=1200&auto=format&fit=crop",
