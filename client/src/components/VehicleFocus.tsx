@@ -123,7 +123,19 @@ export function VehicleFocus({
         aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={onKeyDown}
-        className="relative z-10 my-auto w-full max-w-[min(90vw,520px)] focus:outline-none"
+        /* Capped against the viewport in both directions.
+           
+              It was capped on width alone, so on a window shorter than about
+              900px — which is any browser that is not fullscreen — the card's
+              own height ran past the bottom of the screen and took the colour
+              row with it. The scrim's `overflow-y-auto` could not save it
+              either: the card is centred, and a centred flex child taller than
+              its scroll container overflows in both directions at once.
+           
+              `dvh` rather than `vh` because mobile browsers shrink the visible
+              area as their chrome appears, and `vh` keeps reporting the larger
+              figure. */
+          className="relative z-10 my-auto flex w-full max-w-[min(90vw,520px)] max-h-[calc(100dvh-2.5rem)] flex-col focus:outline-none"
       >
         <p id={titleId} className="sr-only">
           {vehicle.manufacturer} {vehicle.name} — choose a colour
@@ -149,6 +161,9 @@ export function VehicleFocus({
             projection measures a rendered box, and a rotated one measures
             wrong. */}
         <motion.div
+          /* min-h-0 lets this shrink inside the flex column above rather than
+             insisting on its natural height and pushing the colours out. */
+          className="min-h-0 shrink [&_img]:max-h-[46dvh] [&_img]:object-cover"
           layoutId={reduceMotion ? undefined : `vehicle-focus-${vehicle.id}`}
           initial={reduceMotion ? { opacity: 0 } : false}
           animate={reduceMotion ? { opacity: 1 } : undefined}
@@ -164,7 +179,7 @@ export function VehicleFocus({
             until AnimatePresence finally unmounted it. Shorter than the scrim
             so they are gone before the background is sharp again. */}
         <motion.div
-          className="pt-5"
+          className="shrink-0 pt-5"
           initial="hidden"
           animate="show"
           exit={{ opacity: 0, y: 6, transition: { duration: 0.14 } }}
