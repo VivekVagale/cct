@@ -475,7 +475,7 @@ export function Booking() {
             05" was still setting flush to the left edge of "Send it." above a
             button that was centred on something else again. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-4 text-center">
-          <Step number="06" title="Send it." />
+          <Step number="06" title="Submit request." />
 
           {/* The price, and when it is due.
           
