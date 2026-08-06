@@ -72,7 +72,9 @@ const AccordionGallery = ({
 
   const vertical = orientation === 'vertical';
   const count = items.length;
-  const [active, setActive] = useState(Math.min(Math.max(defaultIndex, 0), count - 1));
+  /** Where the gallery sits when nothing is being pointed at. */
+  const restingIndex = Math.min(Math.max(defaultIndex, 0), count - 1);
+  const [active, setActive] = useState(restingIndex);
 
   const prefersReduced =
     typeof window !== 'undefined' && window.matchMedia
@@ -218,6 +220,21 @@ const AccordionGallery = ({
       ref={rootRef}
       className={`accordion-gallery${vertical ? ' accordion-gallery--vertical' : ''}${className ? ` ${className}` : ''}`}
       style={rootStyle}
+      /*
+       * Local addition — re-adding this component from the registry drops it.
+       *
+       * Upstream only ever opens a panel; nothing closes one. The last panel the
+       * pointer touched stayed open after the pointer had gone, so the gallery
+       * kept whatever the visitor happened to brush past on their way down the
+       * page and read as a thing that had been clicked rather than hovered.
+       * Leaving the gallery returns it to its resting panel.
+       *
+       * Only for the hover trigger: under `click` the open panel is a choice
+       * someone made, and taking it away when they move the mouse would undo it.
+       */
+      onMouseLeave={() => {
+        if (trigger === 'hover') setActive(restingIndex);
+      }}
       role="list"
       aria-label="Image accordion gallery"
     >
