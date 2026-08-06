@@ -134,8 +134,14 @@ export function VehicleFocus({
            
               `dvh` rather than `vh` because mobile browsers shrink the visible
               area as their chrome appears, and `vh` keeps reporting the larger
-              figure. */
-          className="relative z-10 my-auto flex w-full max-w-[min(90vw,520px)] max-h-[calc(100dvh-2.5rem)] flex-col focus:outline-none"
+              figure.
+           
+              430px rather than 520. Width is the only honest lever here: the
+              photo is a 4:3 box, so its height follows its width, and the
+              caption under it follows the type. Narrowing the card shortens
+              the whole thing in proportion and everything keeps its shape —
+              which capping any one part of it did not. */
+          className="relative z-10 my-auto flex w-full max-w-[min(86vw,430px)] max-h-[calc(100dvh-2.5rem)] flex-col focus:outline-none"
       >
         <p id={titleId} className="sr-only">
           {vehicle.manufacturer} {vehicle.name} — choose a colour
@@ -161,9 +167,14 @@ export function VehicleFocus({
             projection measures a rendered box, and a rotated one measures
             wrong. */}
         <motion.div
-          /* min-h-0 lets this shrink inside the flex column above rather than
-             insisting on its natural height and pushing the colours out. */
-          className="min-h-0 shrink [&_img]:max-h-[46dvh] [&_img]:object-cover"
+          /* Nothing overriding the card's own geometry.
+          
+             This used to cap the image's height, which cannot work: the photo
+             sits in a fixed 4:3 box, so the box kept its height while the
+             picture shrank inside it and the caption ended up below where the
+             card believed it stopped — under the colour row. The card is scaled
+             by its width instead, on the wrapper above. */
+          className="shrink-0"
           layoutId={reduceMotion ? undefined : `vehicle-focus-${vehicle.id}`}
           initial={reduceMotion ? { opacity: 0 } : false}
           animate={reduceMotion ? { opacity: 1 } : undefined}
