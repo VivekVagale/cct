@@ -322,6 +322,21 @@
    with. The booking column is already narrow, so halving it again leaves a
    211px grid in a 421px column. Overridden here rather than in Cubes.css,
    which is kept exactly as vendored. */
+/*
+ * The reel chart's category labels, off on a phone.
+ *
+ * They are absolutely positioned and `whitespace-nowrap`, so they cannot wrap
+ * or shorten — six reel titles across a 375px chart simply print on top of one
+ * another. Nothing is lost by hiding them: the list beside the chart is its
+ * table view and carries every title and every figure, which is why that list
+ * exists.
+ */
+@media (max-width: 640px) {
+  .reels-chart .text-chart-label {
+    display: none;
+  }
+}
+
 .cubes-fill .default-animation {
   width: 100%;
 }

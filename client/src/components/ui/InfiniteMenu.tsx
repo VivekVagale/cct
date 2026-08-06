@@ -515,6 +515,10 @@ class ArcballControl {
   private readonly EPSILON = 0.1;
   private readonly IDENTITY_QUAT = quat.create();
 
+  /** Where a touch gesture started, and which way it turned out to go. */
+  private gestureOrigin: [number, number] = [0, 0];
+  private gestureAxis: 'x' | 'y' | null = null;
+
   constructor(canvas: HTMLCanvasElement, updateCallback?: UpdateCallback) {
     this.canvas = canvas;
     this.updateCallback = updateCallback || (() => undefined);
@@ -523,6 +527,8 @@ class ArcballControl {
       vec2.set(this.pointerPos, e.clientX, e.clientY);
       vec2.copy(this.previousPointerPos, this.pointerPos);
       this.isPointerDown = true;
+      this.gestureOrigin = [e.clientX, e.clientY];
+      this.gestureAxis = null;
     });
     canvas.addEventListener('pointerup', () => {
       this.isPointerDown = false;
@@ -538,9 +544,47 @@ class ArcballControl {
       this.isPointerDown = false;
     });
     canvas.addEventListener('pointermove', (e: PointerEvent) => {
-      if (this.isPointerDown) {
-        vec2.set(this.pointerPos, e.clientX, e.clientY);
+      if (!this.isPointerDown) return;
+
+      /*
+       * Axis lock, for touch only.
+       *
+       * `touch-action: pan-y` hands a vertical swipe to the page scroller, but
+       * it does not stop `pointermove` firing in the meantime — the browser
+       * takes a few events to decide the gesture is a scroll, and only then
+       * sends `pointercancel`. Those few events arrive here with the drag still
+       * latched and a large vertical delta on them, and the sphere snaps to
+       * wherever the finger has reached. On a phone, where the page is moving
+       * under the finger at the same time, that reads as the sphere jumping
+       * around while you scroll past it.
+       *
+       * So the first real movement of a touch decides what the gesture is. If
+       * it is more vertical than horizontal it belongs to the page and the drag
+       * is dropped on the spot rather than waiting to be cancelled. Horizontal
+       * turns the sphere, which is what the label under it has always promised.
+       *
+       * Mouse and pen are untouched: they have no competing scroll gesture and
+       * a diagonal drag should turn the sphere freely.
+       */
+      if (e.pointerType === 'touch' && this.gestureAxis === null) {
+        const dx = e.clientX - this.gestureOrigin[0];
+        const dy = e.clientY - this.gestureOrigin[1];
+        if (Math.hypot(dx, dy) > 8) {
+          this.gestureAxis = Math.abs(dy) > Math.abs(dx) ? 'y' : 'x';
+          if (this.gestureAxis === 'y') {
+            this.isPointerDown = false;
+            return;
+          }
+          // Start the drag from here, so the 8px spent deciding is not
+          // applied as a jump the moment the axis is settled.
+          vec2.set(this.pointerPos, e.clientX, e.clientY);
+          vec2.copy(this.previousPointerPos, this.pointerPos);
+          return;
+        }
+        return;
       }
+
+      vec2.set(this.pointerPos, e.clientX, e.clientY);
     });
 
     /*

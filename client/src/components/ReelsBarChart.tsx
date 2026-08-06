@@ -143,6 +143,8 @@ export function ReelsBarChart({
 
   return (
     <BarChart
+      /* Scoped so the CSS below can reach the axis labels. See index.css. */
+      className="reels-chart"
       data={chartData}
       xDataKey="reel"
       // Zero rather than a shorter duration: the bars grow from nothing, and a
