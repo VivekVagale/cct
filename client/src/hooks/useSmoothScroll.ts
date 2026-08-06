@@ -56,13 +56,26 @@ export function useSmoothScroll(enabled = true) {
     frame = requestAnimationFrame(loop);
 
     /*
-     * Anchors, by hand.
+     * Anchors, by hand — and as a cut, not a move.
      *
-     * The nav's links are ordinary `href="#about"`. Left alone the browser
-     * jumps the scroll position itself, Lenis sees a position it did not
-     * produce, and the two argue for a frame or two — which lands as a flick
-     * in the middle of an otherwise slow page. Routed through `scrollTo`, the
-     * jump becomes the same eased move as every other scroll on the page.
+     * These used to travel: 1.6s, eased out hard, on the theory that the one
+     * move the visitor did not make themselves should read as the camera
+     * travelling. It reads as lag instead, and the reason is what the travel
+     * passes through. Every section between here and there enters the viewport
+     * on the way past, so its reveal fires — a dozen sections' worth of
+     * transitions starting and finishing inside 1.6 seconds, while the hero's
+     * frame scrub runs its whole assembly backwards or forwards underneath
+     * them. The page is not slow at it; it is doing far too much, and all of it
+     * is work nobody asked to see. Clicking "Start a Project" is a request to
+     * be at the form.
+     *
+     * So it cuts. Sections that were skipped are left unrevealed and play
+     * properly when they are actually scrolled to, which is what their observer
+     * was for.
+     *
+     * Still routed through Lenis rather than left to the browser: Lenis holds
+     * its own interpolated position, and a scroll it did not perform is a
+     * position it will argue with on the next wheel event.
      */
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
@@ -72,16 +85,20 @@ export function useSmoothScroll(enabled = true) {
       const target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
-      lenis.scrollTo(target as HTMLElement, {
-        // Long, and eased out hard. This is the one move on the page the
-        // visitor did not make themselves, so it has to read as the camera
-        // travelling rather than as a cut.
-        duration: 1.6,
-        easing: (t) => 1 - (1 - t) ** 3,
-        // The bar is fixed and 64-80px tall; without this the section's own
-        // first line lands underneath it.
-        offset: -72,
-      });
+      /* No offset. Lenis already subtracts the target's own scroll-margin-top
+         when it is given an element, so the -72 this used to pass was applied
+         on top of the scroll-mt-16/20 the sections carry — a click landed 136
+         to 152px clear of a section that had asked for 64 or 80, and sections
+         without the utility got a different number again. The clearance is
+         decided once, in CSS, where the browser's own anchor jump reads it too:
+         see the section[id] rule in index.css. */
+      lenis.scrollTo(target as HTMLElement, { immediate: true });
+      /* The hash the click would have set, without the history entry a real
+         navigation would leave — going "back" to a scroll position the page no
+         longer holds is worse than not offering it. */
+      if (window.location.hash !== href) {
+        window.history.replaceState(null, "", href);
+      }
     };
 
     document.addEventListener("click", onClick);

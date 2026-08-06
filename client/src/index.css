@@ -277,6 +277,21 @@
   }
 
   /*
+   * Anchor targets stop clear of the fixed bar, and this is where that distance
+   * is decided.
+   *
+   * Four sections already set their own with `scroll-mt-16 sm:scroll-mt-20`,
+   * which still wins here — this is the default for the rest, which had none.
+   * useSmoothScroll reads whichever applies off the element rather than keeping
+   * its own copy of the number, so a click lands in the same place whether
+   * Lenis handled it or the browser did. Lenis does not run on a phone or under
+   * prefers-reduced-motion, and there this rule is the only thing acting.
+   */
+  section[id] {
+    scroll-margin-top: 72px;
+  }
+
+  /*
    * The scrollbar, kept and made almost invisible.
    *
    * It was white once, which on a #05070A page is the brightest thing on
