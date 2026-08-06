@@ -200,30 +200,44 @@ export interface FaqItem {
   answer: string;
 }
 
+/*
+ * The studio's own answers, used as written.
+ *
+ * The turnaround here is days where the old set said two to three weeks for a
+ * single hero frame, and the scope is the whole edit suite rather than vehicle
+ * CGI alone. Both are the studio's to state and neither is inferred, so the
+ * copy stands as they sent it — including the last one, which is the only
+ * charging term on the page and the reason the preview passes exist.
+ */
 export const faqItems: FaqItem[] = [
   {
-    question: "What do you need from me to start?",
+    question: "How long does a project usually take?",
     answer:
-      "Reference photography or manufacturer CAD if you have it, a sense of the mood you're after, and the vehicle's spec. We fill in the rest during Discovery.",
+      "Every project is different, but most edits are completed within 3–7 business days. Larger VFX, CGI, or 3D animation projects may take 1–3 weeks depending on complexity. You'll receive a clear timeline before work begins.",
   },
   {
-    question: "How long does a project take?",
+    question: "What do you need from me to get started?",
     answer:
-      "A single hero frame typically runs two to three weeks. Full cinematic sequences run longer, scoped during Planning once the shot list is locked.",
+      "To get started, simply provide your footage or assets, a project brief, any reference examples, and your vision for the final result. The more details you provide upfront, the more accurately your project can be brought to life.",
   },
   {
-    question: "Do you work with vehicles that don't exist yet?",
+    question: "Can I request revisions?",
     answer:
-      "Yes — concept vehicles, pre-production models, and machines that only exist as sketches are some of our favorite briefs.",
+      "Yes. Revision rounds are included as discussed before the project begins. Preview versions are shared during production to ensure everything aligns with your expectations before final delivery.",
   },
   {
-    question: "Can you match our existing brand's visual language?",
+    question: "What types of content do you create?",
     answer:
-      "Yes. We build a lighting and color philosophy around your brand during Planning, so the delivery feels native to what you already publish.",
+      "I specialize in cinematic video editing, VFX, CGI, 3D motion graphics, product animations, promotional videos, social media content, and custom visual experiences tailored to your brand or creative vision.",
   },
   {
-    question: "What formats do you deliver in?",
+    question: "How do we communicate during the project?",
     answer:
-      "Stills at print resolution, video sequences graded for your platform, and layered source files on request — whatever your team needs downstream.",
+      "Communication is simple and transparent throughout the process. You'll receive regular updates, preview renders when necessary, and direct support until the project is successfully delivered.",
+  },
+  {
+    question: "Will I be charged for revisions after the final render?",
+    answer:
+      "Please review all preview versions carefully before approving the final render. Once the project has been approved, rendered, and delivered, any additional changes that require re-rendering, re-editing, or significant modifications will incur an extra charge based on the scope of the requested work.",
   },
 ];
