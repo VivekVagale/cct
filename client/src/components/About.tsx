@@ -4,7 +4,7 @@ import { useParallax } from "@/components/Reveal";
 import { Mascot } from "@/components/Mascot";
 import { AnimatedText } from "@/components/AnimatedText";
 import { StatCounter } from "@/components/StatCounter";
-import { ReelsBarChart } from "@/components/ReelsBarChart";
+import { ReelsBarChart, ReelsChartLegend } from "@/components/ReelsBarChart";
 import { AudienceMap } from "@/components/AudienceMap";
 import { headline, reachStats, reachWindow, topReels } from "@/data/reach";
 import { audienceTotals, audienceWindow } from "@/data/audience";
@@ -172,6 +172,7 @@ export function About() {
         <div className="mt-16 sm:mt-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-7">
             <ReelsBarChart reels={topReels} hoveredTitle={hoveredReel} />
+            <ReelsChartLegend />
           </div>
 
           {/* The chart's table view. Same numbers, reachable without a pointer. */}

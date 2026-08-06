@@ -180,3 +180,46 @@ export function ReelsBarChart({
     </BarChart>
   );
 }
+
+/**
+ * Which colour is which.
+ *
+ * Two series means a legend is not optional: without one the only thing saying
+ * that the tall bar is views and the short one is likes is the tooltip, which
+ * requires a pointer and says nothing to anyone reading the chart from across
+ * the room.
+ *
+ * The swatch carries the colour and the label wears the page's ordinary muted
+ * ink rather than the series colour. Colouring the text to match is the common
+ * version and it is wrong twice over: it puts two encodings on one meaning, and
+ * it fails the moment the palette goes near the background — --chart-1 is a
+ * pale violet that would be a whisper as type on this page.
+ *
+ * Small, low and centred under the plot, so it reads as a caption rather than
+ * as a second thing to look at.
+ */
+export function ReelsChartLegend() {
+  const series = [
+    { label: "Views", fill: "var(--chart-4)" },
+    { label: "Likes", fill: "var(--chart-1)" },
+  ];
+
+  return (
+    <ul className="mt-5 flex items-center justify-center gap-6">
+      {series.map((s) => (
+        <li key={s.label} className="flex items-center gap-2">
+          {/* A rounded bar rather than a dot: the legend should show the mark
+              the chart actually draws. */}
+          <span
+            aria-hidden
+            className="block h-2 w-4 rounded-full"
+            style={{ background: s.fill }}
+          />
+          <span className="text-[10px] sm:text-xs tracking-[0.18em] uppercase text-[#B8C4D6]">
+            {s.label}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
