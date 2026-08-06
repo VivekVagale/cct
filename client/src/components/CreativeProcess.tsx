@@ -4,6 +4,7 @@ import { processStages, type ProcessStage } from "@/data/content";
 import { Mascot } from "@/components/Mascot";
 import { useScene } from "@/components/SceneDeck";
 import { FoldHeading } from "@/components/FoldHeading";
+import DepthText from "@/components/DepthText";
 
 /**
  * A vertical cinematic journey: the section pins once and each stage occupies
@@ -148,8 +149,30 @@ function Stage({
           <span className="font-display text-[#F5F7FA]/20 leading-none text-5xl sm:text-8xl md:text-[10rem] lg:text-[13rem]">
             {stage.index}
           </span>
-          <h3 className="font-display text-3xl sm:text-6xl md:text-7xl lg:text-8xl text-[#F5F7FA] leading-[1.0]">
-            {stage.title}
+          {/* The five stage titles are extruded rather than flat. They are the
+              one heading on the site with a whole screen to themselves and
+              nothing to compete with, which is the only place this is worth its
+              cost — it draws the word once per layer.
+
+              Sized here rather than by a type class: the component lays its
+              layers out against a font size it has to know, so a Tailwind step
+              would set the box and leave the extrusion measuring something
+              else. The face is the page's near-white and the extrusion the
+              brand violet, so the depth reads as the site's colour rather than
+              as a drop shadow. */}
+          <h3 className="font-display text-[#F5F7FA] leading-[1.0]">
+            <DepthText
+              text={stage.title}
+              fontSize="clamp(2rem, 7vw, 6rem)"
+              fontWeight={400}
+              faceColor="#F5F7FA"
+              depthColor="#9F6EF2"
+              layers={14}
+              depth={5}
+              tilt={9}
+              pointerTracking
+              shadow
+            />
           </h3>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#B8C4D6] leading-relaxed max-w-lg md:max-w-xl">
             {stage.description}

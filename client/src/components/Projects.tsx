@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { projects, type Project } from "@/data/content";
 import { useTilt } from "@/hooks/useTilt";
 import { FoldHeading } from "@/components/FoldHeading";
+import AccordionGallery from "@/components/AccordionGallery";
+import { galleryItems } from "@/data/gallery";
 
 /**
  * The card has no entrance of its own.
@@ -133,6 +135,17 @@ export function Projects() {
           two words and the badge wrapped. The column count moves up a
           breakpoint the whole way rather than only at the bottom, so no width
           gets a card narrower than its own contents. */}
+      {/* The gallery opens the section, before the cards.
+          
+          Panels are a fixed height and share the width between them, so an
+          image here is cropped to a tall sliver when its panel is closed and to
+          something near square when it is open. `object-fit: cover` on a
+          centred subject survives both; anything with its subject near an edge
+          will not. See data/gallery.ts. */}
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-12 sm:mb-20">
+        <AccordionGallery items={galleryItems} height={460} />
+      </div>
+
       {/* `scene-body--tight`, because this is a grid and not a reading order.
           On the deck's ordinary cascade the seventh card started 3.95s in and
           finished past five seconds — a long wait for a section whose whole
@@ -140,7 +153,17 @@ export function Projects() {
           the beat is just shorter. */}
       <div className="scene-body scene-body--tight max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
+          /* The wrapper is what the scroll reveal animates.
+          
+             It has to be a separate element. The reveal transitions `transform`
+             over 650ms, and the card's 3D tilt writes `transform` on every
+             pointer move — on one node the tilt inherits that transition and
+             crawls half a second behind the cursor, which reads as no tilt at
+             all rather than as a slow one. Reveal on the outside, tilt on the
+             inside, and neither knows about the other. */
+          <div key={project.id}>
+            <ProjectCard project={project} />
+          </div>
         ))}
       </div>
     </section>
