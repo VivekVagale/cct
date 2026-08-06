@@ -5,7 +5,7 @@ import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import { SparkleButton } from "@/components/SparkleButton";
-import { CollabToggle } from "@/components/CollabToggle";
+import { MarqueChips, type MarqueChip } from "@/components/MarqueChips";
 import { ThankYouCard } from "@/components/ThankYouCard";
 import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
@@ -13,6 +13,21 @@ import { submitBookingForm } from "@/lib/formHandler";
 import DepthText from "@/components/DepthText";
 
 type Status = "idle" | "submitting" | "success" | "error";
+
+/**
+ * Who the work is for.
+ *
+ * Four rather than two, because "personal or company" collapses the two cases
+ * that behave differently: a brand shooting its own product and an agency or
+ * dealership shooting someone else's have different approvals, different
+ * deadlines and different ideas of what "finished" means.
+ */
+const USAGE_OPTIONS: MarqueChip[] = [
+  { id: "personal", label: "Personal", hint: "My own machine" },
+  { id: "brand", label: "Brand", hint: "Our own product" },
+  { id: "dealership", label: "Dealership", hint: "Stock we sell" },
+  { id: "agency", label: "Agency", hint: "For a client" },
+];
 
 const fieldClass =
   "bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors";
@@ -120,9 +135,12 @@ export function Booking() {
   const [selectedProject, setSelectedProject] = useState(projects[0].title);
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [colorId, setColorId] = useState<string | null>(null);
-  // Off by default. A collab post puts the reel in the client's own feed under
-  // both names, and that is theirs to opt into rather than to notice and undo.
-  const [collabPost, setCollabPost] = useState(false);
+  /*
+   * Who the work is for. Drives the brief more than the machine does — the
+   * same bike shot for someone's own feed and for a dealership's campaign are
+   * two different jobs.
+   */
+  const [usage, setUsage] = useState("personal");
 
   // Resolved once here rather than in two places: the summary above the form
   // and the label sent with the request must never name different machines.
@@ -154,7 +172,9 @@ export function Booking() {
       projectType: selectedProject,
       vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
-      collabPost,
+      usage,
+      // Always. See the note above the button — the collab is not a choice.
+      collabPost: true,
     }).catch(() => false);
 
     setStatus(ok ? "success" : "error");
@@ -405,18 +425,23 @@ export function Booking() {
 
         </div>
 
-        {/* The collab question sits before the button rather than beside the
-            fields: it is a decision about what happens after the work is
-            delivered, not a detail of the brief, and the answer is worth
-            nothing if it is buried in a column someone has already scrolled
-            past. Centred on the same axis as the button below it. */}
+        {/* Not a detail of the brief, so not in the column with the fields:
+            this is the question that decides what the work is for, and it is
+            worth nothing buried where someone has already scrolled past.
+            Centred on the same axis as the button below it. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-6 text-center">
           <Step
             number="04"
-            title="Post it together?"
-            hint="Collab post with @coldchaintheory for better engagement — the reel goes out from both accounts at once and reaches both sets of followers."
+            title="Who's it for?"
+            hint="The same machine shot for your own feed and for a brand campaign are two different jobs — this tells us which one we're making."
           />
-          <CollabToggle checked={collabPost} onChange={setCollabPost} />
+          <MarqueChips
+            name="usage"
+            label="Who the work is for"
+            value={usage}
+            onChange={setUsage}
+            options={USAGE_OPTIONS}
+          />
         </div>
 
         {/* text-center as well as items-center: items-center centres the
@@ -425,6 +450,19 @@ export function Booking() {
             button that was centred on something else again. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-4 text-center">
           <Step number="05" title="Send it." />
+          {/* Stated, not offered.
+          
+              This was a toggle, defaulting to off, because the collab used to
+              be charged for and was the client's to opt into. It is included on
+              every job now — the studio wants the work in its own feed as much
+              as the client wants it in theirs, and the reach the About section
+              argues from only holds if it keeps landing there. A free inclusion
+              drawn as a checkbox invites someone to consider opting out of the
+              one thing you want them to say yes to. */}
+          <p className="max-w-md text-sm text-[#B8C4D6] leading-relaxed">
+            Every job goes out as a collab post on your handle — the reel lands
+            in both feeds at once, in front of both sets of followers.
+          </p>
           <Magnet padding={40} strength={5}>
             <SparkleButton type="submit" disabled={status === "submitting"}>
               {status === "submitting" ? "Sending..." : "Submit Request"}

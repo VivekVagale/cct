@@ -13,6 +13,8 @@ export interface BookingFormData {
    * including the ones that say no — "they did not ask for it" and "they were
    * never asked" are different things to read in an inbox.
    */
+  /** Personal, brand, dealership or agency — see USAGE_OPTIONS in Booking. */
+  usage: string;
   collabPost: boolean;
 }
 
