@@ -36,7 +36,13 @@ function ProjectCard({ project }: { project: Project }) {
       onMouseLeave={onMouseLeave}
       whileTap={disabled ? undefined : { scale: 0.97 }}
       style={{ rotateX, rotateY, transformPerspective: 900 }}
-      className={`group relative overflow-hidden rounded-sm border border-white/[0.1] bg-white/[0.02] transition-colors duration-300 hover:border-white/30 ${
+      /* h-full and a column, because the card is no longer the grid item —
+         the reveal wrapper is. A grid stretches its own children, so the
+         wrapper fills the row and the card inside has to be told to fill the
+         wrapper, or every card shrinks to its own text and the row goes
+         ragged. The caption takes the leftover space so the images stay on one
+         line across a row. */
+      className={`group relative flex h-full flex-col overflow-hidden rounded-sm border border-white/[0.1] bg-white/[0.02] transition-colors duration-300 hover:border-white/30 ${
         disabled ? "cursor-default" : "cursor-pointer"
       }`}
     >
@@ -77,7 +83,7 @@ function ProjectCard({ project }: { project: Project }) {
 
       {/* Transparent caption — no fill of its own, so the page's starfield
           reads through the bottom of the card. */}
-      <div className="relative z-10 p-4 sm:p-5">
+      <div className="relative z-10 flex flex-1 flex-col p-4 sm:p-5">
         <h3
           className={`font-display text-lg sm:text-xl mb-1.5 ${
             disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
@@ -161,7 +167,7 @@ export function Projects() {
              crawls half a second behind the cursor, which reads as no tilt at
              all rather than as a slow one. Reveal on the outside, tilt on the
              inside, and neither knows about the other. */
-          <div key={project.id}>
+          <div key={project.id} className="h-full">
             <ProjectCard project={project} />
           </div>
         ))}
