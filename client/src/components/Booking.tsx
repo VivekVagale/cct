@@ -491,6 +491,14 @@ export function Booking() {
               a number without that sentence reasonably assumes they are about
               to be charged. */}
           <div className="max-w-md">
+            {/* Labelled as an estimate, in the label rather than in a footnote.
+                The figure is what the build usually costs; what it finally
+                costs is settled in the conversation that follows, and calling
+                it a total without saying "estimate" invites someone to treat it
+                as a quote they have been given. */}
+            <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-2">
+              Total project cost estimate
+            </p>
             <p className="font-display text-2xl sm:text-3xl text-[#F5F7FA]">
               {selectedPrice ?? "Quoted after we talk"}
             </p>
