@@ -53,7 +53,12 @@ export const processStages: ProcessStage[] = [
   {
     index: "05",
     title: "Delivery",
-    pose: "thumbsUp",
+    /* Was "thumbsUp", which pointed at a file holding the side close-up — a
+       head-and-shoulders shot with no hands in frame, on the one stage whose
+       whole point is handing something over. The unveil is the delivery pose.
+       It appears again in the booking section, far enough away to read as the
+       studio's gesture for finished work rather than as a repeat. */
+    pose: "projectReady",
     description:
       /* Says what arrives, and stops there. The collab post is offered without
          a word about what it costs — the studio charges for it, and copy that
