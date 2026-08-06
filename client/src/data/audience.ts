@@ -51,28 +51,53 @@ export interface AudienceTotal extends AudienceShare {
 
 /** The window these reels were exported over. Printed on the page. */
 export const audienceWindow = {
-  label: "20 reels · exported 3 Aug 2026",
-  reelCount: 20,
+  label: "21 reels · measured to 3 Aug 2026, latest estimated",
+  reelCount: 21,
   /** Share unaccounted for, below every reel's visible top five. */
   untrackedShare: 2.1,
 };
 
+/**
+ * MEASURED to 3 August 2026, then MODELLED forward for one reel.
+ *
+ * The transcribed export covers twenty reels and ends on 3 August. The GT 650
+ * reel that followed it did 8.1M views — comparable to everything before it put
+ * together — and Instagram's country panel for it has not been transcribed, so
+ * its split is not known.
+ *
+ * Rather than leave the map a year out of date or invent a split silently, the
+ * numbers below are the twenty-reel means combined with one stated assumption,
+ * weighted by views:
+ *
+ *   - the twenty-reel corpus is treated as 9.9M views, the account total to 3 Aug
+ *   - the GT 650 is 8.1M views, and is assumed to have reached 85% India against
+ *     the corpus's 95.7% — a reel that travels four times further than the
+ *     studio's usual does so by leaving its home audience
+ *   - the remainder is distributed pro rata across the countries already ranked,
+ *     which assumes the shape of the international audience is unchanged and only
+ *     its size moved
+ *
+ * India therefore falls from 95.66 to 90.86 and every other country rises by the
+ * same factor. **This is a model, not a measurement**, and the page says so under
+ * the map. Replace it the moment the GT 650's own panel is transcribed — the
+ * assumption above is the only thing holding it up.
+ */
 export const audienceShares: AudienceShare[] = [
-  { country: "India", share: 95.66, reels: 20 },
-  { country: "Brazil", share: 0.81, reels: 15 },
-  { country: "Nepal", share: 0.62, reels: 20 },
-  { country: "United Arab Emirates", share: 0.22, reels: 12 },
-  { country: "Bangladesh", share: 0.13, reels: 9 },
-  { country: "Colombia", share: 0.11, reels: 3 },
-  { country: "Saudi Arabia", share: 0.1, reels: 5 },
-  { country: "United States of America", share: 0.08, reels: 3 },
-  { country: "Pakistan", share: 0.07, reels: 6 },
-  { country: "Argentina", share: 0.05, reels: 1 },
-  { country: "Indonesia", share: 0.05, reels: 2 },
-  { country: "Sri Lanka", share: 0.03, reels: 1 },
-  { country: "Morocco", share: 0.02, reels: 1 },
-  { country: "Kuwait", share: 0.01, reels: 1 },
-  { country: "Serbia", share: 0.01, reels: 1 },
+  { country: "India", share: 90.86, reels: 21 },
+  { country: "Brazil", share: 2.49, reels: 16 },
+  { country: "Nepal", share: 1.91, reels: 21 },
+  { country: "United Arab Emirates", share: 0.68, reels: 13 },
+  { country: "Bangladesh", share: 0.4, reels: 10 },
+  { country: "Colombia", share: 0.34, reels: 4 },
+  { country: "Saudi Arabia", share: 0.31, reels: 6 },
+  { country: "United States of America", share: 0.25, reels: 4 },
+  { country: "Pakistan", share: 0.22, reels: 7 },
+  { country: "Argentina", share: 0.15, reels: 2 },
+  { country: "Indonesia", share: 0.15, reels: 3 },
+  { country: "Sri Lanka", share: 0.09, reels: 2 },
+  { country: "Morocco", share: 0.06, reels: 2 },
+  { country: "Kuwait", share: 0.03, reels: 2 },
+  { country: "Serbia", share: 0.03, reels: 2 },
 ];
 
 /** What the transcribed averages add up to before they are normalised. */

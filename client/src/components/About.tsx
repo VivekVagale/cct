@@ -262,9 +262,11 @@ export function About() {
                 column does not reach 100. */}
             <p className="mt-6 text-xs sm:text-sm text-[#B8C4D6]/70 leading-relaxed">
               Share of all tracked views across {audienceWindow.reelCount}{" "}
-              reels. Instagram reports only each reel’s top five countries, so
-              roughly {audienceWindow.untrackedShare}% of views sit below what
-              it will show and are not counted here.
+              reels, measured to 3 August 2026. The latest reel’s country split
+              is estimated rather than measured. Instagram reports only each
+              reel’s top five countries, so roughly{" "}
+              {audienceWindow.untrackedShare}% of views sit below what it will
+              show and are not counted here.
             </p>
           </div>
         </div>
