@@ -14,7 +14,13 @@ export const processStages: ProcessStage[] = [
     title: "Discovery",
     pose: "sideCloseUp",
     description:
-      "We start with the machine, not the brief — reference photography, spec sheets, and a conversation about the story you want it to tell.",
+      /* The warning is the useful part of this step and belongs here rather
+         than in a contract nobody reads at this stage. Framed as the reason for
+         the questions, not as a threat: a client who understands why the detail
+         is asked for supplies it, where one who is told what they cannot change
+         later goes looking for a studio that sounds friendlier. Step 04 says
+         what a render costs in hours, which is what makes this land. */
+      "We start with the machine, not the brief — reference photography, spec sheets, and a conversation about the story you want it to tell. Bring every detail now: colour, finish, angle, badge, the lot. Once a shot is rendered it is hours of compute deep, and changing it means rendering it again.",
   },
   {
     index: "02",
