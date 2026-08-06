@@ -245,8 +245,15 @@ function Stage({
                  the copy. laptop is 1.11 wide against 0.77 for the rest —
                  at the tall poses' height it was ~300px into the text. */
               WIDE_POSES.has(stage.pose)
-                ? "h-[min(30vh,60vw)] sm:h-[38vh] md:h-[62vh] lg:h-[70vh]"
-                : "h-[min(38vh,74vw)] sm:h-[48vh] md:h-[92vh] lg:h-[102vh]"
+                /* Every step is capped against vw as well as vh, because
+                   height is what sets width here and a tall, narrow viewport
+                   turns a generous height into a pose wider than the screen. A
+                   768x1024 tablet was drawing the laptop 794px across a 768px
+                   viewport, straight over the copy beside it. The vw figures
+                   are the widest each aspect may be: 40vw x 1.25 and 60vw x
+                   0.77 both land inside the column. */
+                ? "h-[min(30vh,60vw)] sm:h-[38vh] md:h-[min(62vh,40vw)] lg:h-[min(70vh,40vw)]"
+                : "h-[min(38vh,74vw)] sm:h-[48vh] md:h-[min(92vh,60vw)] lg:h-[min(102vh,60vw)]"
             }`}
           />
         </motion.div>

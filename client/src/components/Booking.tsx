@@ -88,7 +88,10 @@ function ChosenMachine({
         No machine picked yet.{" "}
         <a
           href="#booking"
-          className="text-[#F5F7FA] border-b border-white/30 transition-colors duration-300 hover:border-white"
+          /* Padded to a real target: it is inline in a sentence, so it
+             inherited the line's height, and it is the only way back to the
+             configurator from down here. */
+          className="inline-block py-1.5 -my-1.5 text-[#F5F7FA] border-b border-white/30 transition-colors duration-300 hover:border-white"
         >
           Step 01 is at the top of this section.
         </a>{" "}
