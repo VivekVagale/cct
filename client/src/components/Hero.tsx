@@ -294,13 +294,25 @@ export function Hero({
   // would re-render the Hero on every scroll tick. Seeded on mount as well as
   // on change, so landing deep in the page starts with the right value.
   useEffect(() => {
-    // One-way, and only while this scene is on screen. The stars coming up is
-    // an event in the story rather than a readout of a scroll position: once
-    // they are up they stay up, including on the way back to the top, and a
-    // hero that is no longer current says nothing at all.
+    /*
+     * Follows the scroll in both directions.
+     *
+     * It was one-way for a while — once the stars were up they stayed up — to
+     * survive the scene deck, where a scene that was not current stopped being
+     * rendered, measured as zero and would have written that zero out. There is
+     * no such state in a document: the hero is always mounted and always
+     * measurable, and the `activeRef` guard below still covers the deck if it
+     * is ever switched back on.
+     *
+     * And the latch was wrong here anyway. The frames are keyed but their edges
+     * are not perfectly clean, so the black behind them is doing real work —
+     * scroll back up with the starfield still lit and those edges are suddenly
+     * visible against it. The backdrop has to go back to black exactly as it
+     * came up.
+     */
     const apply = (v: number) => {
       if (!activeRef.current) return;
-      if (v > galaxyOpacity.get()) galaxyOpacity.set(v);
+      galaxyOpacity.set(v);
     };
     apply(galaxyReveal.get());
     return galaxyReveal.on("change", apply);

@@ -89,6 +89,10 @@ function App() {
 
   const handleSceneChange = useCallback(
     (index: number) => {
+      // Deck only, and the deck is off. Kept because it is the deck's answer to
+      // a scene that cannot measure itself; in a document the hero owns this
+      // value outright and must be allowed to take it back down — see the note
+      // in Hero, and the black edges it exists to hide.
       if (index > 0 && galaxyOpacity.get() < 1) {
         animate(galaxyOpacity, 1, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
       }
