@@ -48,7 +48,8 @@ export interface ReelStat {
   likes: string;
   /** Column geometry only, same as `views`. Never rendered — `likes` is. */
   likesValue: number;
-  shares: string;
+  /** Optional: Instagram reports it per reel and not every export carries it. */
+  shares?: string;
   /** Set only where the reel's caption credited a commissioning client. */
   client?: string;
 }
@@ -83,6 +84,27 @@ export const reachStats: ReachStat[] = [
  * argument: this is what a client's own machine did.
  */
 export const topReels: ReelStat[] = [
+  {
+    /*
+     * The studio's best-performing reel by a wide margin — 8.1M against 2M for
+     * the next one, which is why it leads the table.
+     *
+     * Two figures here are not from the export and are marked as such rather
+     * than guessed quietly. `postedAt` is a placeholder: the chart derives its
+     * whole x-scale from these dates, so this column is currently sitting one
+     * day after the previous reel and will move once the real date is known.
+     * `shares` is simply absent — the table prints likes alone for this row
+     * rather than showing a number nobody supplied.
+     */
+    title: "GT 650 MR Clean",
+    vehicle: "Royal Enfield",
+    postedAt: "2026-02-17",
+    views: 8_100_000,
+    viewsLabel: "8.1M",
+    likes: "722K",
+    likesValue: 722_000,
+    client: "@grand_turismo_650",
+  },
   {
     title: "Himalayan 450",
     vehicle: "Royal Enfield",

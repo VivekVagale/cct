@@ -181,7 +181,7 @@ export function About() {
                 .sort((a, b) => b.views - a.views)
                 .map((reel) => (
                   <li
-                    key={reel.postedAt}
+                    key={reel.title}
                     tabIndex={0}
                     onMouseEnter={() => hoverReel(reel.title)}
                     onMouseLeave={() => hoverReel(null)}
@@ -194,7 +194,7 @@ export function About() {
                         {reel.vehicle} {reel.title}
                       </p>
                       <p className="text-xs text-[#B8C4D6]/70 mt-1">
-                        {reel.likes} likes · {reel.shares} shares
+                        {reel.likes} likes{reel.shares ? ` · ${reel.shares} shares` : ""}
                         {reel.client && <> · for {reel.client}</>}
                       </p>
                     </div>
