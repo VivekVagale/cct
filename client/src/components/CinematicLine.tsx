@@ -64,18 +64,18 @@ export function CinematicLine({ text, className, id }: CinematicLineProps) {
       ref={ref}
       id={id}
       className={cn(
-        /* The height is the whole frame and the overflow is clipped, because
-           this is a fixed scene: content that does not quite fit cannot be
-           scrolled to, and a fixed scene reporting travel it can never travel
-           used to leave the deck waiting for an end that never came. Padding
-           in vh so the card breathes without ever adding up past the screen. */
-        "relative w-full h-full max-h-screen overflow-hidden py-[6vh] flex items-center justify-center text-center px-4 sm:px-6",
+        /* Height follows the type, with a floor so the card still reads as a
+           full moment rather than a band. It used to be `h-full` clipped to the
+           screen, which was right while this was a fixed scene and wrong now:
+           the line runs to two lines at this size, and a clipped card would cut
+           the second one off with no way to scroll to it. */
+        "relative w-full min-h-[78vh] py-[8vh] flex items-center justify-center text-center px-4 sm:px-6",
         className,
       )}
     >
       <motion.div
         style={reduceMotion || inDeck ? undefined : { opacity, y }}
-        className="scene-heading w-full max-w-[95vw]"
+        className="scene-heading w-full max-w-[88vw]"
       >
         {reduceMotion ? (
           // No canvas at all under reduced motion. The shader's whole output is
@@ -91,12 +91,13 @@ export function CinematicLine({ text, className, id }: CinematicLineProps) {
             // font-display is on the wrapper and the component inherits it, so
             // the warped type is the same face as the rest of the page.
             fontFamily="inherit"
-            /* As large as a title card can be and still hold the line. The vw
-               term is what does the work — this is type sized to the screen
-               rather than to a paragraph, which is the difference between a
-               line of copy and a card. The rem floor keeps it readable on a
-               phone; the ceiling stops it outgrowing a very wide monitor. */
-            fontSize="clamp(3rem, 13vw, 11rem)"
+            /* Sized to the screen, not to a line of copy — and no longer
+               capped at whatever kept it on one line. Two lines is the better
+               shape for a card anyway: a single line spanning a 1920px monitor
+               is a strip of type, where two stacked lines are a title. The rem
+               floor keeps it readable on a phone; the ceiling only stops it
+               outgrowing a very wide monitor. */
+            fontSize="clamp(3.5rem, 15vw, 17rem)"
             fontWeight={400}
             letterSpacing="0.01em"
             lineHeight={1.02}
@@ -119,7 +120,7 @@ export function CinematicLine({ text, className, id }: CinematicLineProps) {
             /* In vh, not rem. The card is a fixed scene now — whatever this
                reserves has to fit the screen it is on, at every size, or the
                scene clips content it can never scroll to. */
-            className="font-display !min-h-[42vh] sm:!min-h-[52vh]"
+            className="font-display !min-h-[46vh] sm:!min-h-[58vh]"
           />
         )}
       </motion.div>

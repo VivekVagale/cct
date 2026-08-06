@@ -76,6 +76,16 @@ export function CreativeProcess() {
   );
 }
 
+/**
+ * Poses that are wider than they are tall, or close to it.
+ *
+ * Every pose is sized by its height and lets its width follow, which keeps the
+ * character's proportions right and means a wide render claims far more of the
+ * row than a narrow one. These two need their own, shorter height or they
+ * overlap the copy beside them.
+ */
+const WIDE_POSES = new Set(["laptop", "clapperboard"]);
+
 function Stage({
   stage,
   index,
@@ -161,7 +171,7 @@ function Stage({
                screen and what is left reads as a figure standing at the edge of
                shot. Only this one — the other four are cut at the waist alone
                and sit where the row puts them. */
-            index === 0 ? " md:-mr-[7vw] lg:-mr-[5vw]" : ""
+            index === 0 || index === 4 ? " md:-mr-[11vw] lg:-mr-[8vw]" : ""
           }`}
         >
           {/* Height-sized, so width is intrinsic and a wide pose can overrun a
@@ -197,7 +207,15 @@ function Stage({
                short enough that the head stays clear of the bar at the worst
                moment of the drift, while the hem is still well under the
                bottom edge. */
-            className="h-[min(38vh,74vw)] sm:h-[48vh] md:h-[92vh] md:-mb-[12vh] lg:h-[102vh]"
+            className={`md:-mb-[12vh] ${
+              /* Height is what sets the width here, so a wide pose needs a
+                 shorter one or it grows across the column and sits on top of
+                 the copy. laptop is 1.11 wide against 0.77 for the rest —
+                 at the tall poses' height it was ~300px into the text. */
+              WIDE_POSES.has(stage.pose)
+                ? "h-[min(30vh,60vw)] sm:h-[38vh] md:h-[62vh] lg:h-[70vh]"
+                : "h-[min(38vh,74vw)] sm:h-[48vh] md:h-[92vh] lg:h-[102vh]"
+            }`}
           />
         </motion.div>
       </div>
