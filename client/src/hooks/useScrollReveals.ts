@@ -43,7 +43,16 @@ export function useScrollReveals(enabled = true) {
           observer.unobserve(entry.target);
           targets.delete(entry.target);
         }
-        if (targets.size === 0) observer.disconnect();
+        /*
+         * The observer is deliberately not disconnected when the set empties.
+         *
+         * It used to be, which is tidy and wrong: sections mount as the page is
+         * built, so a block that appears after the last known target has played
+         * would be marked `reveal-pending` by the sweep below and then never
+         * observed by anything. It would sit at opacity 0 for good. The
+         * observer costs nothing while it has nothing to watch, and it is
+         * disconnected on unmount either way.
+         */
       },
       {
         /* A quarter of the element, and a margin that starts it just before it

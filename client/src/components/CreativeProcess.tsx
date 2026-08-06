@@ -3,9 +3,9 @@ import { motion, useScroll, useTransform, useSpring, type MotionValue } from "fr
 import { processStages, type ProcessStage } from "@/data/content";
 import { Mascot } from "@/components/Mascot";
 import { useScene } from "@/components/SceneDeck";
+import { useIsPhone } from "@/hooks/useIsPhone";
 import { FoldHeading } from "@/components/FoldHeading";
 import DepthText from "@/components/DepthText";
-import { useIsPhone } from "@/hooks/useIsPhone";
 
 /**
  * A vertical cinematic journey: the section pins once and each stage occupies
@@ -26,6 +26,24 @@ import { useIsPhone } from "@/hooks/useIsPhone";
  */
 export function CreativeProcess() {
   const ref = useRef<HTMLDivElement>(null);
+  /*
+   * A phone does not pin this section.
+   *
+   * Five stages crossfading inside a `position: sticky` stage is a fine effect
+   * on a desktop and a poor bargain on a phone. It costs a scroll listener, a
+   * spring and five absolutely-positioned stages alive at once — and, worse, it
+   * pins against a viewport whose height changes every time the browser's own
+   * chrome slides in and out. That is what "smooth going down, glitches going
+   * up" describes: the bar reappears on an upward scroll, the sticky stage is
+   * measured against a viewport that just changed, and the pinned content jumps
+   * while the page around it does not.
+   *
+   * Stacked, each stage is an ordinary block that scrolls like everything else
+   * and reveals like everything else. The story is the same five steps in the
+   * same order; what goes is a pinning effect nobody on a phone was getting
+   * cleanly anyway.
+   */
+  const isPhone = useIsPhone();
   // Measured against the scene's scroller — see the same note in Hero. In the
   // deck the window never moves, so the five stages would all sit on stage one.
   const { scroller } = useScene();
@@ -52,9 +70,15 @@ export function CreativeProcess() {
       id="process"
       ref={ref}
       className="relative pointer-events-auto"
-      style={{ height: `${processStages.length * 100}vh` }}
+      style={isPhone ? undefined : { height: `${processStages.length * 100}vh` }}
     >
-      <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+      <div
+        className={
+          isPhone
+            ? "w-full"
+            : "sticky top-0 h-[100svh] w-full overflow-hidden"
+        }
+      >
         <motion.div
           style={{ opacity: headingOpacity, y: headingY }}
           className="scene-heading absolute inset-x-0 top-[12%] sm:top-[16%] z-20 px-6 sm:px-10 max-w-[1600px] mx-auto pointer-events-none"
@@ -71,7 +95,13 @@ export function CreativeProcess() {
         </motion.div>
 
         {processStages.map((stage, i) => (
-          <Stage key={stage.index} stage={stage} index={i} progress={progress} />
+          <Stage
+            key={stage.index}
+            stage={stage}
+            index={i}
+            progress={progress}
+            pinned={!isPhone}
+          />
         ))}
       </div>
     </section>
@@ -99,10 +129,13 @@ function Stage({
   stage,
   index,
   progress,
+  pinned,
 }: {
   stage: ProcessStage;
   index: number;
   progress: MotionValue<number>;
+  /** False on a phone, where the stages stack and scroll — see CreativeProcess. */
+  pinned: boolean;
 }) {
   const isPhone = useIsPhone();
   const count = processStages.length;
@@ -124,7 +157,17 @@ function Stage({
   const scale = useTransform(progress, [at - span, at, at + span], [0.95, 1, 1.03]);
 
   return (
-    <motion.div style={{ opacity }} className="absolute inset-0">
+    <motion.div
+      /* Unpinned, the stage is a block in the flow with its own space, and
+         nothing about it is driven by the section's scroll — it reveals on the
+         way past like every other section on the page. */
+      style={pinned ? { opacity } : undefined}
+      className={
+        pinned
+          ? "absolute inset-0"
+          : "scene-body relative w-full py-16 first:pt-0"
+      }
+    >
       {/* Two columns from md up: copy left, mascot right. Below that there is
           not enough width to sit them side by side, so they stack — mascot
           above, copy beneath — and both centre. */}
@@ -134,9 +177,13 @@ function Stage({
           crosses, so the clearance has to cover that drift as well as sit the
           copy off the bottom: at 31px the description's last line ended up flush
           against the viewport edge at the bottom of the travel. */}
-      <div className="relative h-full w-full max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col items-center justify-end gap-5 pb-[14vh] sm:gap-6 md:flex-row md:items-center md:justify-between md:gap-10 md:pb-0">
+      <div
+        className={`relative w-full max-w-[1600px] mx-auto px-6 sm:px-10 flex flex-col items-center gap-5 sm:gap-6 md:flex-row md:items-center md:justify-between md:gap-10 md:pb-0 ${
+          pinned ? "h-full justify-end pb-[14vh]" : "justify-start"
+        }`}
+      >
         <motion.div
-          style={{ y }}
+          style={pinned ? { y } : undefined}
           className="order-2 md:order-1 md:w-[46%] flex flex-col items-center text-center md:items-start md:text-left gap-2 md:gap-4 pointer-events-none"
         >
           {/* The stacked layout has one viewport for a mascot and all three of
@@ -198,7 +245,7 @@ function Stage({
             height would have hung off the top as well and taken the helmet with
             it. */}
         <motion.div
-          style={{ y, scale }}
+          style={pinned ? { y, scale } : undefined}
           className={`order-1 md:order-2 md:w-[50%] flex items-end justify-center md:justify-end md:self-stretch pointer-events-none${
             /* The first pose is cut square down its right side as well as its
                hem, and unlike the hem there is no bottom edge to hide it under.

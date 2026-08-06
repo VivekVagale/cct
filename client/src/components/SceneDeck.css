@@ -272,6 +272,17 @@
   opacity: 0;
   transform: translate3d(0, 24px, 0);
   will-change: transform, opacity;
+  /*
+   * A revealing element must not become a scroll anchor.
+   *
+   * The browser picks an element near the top of the viewport and keeps it
+   * still when content around it resizes — helpful normally, and wrong here: a
+   * block that is mid-reveal is moving 24px under its own animation, and the
+   * anchor chases it by adjusting the scroll position. That is a page nudging
+   * itself while the visitor is scrolling, and it shows up most on the way back
+   * up, where the reveals are behind rather than ahead.
+   */
+  overflow-anchor: none;
 }
 
 .reveal-pending,
