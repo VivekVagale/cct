@@ -345,7 +345,14 @@
  * values are exposed as custom properties rather than being written twice.
  */
 :root {
-  --selected-ring: 0 0 0 1px rgba(159, 110, 242, 0.55);
+  /* 2px at near-full strength, up from 1px at 55%.
+  
+     A hairline at half opacity is what "unselected" already looks like on this
+     page — every card carries a 1px white line at 10% — so the selected state
+     was reading as a slightly brighter version of nothing in particular. The
+     colour picker is where that hurt most: the swatches are photographs of the
+     same bike, so the outline is the only thing saying which one is chosen. */
+  --selected-ring: 0 0 0 2px rgba(159, 110, 242, 0.95);
   --selected-bloom: 0 0 18px rgba(122, 68, 224, 0.5),
     0 0 44px rgba(122, 68, 224, 0.2);
 }
