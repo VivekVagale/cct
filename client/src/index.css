@@ -277,19 +277,24 @@
   }
 
   /*
-   * The scrollbar, in the site's own colours rather than the browser's.
+   * The scrollbar, kept and made almost invisible.
    *
-   * The thumb was #FFFFFF, which on a #05070A page is the brightest thing on
-   * screen and reads as a white bar rather than as a scrollbar — most of all
-   * on the horizontal one, which runs the full width of the viewport. Dim
-   * violet at rest, the brand violet under the pointer.
+   * It was white once, which on a #05070A page is the brightest thing on
+   * screen; then dim violet, which put a coloured stripe down the edge of a
+   * cinematic page and drew the eye to the one element that is not the work.
+   *
+   * It is a barely-there grey now, and narrower. Not removed: the document
+   * runs to about 25,000px and the bar is the only thing that says how much of
+   * it is left — hiding it entirely takes away the reader's sense of place on
+   * a page whose whole argument is scrolling through it. It lifts to a faint
+   * white on hover, so it is there when reached for and invisible when not.
    *
    * Both axes are styled: ::-webkit-scrollbar's `width` only sizes the
    * vertical bar, and a horizontal one takes its `height`.
    */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -297,18 +302,18 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #3B2568;
-    border-radius: 4px;
+    background: rgba(245, 247, 250, 0.10);
+    border-radius: 999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #9F6EF2;
+    background: rgba(245, 247, 250, 0.28);
   }
 
   /* Firefox has no ::-webkit- pseudo-elements and was showing the default
      light thumb on a black page. */
   html {
-    scrollbar-color: #3b2568 #05070a;
+    scrollbar-color: rgba(245, 247, 250, 0.12) transparent;
     scrollbar-width: thin;
   }
 }
