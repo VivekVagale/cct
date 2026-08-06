@@ -144,7 +144,12 @@ export function About() {
           <motion.div
             ref={aboutMascotRef}
             style={{ y: aboutMascotY }}
-            className="lg:col-span-4 flex justify-center lg:justify-end"
+            /* Pushed past the right edge on desktop. The pose is cut square
+               down that side, and at this size the cut was landing in open
+               frame — the same treatment the first and last process stages
+               get. The document already clips its horizontal axis, so what
+               leaves the viewport is simply gone rather than scrollable. */
+            className="lg:col-span-4 flex justify-center lg:justify-end lg:-mr-[7vw] xl:-mr-[5vw]"
           >
             <Mascot pose="armsCrossed" size="xl" parallax />
           </motion.div>
