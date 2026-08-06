@@ -48,6 +48,28 @@
  * the glow the same colour throughout, so it reads as light spreading rather
  * than as a second shape fading up.
  */
+/*
+ * The glow needs a stacking context to be contained by, and it has to be an
+ * ancestor rather than the button.
+ *
+ * `z-index: -10` paints the bloom behind the nearest ancestor that forms a
+ * stacking context. Inside the old scene deck that was the scene wrapper, which
+ * had `will-change: transform` — so the glow was held there and painted over
+ * the page. As an ordinary document there is no such wrapper, the bloom escapes
+ * all the way up, and it lands behind App's opaque page background where
+ * nothing can see it. The ring stayed, because the ring is the button's own
+ * background; only the bloom went.
+ *
+ * `isolation: isolate` on the parent creates the context without putting a
+ * transform, filter or opacity on `.glow-button` itself — which is the thing
+ * the warning above forbids, and the reason this is not simply solved by
+ * promoting the button.
+ */
+.glow-button-host,
+:has(> .glow-button) {
+  isolation: isolate;
+}
+
 .glow-button::before {
   content: "";
   position: absolute;
