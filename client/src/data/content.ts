@@ -106,9 +106,9 @@ export const projects: Project[] = [
     comingSoon: true,
   },
   {
-    id: "firestorm",
-    title: "Project Firestorm",
-    description: "Volumetric heat and light, simulated frame by frame.",
+    id: "ghost-rider",
+    title: "Project Ghost Rider",
+    description: "A rider wreathed in fire — volumetric flame and heat haze, simulated frame by frame.",
     image:
       "https://images.unsplash.com/photo-1495954380655-01ec3939a26f?q=80&w=1200&auto=format&fit=crop",
     comingSoon: true,
