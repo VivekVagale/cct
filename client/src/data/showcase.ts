@@ -19,12 +19,16 @@ export interface ShowcaseItem {
  * InfiniteMenu can place them with no two identical frames adjacent. The
  * twelve it replaces had to repeat three or four times each.
  *
- * **The titles are frame numbers, and they are placeholders.** They are the
- * source filenames, which is honest — a shot ID is a real thing — but it is not
- * what these are. Each should carry what the shot actually is, the way the
- * previous set did with "Tibetan Flags" and "Too Clean", and the vehicle where
- * it is known. Nothing here guesses at either: a title invented from looking at
- * a render is exactly the sort of claim this site is careful not to make.
+ * Thirteen are titled from the frames themselves; the rest still carry their
+ * source frame number and want the same treatment.
+ *
+ * `vehicle` is filled in only where a badge is actually legible in the shot —
+ * the Interceptor's tank, the Guerrilla's, the Himalayan's fork. The rest are
+ * left blank rather than inferred from a silhouette, which is the same rule the
+ * previous set followed and the reason this site's captions can be trusted.
+ *
+ * The categories are the three scenes these come from: machines suspended above
+ * the cloud deck with jets, a night airfield, and the close detail work.
  */
 export const showcaseItems: ShowcaseItem[] = [
   {
@@ -33,63 +37,65 @@ export const showcaseItems: ShowcaseItem[] = [
     image: "/showcase/f-0001.webp",
   },
   {
-    title: "Frame 0148",
-    category: "Selected Work",
+    title: "Above the Weather",
+    category: "Aerial",
     image: "/showcase/f-0148.webp",
   },
   {
-    title: "Frame 0153",
-    category: "Selected Work",
+    title: "Interceptor, Close",
+    category: "Detail",
+    vehicle: "Royal Enfield Interceptor 650",
     image: "/showcase/f-0153.webp",
   },
   {
-    title: "Frame 0156",
-    category: "Selected Work",
+    title: "Escort",
+    category: "Aerial",
     image: "/showcase/f-0156.webp",
   },
   {
-    title: "Frame 0164",
-    category: "Selected Work",
+    title: "Moonrise on the Apron",
+    category: "Night",
     image: "/showcase/f-0164.webp",
   },
   {
-    title: "Frame 0168",
-    category: "Selected Work",
+    title: "Formation",
+    category: "Aerial",
     image: "/showcase/f-0168.webp",
   },
   {
-    title: "Frame 0185",
-    category: "Selected Work",
+    title: "Sedan, Airborne",
+    category: "Aerial",
     image: "/showcase/f-0185.webp",
   },
   {
-    title: "Frame 0192",
-    category: "Selected Work",
+    title: "Standoff",
+    category: "Night",
     image: "/showcase/f-0192.webp",
   },
   {
-    title: "Frame 0242",
-    category: "Selected Work",
+    title: "Chrome at Dusk",
+    category: "Detail",
     image: "/showcase/f-0242.webp",
   },
   {
-    title: "Frame 0255",
-    category: "Selected Work",
+    title: "Perched",
+    category: "Aerial",
     image: "/showcase/f-0255.webp",
   },
   {
-    title: "Frame 0262",
-    category: "Selected Work",
+    title: "Wing Rider",
+    category: "Aerial",
     image: "/showcase/f-0262.webp",
   },
   {
-    title: "Frame 0268",
-    category: "Selected Work",
+    title: "Guerrilla, Backlit",
+    category: "Detail",
+    vehicle: "Royal Enfield Guerrilla 450",
     image: "/showcase/f-0268.webp",
   },
   {
-    title: "Frame 0273",
-    category: "Selected Work",
+    title: "Grounded",
+    category: "Night",
     image: "/showcase/f-0273.webp",
   },
   {
@@ -98,8 +104,9 @@ export const showcaseItems: ShowcaseItem[] = [
     image: "/showcase/f-0275.webp",
   },
   {
-    title: "Frame 0276",
-    category: "Selected Work",
+    title: "Himalayan, Golden Hour",
+    category: "Aerial",
+    vehicle: "Royal Enfield Himalayan",
     image: "/showcase/f-0276.webp",
   },
   {
