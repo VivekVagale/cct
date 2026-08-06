@@ -18,14 +18,19 @@ type Status = "idle" | "submitting" | "success" | "error";
 /**
  * Who the work is for.
  *
- * Four rather than two, because "personal or company" collapses the two cases
- * that behave differently: a brand shooting its own product and an agency or
- * dealership shooting someone else's have different approvals, different
- * deadlines and different ideas of what "finished" means.
+ * Four rather than two, because "personal or company" collapses the cases that
+ * behave least alike: a business shooting its own product, a dealership
+ * shooting stock it is selling, and an agency shooting for someone else all
+ * have different approvals, deadlines and definitions of finished.
+ *
+ * `commercial` rather than `brand`, which read as a question about whether the
+ * client considers themselves a brand — a judgement rather than a fact.
+ * Commercial asks the thing that actually changes the job: whether the work is
+ * being sold behind.
  */
 const USAGE_OPTIONS: MarqueChip[] = [
   { id: "personal", label: "Personal", hint: "My own machine" },
-  { id: "brand", label: "Brand", hint: "Our own product" },
+  { id: "commercial", label: "Commercial", hint: "For a business" },
   { id: "dealership", label: "Dealership", hint: "Stock we sell" },
   { id: "agency", label: "Agency", hint: "For a client" },
 ];
