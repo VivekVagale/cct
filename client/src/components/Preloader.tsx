@@ -28,8 +28,21 @@ const PORTRAIT_QUERY = "(orientation: portrait) and (max-width: 900px)";
  * the whole site is a loading screen someone leaves.
  */
 
-/** How many frames of the opening have to exist before the story can start. */
-const CRITICAL_FRAMES = 48;
+/**
+ * How many frames of the opening have to exist before the story can start.
+ *
+ * 48 was enough to begin on, and not enough to scroll on. The sequence decodes
+ * a moving window around wherever the scrub currently is, and a fast scroll
+ * outruns that window — the assembly stutters through whichever frames happen
+ * to be ready. Blocking on the first third means the part everyone scrolls
+ * through fastest is already there.
+ *
+ * It stops at a third rather than all 298 because the full set is tens of
+ * megabytes: waiting for it would trade a stutter for a loading screen nobody
+ * sits through. The rest is fetched behind the curtain instead — see
+ * `warmRemainingFrames`.
+ */
+const CRITICAL_FRAMES = 96;
 
 /**
  * The shortest time the curtain is allowed to be up, in ms.
@@ -90,11 +103,35 @@ export function Preloader({ onDone }: { onDone: () => void }) {
         // explicitly low priority, so say so here too rather than leaving them
         // to compete as equals.
         img.fetchPriority = "high";
-        img.onload = img.onerror = () => resolve();
+        img.onload = () => {
+          // Decoding here rather than at first paint is the whole point: an
+          // image in cache still costs a decode the moment it is drawn, and
+          // that moment is mid-scrub.
+          if (typeof img.decode === "function") img.decode().then(resolve, resolve);
+          else resolve();
+        };
+        img.onerror = () => resolve();
         img.src = src;
       }).then(tick);
 
     const fonts = (document.fonts?.ready ?? Promise.resolve()).then(tick);
+
+    /*
+     * Everything the blocking set does not cover, pulled quietly afterwards.
+     *
+     * Not awaited and not counted: the curtain is already up on the visitor's
+     * behalf and these are frames they will not reach for several seconds. By
+     * the time the scrub gets there the bytes are in cache and the only work
+     * left is the decode, which is the part the sequence is built to manage.
+     */
+    const warmRemainingFrames = () => {
+      for (let i = frames.length; i < sequence.count; i++) {
+        const img = new Image();
+        img.fetchPriority = "low";
+        img.decoding = "async";
+        img.src = sequence.srcFor(i);
+      }
+    };
 
     const everything = Promise.all([...frames.map(settle), fonts]);
     const deadline = new Promise<void>((resolve) =>
@@ -109,6 +146,7 @@ export function Preloader({ onDone }: { onDone: () => void }) {
           if (!live) return;
           setOpen(false);
           doneRef.current();
+          warmRemainingFrames();
         },
         Math.max(0, MIN_VISIBLE_MS - held),
       );
