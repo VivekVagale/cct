@@ -257,6 +257,15 @@ export function VehicleFocus({
             
                More of them simply means more rows and more scrolling, which is
                the correct trade — a colour picker exists to be looked at. */
+            /* Lenis has to be told to keep its hands off this one.
+            
+               Smooth scrolling works by capturing the wheel globally and
+               calling preventDefault on it, then moving the page itself — which
+               means a nested scroller never receives a native scroll at all.
+               The list was scrollable and the wheel simply never reached it.
+               `data-lenis-prevent` is the library's own opt-out for exactly
+               this case. */
+            data-lenis-prevent
             className="grid grid-cols-2 gap-3 max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain pr-1"
           >
             {vehicle.colors.map((color) => (
