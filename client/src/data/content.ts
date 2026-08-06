@@ -106,6 +106,18 @@ export const projects: Project[] = [
     comingSoon: true,
   },
   {
+    id: "battlegrounds",
+    title: "Project Battlegrounds",
+    description:
+      "Two machines, a drop zone and a lot of smoke — game-key art staging, rendered as stills.",
+    /* A real render of the studio's own, standing in until this one is shot.
+       The other coming-soon cards carry Unsplash photographs of other people's
+       motorcycles, which is the thing this section was cleaned of once already
+       — a placeholder that is at least the studio's work is the lesser wrong. */
+    image: "/showcase/too-clean.webp",
+    comingSoon: true,
+  },
+  {
     id: "ghost-rider",
     title: "Project Ghost Rider",
     description: "A rider wreathed in fire — volumetric flame and heat haze, simulated frame by frame.",
