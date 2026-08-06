@@ -140,8 +140,11 @@ export function VehicleFocus({
               photo is a 4:3 box, so its height follows its width, and the
               caption under it follows the type. Narrowing the card shortens
               the whole thing in proportion and everything keeps its shape —
-              which capping any one part of it did not. */
-          className="relative z-10 my-auto flex w-full max-w-[min(86vw,430px)] max-h-[calc(100dvh-2.5rem)] flex-col focus:outline-none"
+              which capping any one part of it did not.
+           
+              From md the dialog goes wide instead, because the colours move
+              beside the machine rather than under it. */
+          className="relative z-10 my-auto flex w-full max-w-[min(92vw,430px)] md:max-w-[min(94vw,940px)] max-h-[calc(100dvh-2.5rem)] flex-col focus:outline-none"
       >
         <p id={titleId} className="sr-only">
           {vehicle.manufacturer} {vehicle.name} — choose a colour
@@ -166,6 +169,7 @@ export function VehicleFocus({
             which is why the rotation from useTilt is switched off here: layout
             projection measures a rendered box, and a rotated one measures
             wrong. */}
+        <div className="flex min-h-0 flex-col gap-6 md:flex-row md:items-start md:gap-8">
         <motion.div
           /* Nothing overriding the card's own geometry.
           
@@ -174,7 +178,7 @@ export function VehicleFocus({
              picture shrank inside it and the caption ended up below where the
              card believed it stopped — under the colour row. The card is scaled
              by its width instead, on the wrapper above. */
-          className="shrink-0"
+          className="shrink-0 md:w-[400px]"
           layoutId={reduceMotion ? undefined : `vehicle-focus-${vehicle.id}`}
           initial={reduceMotion ? { opacity: 0 } : false}
           animate={reduceMotion ? { opacity: 1 } : undefined}
@@ -190,7 +194,18 @@ export function VehicleFocus({
             until AnimatePresence finally unmounted it. Shorter than the scrim
             so they are gone before the background is sharp again. */}
         <motion.div
-          className="shrink-0 pt-5"
+          /* min-h-0 so the list inside can shrink and scroll rather than
+             pushing the card past the viewport — the card is a flex column
+             with a height cap, and a child that refuses to shrink defeats it. */
+          /* Beside the machine from md up, and the part that scrolls.
+          
+             Under the card, a long range pushed the colours off the bottom of
+             a laptop screen and left the visitor scrolling a modal to find
+             them. Beside it, the machine stays in view while the colours are
+             chosen — which is the whole point of looking at a colour — and the
+             list has the dialog's full height to use before it needs to
+             scroll at all. */
+          className="flex min-h-0 flex-1 flex-col pt-0 md:pt-0"
           initial="hidden"
           animate="show"
           exit={{ opacity: 0, y: 6, transition: { duration: 0.14 } }}
@@ -213,13 +228,36 @@ export function VehicleFocus({
           {/* Columns from the data, not a breakpoint: vehicles carry two or
               three colours and a fixed three-up leaves a hole under the ones
               that carry two. */}
+          {/*
+            Three across, wrapping, and scrolling inside its own box.
+
+            The column count used to be the number of colours, which was fine
+            when a machine had two or three and absurd once the real range
+            arrived — Meteor 350 has twenty, and twenty columns of a 430px card
+            is a row of 20px slivers with the names clipped to one letter. A
+            fixed three keeps every card the same usable size whatever the
+            machine, and the rows simply continue downward.
+
+            `overscroll-contain` is the other half. Without it a wheel at the
+            end of this list chains straight through to the page behind, which
+            is what made scrolling here move the site instead of the colours.
+          */}
           <div
             role="radiogroup"
             aria-label={`Colour for ${vehicle.manufacturer} ${vehicle.name}`}
-            className="grid gap-3"
-            style={{
-              gridTemplateColumns: `repeat(${vehicle.colors.length}, minmax(0, 1fr))`,
-            }}
+            /* Two across, not three.
+            
+               Each of these carries a photograph of that exact colourway and a
+               name that must not be clipped — "Signals Commando Sand" and
+               "Bruntingthorpe Blue" are real entries in this range. Three
+               columns of a 940px dialog left a ~170px card, which is a thumbnail
+               with a truncated caption. Two gives ~260px: an image big enough to
+               tell one paint from another, and room for the longest name on two
+               lines rather than an ellipsis.
+            
+               More of them simply means more rows and more scrolling, which is
+               the correct trade — a colour picker exists to be looked at. */
+            className="grid grid-cols-2 gap-3 max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain pr-1"
           >
             {vehicle.colors.map((color) => (
               <ColorCard
@@ -231,6 +269,7 @@ export function VehicleFocus({
             ))}
           </div>
         </motion.div>
+        </div>
       </div>
     </div>,
     document.body,
