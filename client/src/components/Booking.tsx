@@ -10,7 +10,7 @@ import { ThankYouCard } from "@/components/ThankYouCard";
 import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
-import { FoldHeading } from "@/components/FoldHeading";
+import DepthText from "@/components/DepthText";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -208,8 +208,27 @@ export function Booking() {
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
             Step 01 — Configure
           </p>
-          <h2 className="font-display text-5xl sm:text-8xl lg:text-9xl text-[#F5F7FA] max-w-4xl leading-[0.98]">
-            <FoldHeading text="Pick your machine." />
+          {/* Extruded, like the five process titles. Same treatment for the
+              same reason: this heading opens a section with the whole band to
+              itself, so the depth has room to read.
+
+              A step larger than the process titles, which share their screen
+              with a stage heading and a 13rem step number. The size lives here
+              rather than in a type class because the component lays its layers
+              out against a font size it has to be told. */}
+          <h2 className="font-display text-[#F5F7FA] max-w-4xl leading-[0.98]">
+            <DepthText
+              text="Pick your machine."
+              fontSize="clamp(2.5rem, 9vw, 8rem)"
+              fontWeight={400}
+              faceColor="#F5F7FA"
+              depthColor="#9F6EF2"
+              layers={14}
+              depth={5}
+              tilt={9}
+              pointerTracking
+              shadow
+            />
           </h2>
           <p className="text-sm sm:text-base text-[#B8C4D6] mt-4 sm:mt-5 max-w-md">
             Choose the vehicle, then its colour. Five steps in all — this is the
