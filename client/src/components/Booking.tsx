@@ -350,16 +350,16 @@ export function Booking() {
           </div>
         </div>
 
-        {/* The second pose, and the cubes under it. Step 03 is the tallest
-            part of the form — a description field and seven project cards — so
-            this column has the room for both where step 02's does not.
+        {/* The cubes. The pose that stood here moved down to step 05, where a
+            reaction to a question is worth more than a figure standing beside a
+            text field. Step 03 keeps the cubes on their own — the column is the
+            tallest in the form and would read as empty without something in it.
 
             The pointer reaches the cubes: the grid tilts toward the cursor and
             that is all it does. The click ripple stays off, because a click
             there leads nowhere. */}
         <div className="hidden lg:flex lg:col-span-4 flex-col items-center gap-10">
           <div className="sticky top-28 flex flex-col items-center gap-10">
-            <Mascot pose="fistPump" size="lg" parallax />
             <div aria-hidden className="w-full cubes-fill">
               <Cubes
                 gridSize={6}
@@ -444,6 +444,17 @@ export function Booking() {
             number="05"
             title="Who's it for?"
             hint="The same machine shot for your own feed and for a brand campaign are two different jobs — this tells us which one we're making."
+          />
+          {/* Down from step 03. A pose reacting to a question the visitor has
+              just been asked reads as an answer being received; the same pose
+              beside a description field was only filling a column. Desktop
+              only, like the other two — stacked on a phone it is a screen of
+              mascot between the question and the chips. */}
+          <Mascot
+            pose="fistPump"
+            size="lg"
+            parallax
+            className="hidden lg:block"
           />
           <MarqueChips
             name="usage"
