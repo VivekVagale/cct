@@ -445,11 +445,7 @@ export function Booking() {
             worth nothing buried where someone has already scrolled past.
             Centred on the same axis as the button below it. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-6 text-center">
-          <Step
-            number="05"
-            title="Who's it for?"
-            hint="The same machine shot for your own feed and for a brand campaign are two different jobs — this tells us which one we're making."
-          />
+          <Step number="05" title="Who's it for?" />
           {/* Down from step 03. A pose reacting to a question the visitor has
               just been asked reads as an answer being received; the same pose
               beside a description field was only filling a column. Desktop
@@ -461,6 +457,16 @@ export function Booking() {
             parallax
             className="hidden lg:block"
           />
+          {/* The explanation sits between the pose and the chips rather than
+              under the heading. It is the sentence that makes the four options
+              mean something, so it belongs where the eye is about to reach for
+              them — under the heading it was read before the question had
+              landed, and scrolled past before the answer was needed. */}
+          <p className="max-w-md text-sm text-[#B8C4D6] leading-relaxed">
+            The same machine shot for your own feed and for a brand campaign are
+            two different jobs — this tells us which one we&rsquo;re making.
+          </p>
+
           <MarqueChips
             name="usage"
             label="Who the work is for"
