@@ -67,12 +67,16 @@ export const reachWindow = {
 /** The ratio the section leads on — 2,750 views for every follower. */
 export const headline = {
   followers: "3.6K",
-  views: "9.9M",
+  /* 14.3M, which includes the GT 650's 8.1M — that one reel is more than half
+     of everything the account has done. */
+  views: "14.3M",
 };
 
 export const reachStats: ReachStat[] = [
-  { label: "Likes", value: "1.2M", amount: 1.2, suffix: "M" },
-  { label: "Shares", value: "138K", amount: 138, suffix: "K" },
+  { label: "Likes", value: "1.523M", amount: 1.523, suffix: "M" },
+  /* Down from the 138K previously on this page. The studio's current export
+     says 100K; where they disagree the newer figure wins. */
+  { label: "Shares", value: "100K", amount: 100, suffix: "K" },
   { label: "Saves", value: "52K", amount: 52, suffix: "K" },
   { label: "Reposts", value: "21K", amount: 21, suffix: "K" },
   { label: "Reels", value: "37", amount: 37 },
