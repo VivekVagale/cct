@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   motion,
   useScroll,
@@ -194,7 +194,30 @@ export function Hero({
     return () => mql.removeEventListener("change", sync);
   }, []);
 
-  const sequence = portrait ? HERO_SEQUENCE_MOBILE : HERO_SEQUENCE;
+  /*
+   * Every second frame on a phone.
+   *
+   * 298 frames is 298 decodes and 298 frames held in memory, and a phone is
+   * where both hurt — it has the tighter decode budget and it is the device
+   * that was measured getting hot. Halving the set halves the memory and the
+   * decode work outright.
+   *
+   * It costs almost nothing to look at. The note on MOBILE_ASSEMBLY_VH already
+   * says why: a swipe covers 40 to 80 frames whatever the sequence length, so
+   * touch was never advancing one frame at a time and cannot tell 149 apart
+   * from 298. This would be plainly visible under a wheel, which is why it is
+   * not done on the desktop set.
+   */
+  const baseSequence = portrait ? HERO_SEQUENCE_MOBILE : HERO_SEQUENCE;
+  const sequence = useMemo(() => {
+    if (!portrait) return baseSequence;
+    const srcFor = baseSequence.srcFor;
+    return {
+      ...baseSequence,
+      count: Math.ceil(baseSequence.count / 2),
+      srcFor: (i: number) => srcFor(Math.min(baseSequence.count - 1, i * 2)),
+    };
+  }, [portrait, baseSequence]);
   const budgetBytes = portrait ? MOBILE_BUDGET : DESKTOP_BUDGET;
   // Same media query the sequence choice uses. A portrait phone is exactly the
   // case the shorter scrub is for, and having one switch drive both keeps the
