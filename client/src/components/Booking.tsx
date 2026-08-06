@@ -251,7 +251,7 @@ export function Booking() {
             />
           </h2>
           <p className="text-sm sm:text-base text-[#B8C4D6] mt-4 sm:mt-5 max-w-md">
-            Choose the vehicle, then its colour. Five steps in all — this is the
+            Choose the vehicle, then its colour. Six steps in all — this is the
             only one that needs a decision from you before the form.
           </p>
         </div>
@@ -400,8 +400,18 @@ export function Booking() {
             {/* A fieldset rather than a label: a label may caption one control,
                 and this is a group of them. */}
             <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
-              <legend className="text-xs tracking-[0.14em] uppercase text-[#B8C4D6] mb-3">
-                Project
+              {/* A step, not a field label. Choosing the kind of build is a
+                  decision on the same footing as choosing the machine, and it
+                  was reading as one more input on the end of the description.
+                  The legend still carries it for a screen reader — the numbering
+                  is visual, the grouping is structural. */}
+              <legend className="mb-3">
+                <span className="block text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-2">
+                  Step 04
+                </span>
+                <span className="block font-display text-xl sm:text-2xl text-[#F5F7FA] leading-tight">
+                  Pick the kind of build.
+                </span>
               </legend>
               {/* Same reasoning as the CGI Projects grid: these are that card
                   with a selected state, so they need the same column width to
@@ -431,7 +441,7 @@ export function Booking() {
             Centred on the same axis as the button below it. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-6 text-center">
           <Step
-            number="04"
+            number="05"
             title="Who's it for?"
             hint="The same machine shot for your own feed and for a brand campaign are two different jobs — this tells us which one we're making."
           />
@@ -449,7 +459,7 @@ export function Booking() {
             05" was still setting flush to the left edge of "Send it." above a
             button that was centred on something else again. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-4 text-center">
-          <Step number="05" title="Send it." />
+          <Step number="06" title="Send it." />
           {/* Stated, not offered.
           
               This was a toggle, defaulting to off, because the collab used to
