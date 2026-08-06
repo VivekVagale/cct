@@ -15,8 +15,8 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col sm:items-end gap-4">
-          {/* Wraps rather than overflowing: four uppercase links with this much
-              tracking are wider than a 375px viewport's content box. */}
+          {/* Wraps rather than overflowing: uppercase links with this much
+              tracking run wider than a 375px viewport's content box. */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
             <a href="#projects" className="inline-block py-2 -my-2 hover:text-[#F5F7FA] transition-colors duration-300">
               Work
@@ -26,9 +26,6 @@ export function Footer() {
             </a>
             <a href="#booking" className="inline-block py-2 -my-2 hover:text-[#F5F7FA] transition-colors duration-300">
               Book
-            </a>
-            <a href="#" className="inline-block py-2 -my-2 hover:text-[#F5F7FA] transition-colors duration-300">
-              Instagram
             </a>
           </div>
           <p className="text-xs text-[#B8C4D6]/60">
