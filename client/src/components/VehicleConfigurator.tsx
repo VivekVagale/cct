@@ -139,10 +139,21 @@ export function VehicleConfigurator({
             selectedColorId={selectedColorId}
             onSelectColor={(colorId) => {
               onSelectColor(colorId);
-              // Choosing a colour finishes the job the panel was opened for, so
-              // it closes itself rather than leaving the visitor to work out
-              // how to get back to the form.
-              setFocusedId(null);
+              /*
+               * Closes after the choice has been seen, not with it.
+               *
+               * Choosing a colour finishes the job the panel was opened for, so
+               * it closes itself rather than leaving the visitor to work out how
+               * to get back to the form — but closing on the same frame as the
+               * click threw the confirmation away with the panel. The ring and
+               * the check badge landed and were gone inside one frame, so the
+               * only evidence a colour had been picked was the panel vanishing,
+               * which reads as a dismissal rather than a selection.
+               *
+               * Long enough to register as an answer, short enough that nobody
+               * waits for it.
+               */
+              window.setTimeout(() => setFocusedId(null), 520);
             }}
             onDismiss={() => setFocusedId(null)}
           />
