@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import { useParallax } from "@/components/Reveal";
 import { Mascot } from "@/components/Mascot";
@@ -41,6 +41,22 @@ export function About() {
    */
   const [hoveredReel, setHoveredReel] = useState<string | null>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+
+  /*
+   * Hovering a row re-renders this whole section — two charts, a map of ~180
+   * shapes, five counters and two tables — because the highlight is state held
+   * here so the row and the shape it names light together.
+   *
+   * That is the right structure and the wrong priority. Marked as a transition,
+   * React is free to finish the frame the visitor is scrolling in before it
+   * repaints the map, instead of holding the scroll while it does. The
+   * highlight lands a frame or two later, which nobody can see; the stutter it
+   * used to cause, they could.
+   */
+  const [, startHighlight] = useTransition();
+  const hoverReel = (v: string | null) => startHighlight(() => setHoveredReel(v));
+  const hoverCountry = (v: string | null) =>
+    startHighlight(() => setHoveredCountry(v));
 
   /*
    * Depth, from two layers moving at different rates.
@@ -167,10 +183,10 @@ export function About() {
                   <li
                     key={reel.postedAt}
                     tabIndex={0}
-                    onMouseEnter={() => setHoveredReel(reel.title)}
-                    onMouseLeave={() => setHoveredReel(null)}
-                    onFocus={() => setHoveredReel(reel.title)}
-                    onBlur={() => setHoveredReel(null)}
+                    onMouseEnter={() => hoverReel(reel.title)}
+                    onMouseLeave={() => hoverReel(null)}
+                    onFocus={() => hoverReel(reel.title)}
+                    onBlur={() => hoverReel(null)}
                     className="chart-row py-4 px-3 -mx-3 flex items-baseline justify-between gap-4 focus:outline-none"
                   >
                     <div className="min-w-0">
@@ -228,10 +244,10 @@ export function About() {
                 <li
                   key={row.country}
                   tabIndex={0}
-                  onMouseEnter={() => setHoveredCountry(row.country)}
-                  onMouseLeave={() => setHoveredCountry(null)}
-                  onFocus={() => setHoveredCountry(row.country)}
-                  onBlur={() => setHoveredCountry(null)}
+                  onMouseEnter={() => hoverCountry(row.country)}
+                  onMouseLeave={() => hoverCountry(null)}
+                  onFocus={() => hoverCountry(row.country)}
+                  onBlur={() => hoverCountry(null)}
                   className="chart-row py-3 px-3 -mx-3 flex items-baseline justify-between gap-4 focus:outline-none"
                 >
                   <span className="text-sm text-[#F5F7FA]">{row.country}</span>

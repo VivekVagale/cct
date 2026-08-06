@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
   ChoroplethChart,
@@ -51,14 +51,31 @@ const getShare = (feature: { properties?: { name?: string } | null }) =>
 function ListHoverBridge({ country }: { country: string | null }) {
   const { features, setHoveredFeatureIndex } = useChoropleth();
 
+  /*
+   * Built once, not walked per hover.
+   *
+   * This was a `findIndex` over ~180 countries on every pointer move between
+   * rows, and each hit re-rendered the map. On its own that is cheap; landing
+   * in the middle of a scroll, on the same frames the smooth scroll and the
+   * charts are already using, it was enough to show. The lookup is now a Map
+   * keyed on the name the geojson uses.
+   */
+  const indexByName = useMemo(() => {
+    const m = new Map<string, number>();
+    features.forEach((f, i) => {
+      const name = f.properties?.name;
+      if (name) m.set(name, i);
+    });
+    return m;
+  }, [features]);
+
   useEffect(() => {
     if (!country) {
       setHoveredFeatureIndex(null);
       return;
     }
-    const index = features.findIndex((f) => f.properties?.name === country);
-    setHoveredFeatureIndex(index === -1 ? null : index);
-  }, [country, features, setHoveredFeatureIndex]);
+    setHoveredFeatureIndex(indexByName.get(country) ?? null);
+  }, [country, indexByName, setHoveredFeatureIndex]);
 
   return null;
 }
