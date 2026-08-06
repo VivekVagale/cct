@@ -35,7 +35,10 @@ export const processStages: ProcessStage[] = [
     title: "Rendering",
     pose: "laptop",
     description:
-      "Physically based lighting and simulation, rendered in layers so every frame can be graded with the precision of a color session.",
+      /* The hours and the hardware are stated because this is the step a
+         client cannot see and most misjudge — it is where the schedule and the
+         cost actually come from. Said as fact, not as a complaint. */
+      "Physically based lighting and simulation, rendered in layers so every frame can be graded with the precision of a colour session. This is the slow part: hours of GPU compute per shot, and every second of footage is a few hundred frames of it.",
   },
   {
     index: "05",
