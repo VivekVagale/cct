@@ -245,7 +245,7 @@ function Stage({
                  the copy. laptop is 1.11 wide against 0.77 for the rest —
                  at the tall poses' height it was ~300px into the text. */
               WIDE_POSES.has(stage.pose)
-                ? "h-[min(34vh,66vw)] sm:h-[44vh] md:h-[84vh] lg:h-[94vh]"
+                ? "h-[min(30vh,60vw)] sm:h-[38vh] md:h-[62vh] lg:h-[70vh]"
                 : "h-[min(38vh,74vw)] sm:h-[48vh] md:h-[92vh] lg:h-[102vh]"
             }`}
           />
