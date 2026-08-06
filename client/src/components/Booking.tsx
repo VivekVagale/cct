@@ -365,7 +365,13 @@ export function Booking() {
             there leads nowhere. */}
         <div className="hidden lg:flex lg:col-span-4 flex-col items-center gap-10">
           <div className="sticky top-28 flex flex-col items-center gap-10">
-            <div aria-hidden className="w-full cubes-fill">
+            {/* An explicit square, because the grid has no intrinsic size.
+                It used to inherit one from the column, which the mascot above
+                it was holding open — take the mascot away and the flex column
+                collapses to nothing and the cubes render into a zero-height
+                box. Nothing was removed; there was simply no longer anywhere
+                for them to be. */}
+            <div aria-hidden className="w-full aspect-square cubes-fill">
               <Cubes
                 gridSize={6}
                 maxAngle={45}
