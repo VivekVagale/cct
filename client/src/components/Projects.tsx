@@ -149,6 +149,14 @@ export function Projects() {
           centred subject survives both; anything with its subject near an edge
           will not. See data/gallery.ts. */}
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-12 sm:mb-20">
+        {/* Small, and the same eyebrow treatment the section's own kicker uses.
+            Two blocks under one heading need naming or the visitor reads the
+            gallery as the projects — but these are subheads inside a section
+            that already has a title, so they sit at the eyebrow's weight rather
+            than competing with "CGI Projects" above them. */}
+        <h3 className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
+          Workflow
+        </h3>
         <AccordionGallery items={galleryItems} height={460} />
       </div>
 
@@ -157,6 +165,10 @@ export function Projects() {
           finished past five seconds — a long wait for a section whose whole
           content is the cards. Cards a row apart still arrive a beat apart;
           the beat is just shorter. */}
+      <h3 className="max-w-[1600px] mx-auto px-6 sm:px-10 text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
+        Projects Range
+      </h3>
+
       <div className="scene-body scene-body--tight max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {projects.map((project) => (
           /* The wrapper is what the scroll reveal animates.
