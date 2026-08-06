@@ -80,9 +80,16 @@ export function CreativeProcess() {
  * Poses that are wider than they are tall, or close to it.
  *
  * Every pose is sized by its height and lets its width follow, which keeps the
- * character's proportions right and means a wide render claims far more of the
- * row than a narrow one. These two need their own, shorter height or they
- * overlap the copy beside them.
+ * proportions honest and means a wide render claims far more of the row than a
+ * narrow one — laptop is 1.11 wide against 0.77 for the rest.
+ *
+ * They were simply made much shorter, which stopped the overlap and left
+ * stages 03 and 04 visibly smaller figures than the four around them. The
+ * width is the problem, not the height, so the width is what moves: these are
+ * pushed off the right edge like stages 01 and 05, and the extra reach leaves
+ * the frame instead of landing on the copy. That buys back all but a hair of
+ * the height, and the part now off-screen is the far edge of the laptop and
+ * the clapperboard — which is where their square cut is anyway.
  */
 const WIDE_POSES = new Set(["laptop", "clapperboard"]);
 
@@ -171,7 +178,9 @@ function Stage({
                screen and what is left reads as a figure standing at the edge of
                shot. Only this one — the other four are cut at the waist alone
                and sit where the row puts them. */
-            index === 0 || index === 4 ? " md:-mr-[11vw] lg:-mr-[8vw]" : ""
+            index === 0 || index === 4 || WIDE_POSES.has(stage.pose)
+              ? " md:-mr-[11vw] lg:-mr-[8vw]"
+              : ""
           }`}
         >
           {/* Height-sized, so width is intrinsic and a wide pose can overrun a
@@ -213,7 +222,7 @@ function Stage({
                  the copy. laptop is 1.11 wide against 0.77 for the rest —
                  at the tall poses' height it was ~300px into the text. */
               WIDE_POSES.has(stage.pose)
-                ? "h-[min(30vh,60vw)] sm:h-[38vh] md:h-[62vh] lg:h-[70vh]"
+                ? "h-[min(34vh,66vw)] sm:h-[44vh] md:h-[84vh] lg:h-[94vh]"
                 : "h-[min(38vh,74vw)] sm:h-[48vh] md:h-[92vh] lg:h-[102vh]"
             }`}
           />
