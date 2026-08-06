@@ -304,7 +304,7 @@ function Stage({
                    viewport, straight over the copy beside it. The vw figures
                    are the widest each aspect may be: 40vw x 1.25 and 60vw x
                    0.77 both land inside the column. */
-                ? "h-[min(30vh,60vw)] sm:h-[38vh] md:h-[min(62vh,40vw)] lg:h-[min(70vh,40vw)]"
+                ? "h-[min(34vh,66vw)] sm:h-[44vh] md:h-[min(74vh,44vw)] lg:h-[min(84vh,44vw)]"
                 : "h-[min(38vh,74vw)] sm:h-[48vh] md:h-[min(92vh,60vw)] lg:h-[min(102vh,60vw)]"
             }`}
           />
