@@ -56,7 +56,8 @@ function ProjectCard({ project }: { project: Project }) {
         style={{ background: glowBackground }}
       />
 
-      <div className="relative aspect-[4/3] overflow-hidden">
+      {/* 9:16 on a phone, which is the shape the renders actually are. */}
+      <div className="relative aspect-[9/16] sm:aspect-[4/3] overflow-hidden">
         <img
           src={project.image}
           alt={project.title}
@@ -83,25 +84,25 @@ function ProjectCard({ project }: { project: Project }) {
 
       {/* Transparent caption — no fill of its own, so the page's starfield
           reads through the bottom of the card. */}
-      <div className="relative z-10 flex flex-1 flex-col p-4 sm:p-5">
+      <div className="relative z-10 flex flex-1 flex-col p-2 sm:p-5">
         <h3
-          className={`font-display text-lg sm:text-xl mb-1.5 ${
+          className={`font-display text-[11px] leading-tight sm:text-xl mb-1 sm:mb-1.5 ${
             disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
           }`}
         >
           {project.title}
         </h3>
 
-        <p className="text-xs text-[#B8C4D6] leading-relaxed mb-3">
+        <p className="hidden sm:block text-xs text-[#B8C4D6] leading-relaxed mb-3">
           {project.description}
         </p>
 
         {disabled ? (
-          <span className="inline-block text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]/70 border border-white/15 px-2.5 py-1 transition-colors duration-300 group-hover:border-white/30 group-hover:text-[#B8C4D6]">
+          <span className="inline-block text-[8px] sm:text-[10px] tracking-[0.12em] sm:tracking-[0.18em] uppercase text-[#B8C4D6]/70 border border-white/15 px-1.5 py-0.5 sm:px-2.5 sm:py-1 transition-colors duration-300 group-hover:border-white/30 group-hover:text-[#B8C4D6]">
             Coming Soon
           </span>
         ) : (
-          <span className="inline-block text-[10px] tracking-[0.18em] uppercase text-[#F5F7FA] border-b border-white/30 pb-1 group-hover:border-white transition-colors duration-300">
+          <span className="inline-block text-[8px] sm:text-[10px] tracking-[0.12em] sm:tracking-[0.18em] uppercase text-[#F5F7FA] border-b border-white/30 pb-0.5 sm:pb-1 group-hover:border-white transition-colors duration-300">
             Inquire
           </span>
         )}
@@ -169,7 +170,11 @@ export function Projects() {
         Projects Range
       </h3>
 
-      <div className="scene-body scene-body--tight max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      <div /* Three up on a phone. The renders are 9:16, so three narrow columns show
+             each one nearly whole where one wide column showed a letterboxed
+             strip — and a range reads as a range when several are on screen at
+             once. The caption shrinks with them. */
+          className="scene-body scene-body--tight max-w-[1600px] mx-auto px-6 sm:px-10 grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
         {projects.map((project) => (
           /* The wrapper is what the scroll reveal animates.
           

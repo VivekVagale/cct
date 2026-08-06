@@ -252,8 +252,18 @@
    viewport on a phone instead of shrinking.
    --------------------------------------------------------------------------- */
 .card {
-  --width: clamp(260px, 78vw, 360px);
+  /* 78vw was most of a phone screen for one testimonial, and at 16/9 tall that
+     is a card taller than the viewport — nothing else in the section could be
+     seen beside it. 58vw shows the edge of the next ticket, which is what says
+     there are more to swipe to. */
+  --width: clamp(200px, 58vw, 360px);
   --height: calc(var(--width) * 16 / 9);
+}
+
+@media (min-width: 640px) {
+  .card {
+    --width: clamp(260px, 40vw, 360px);
+  }
 }
 
 /* ---------------------------------------------------------------------------
