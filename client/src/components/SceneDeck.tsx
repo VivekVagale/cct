@@ -154,6 +154,16 @@ type ScenePhase = "unvisited" | "playing" | "settled";
 interface SceneContextValue {
   /** True only for the scene currently on screen. */
   active: boolean;
+  /**
+   * Whether a deck is driving the page at all.
+   *
+   * Distinct from `active`, and the distinction matters: outside a deck every
+   * section is on screen in the ordinary way, so `active: false` there means
+   * "no deck is telling me whether I am current", not "I am hidden". Anything
+   * that goes quiet while it is not the current scene has to check this first
+   * or it goes quiet permanently in the document.
+   */
+  inDeck: boolean;
   /** Where this scene is in the deck, for anything that wants to know. */
   index: number;
   phase: ScenePhase;
@@ -195,6 +205,7 @@ interface SceneContextValue {
  */
 const SceneContext = createContext<SceneContextValue>({
   active: false,
+  inDeck: false,
   index: 0,
   phase: "unvisited",
   settled: false,
@@ -272,6 +283,7 @@ export function SceneDeck({
   scenes,
   onSceneChange,
   paused = false,
+  deck = false,
 }: {
   scenes: SceneDefinition[];
   /**
@@ -287,6 +299,22 @@ export function SceneDeck({
    * and need to know — the starfield behind it, principally.
    */
   onSceneChange?: (index: number, id: string) => void;
+  /**
+   * Whether to run as a deck at all.
+   *
+   * Off. The deck replaced the page's scroll with eleven full-screen scenes and
+   * a wheel handler that cancels every event, and however carefully that is
+   * tuned it is a slideshow — the studio's word for it was "a PPT". The
+   * reference sites it was chasing are not built that way: Apple's product
+   * pages and Lusion are ordinary scrolling documents whose *moments* are
+   * pinned and scrubbed, and the smoothness is inertial scrolling rather than
+   * the absence of scrolling.
+   *
+   * Everything below still works and is one prop away, because the two pinned
+   * sections and the reveals are the same code in both modes. It is kept rather
+   * than deleted so the choice stays reversible.
+   */
+  deck?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
@@ -438,8 +466,16 @@ export function SceneDeck({
     damping: 34,
     mass: 0.45,
   });
-  /** Leans away from the push: a shove downwards moves the scene up. */
-  const pushY = useTransform(pushSpring, [-1, 1], [7, -7]);
+  /**
+   * Leans away from the push: a shove downwards moves the scene up.
+   *
+   * 11px rather than the 7 it started at. Seven was chosen to be felt and not
+   * noticed, and the note about it was right about the physiology and wrong
+   * about the brief — a deck with no page scroll has to answer an input with
+   * something a visitor can actually see happening, or the only feedback in the
+   * whole interaction is a scene eventually changing.
+   */
+  const pushY = useTransform(pushSpring, [-1, 1], [11, -11]);
   /* Depth and light both fall off with the *size* of the push regardless of
      its direction — the scene withdraws from the visitor either way, which is
      what makes the next one feel like it is already behind this one. */
@@ -683,7 +719,13 @@ export function SceneDeck({
   }, []);
 
   useEffect(() => {
-    if (reduceMotion || paused) return;
+    /*
+     * Every one of these installs a global listener or locks the document, so
+     * each has to bail when the deck is not the thing running the page. The
+     * wheel handler in particular calls `preventDefault` on every event: left
+     * running in document mode it cancels the page's scrolling outright.
+     */
+    if (!deck || reduceMotion || paused) return;
 
     const onWheel = (e: WheelEvent) => {
       const delta = e.deltaY;
@@ -697,8 +739,17 @@ export function SceneDeck({
       e.preventDefault();
 
       if (glide(delta)) {
-        // The section is still being read. Nothing else to do; the frame loop
-        // has it from here.
+        /*
+         * The section is still being read, and it still answers.
+         *
+         * This used to return here and nothing but the scroll position moved,
+         * which meant every notch inside a long section produced no response
+         * from the section itself — the content slid and the type sat on it
+         * like a decal. A third of a charge is enough for the heading and the
+         * body to float against the movement without ever building toward a
+         * scene change, which is what the full charge is for.
+         */
+        charge((delta / WHEEL_THRESHOLD) * 0.34);
         wheelAccumulator.current = 0;
         return;
       }
@@ -815,18 +866,18 @@ export function SceneDeck({
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [reduceMotion, paused, go, innerScrollHasRoom, count, jump, charge, release, glide]);
+  }, [deck, reduceMotion, paused, go, innerScrollHasRoom, count, jump, charge, release, glide]);
 
   // The document itself must not scroll — there is nothing below the fold to
   // scroll to, and a rubber-band on a locked page reads as breakage.
   useEffect(() => {
-    if (reduceMotion) return;
+    if (!deck || reduceMotion) return;
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = overflow;
     };
-  }, [reduceMotion]);
+  }, [deck, reduceMotion]);
 
   /* A scene's starting scroll position is handled by the layout effect above,
      which is the only thing that should touch it: this one ran once, on the
@@ -839,7 +890,7 @@ export function SceneDeck({
    * turned into a scene change instead.
    */
   useEffect(() => {
-    if (reduceMotion) return;
+    if (!deck || reduceMotion) return;
     const onClick = (e: MouseEvent) => {
       const anchor = (e.target as HTMLElement | null)?.closest?.("a");
       const href = anchor?.getAttribute("href");
@@ -851,16 +902,14 @@ export function SceneDeck({
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
-  }, [reduceMotion, scenes, index, jump]);
+  }, [deck, reduceMotion, scenes, index, jump]);
 
   /*
-   * The document, unchanged, for anyone who has asked for less motion.
-   *
-   * Not a slower deck — a deck is the motion. A page that rebuilds itself on
-   * every input is the thing the setting is refusing, so it gets the sections
-   * stacked and the browser's own scroll.
+   * The page as a document: sections stacked, the browser's own scroll,
+   * smoothed by Lenis. This is the default now, and the only thing anyone sees
+   * unless the deck is explicitly asked for.
    */
-  if (reduceMotion) {
+  if (reduceMotion || !deck) {
     return (
       <>
         {scenes.map((scene) => (
@@ -941,6 +990,7 @@ export function SceneDeck({
               <SceneContext.Provider
                 value={{
                   active: isCurrent,
+                  inDeck: true,
                   index: i,
                   phase: isCurrent ? "playing" : "settled",
                   settled: false,
@@ -990,17 +1040,28 @@ export function SceneDeck({
 type SceneMotion = { direction: number; beat: boolean };
 
 const SCENE_VARIANTS = {
+  /*
+   * A scene travels in. It does not simply appear.
+   *
+   * This used to be opacity and scale alone, and that is the whole of what made
+   * the deck feel like slides: a thing that fades in has not come from
+   * anywhere, so there is no direction to the story and no sense that the last
+   * screen went *up* and this one came from below. Sixty-four pixels is enough
+   * to read as movement and nowhere near enough to read as a slide transition —
+   * the scene is arriving, not sliding across.
+   *
+   * Signed by direction, so scrolling back sends everything the other way and
+   * going backwards actually looks like going backwards.
+   */
   enter: ({ direction, beat }: SceneMotion) => ({
     opacity: 0,
-    // A beat arrives from somewhere. A section in the flow is already where it
-    // belongs and only has to appear — no depth to travel, no focus to find,
-    // because the visitor is reading their way forward rather than being taken
-    // somewhere.
+    y: direction > 0 ? 64 : -64,
     scale: beat ? (direction > 0 ? 0.94 : 1.06) : 1,
     filter: beat ? "blur(14px)" : "blur(0px)",
   }),
   center: ({ direction, beat }: SceneMotion) => ({
     opacity: 1,
+    y: 0,
     scale: 1,
     filter: "blur(0px)",
     transition: !beat
@@ -1022,6 +1083,10 @@ const SCENE_VARIANTS = {
   }),
   exit: ({ direction, beat }: SceneMotion) => ({
     opacity: 0,
+    // The outgoing scene leaves the way the incoming one arrived: forward means
+    // this one goes up and out. The two together are one movement rather than
+    // two dissolves that happen to overlap.
+    y: direction > 0 ? -64 : 64,
     scale: beat ? (direction > 0 ? 1.06 : 0.94) : 1,
     filter: beat ? "blur(14px)" : "blur(0px)",
     transition: !beat

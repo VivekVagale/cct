@@ -204,7 +204,7 @@ export function Booking() {
           step. Aligned at the top it starts level with the Step 01 line and
           hangs down the side of the copy instead. */}
       <div className="max-w-[1600px] mx-auto px-6 sm:px-10 mb-10 sm:mb-16 flex items-start justify-between gap-8">
-        <div>
+        <div className="scene-heading">
           <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5">
             Step 01 — Configure
           </p>

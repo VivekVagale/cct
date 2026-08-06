@@ -19,20 +19,25 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
 import { animate, motion, useMotionValue, useReducedMotion } from "framer-motion";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
+import { useScrollReveals } from "@/hooks/useScrollReveals";
 
 function App() {
   const reduceMotion = useReducedMotion();
 
   /*
-   * Inertial scrolling, for the document fallback only.
+   * Inertial scrolling, for everyone.
    *
-   * The deck has no page scroll to smooth — a wheel notch there is an
-   * instruction to change scene, not a distance to travel, and Lenis
-   * interpolating a scroll position that nothing reads would be two systems
-   * arguing over an input only one of them uses. It stays for the
-   * reduced-motion path, which *is* an ordinary document.
+   * This is the smoothness the references have. It was switched off for all but
+   * reduced-motion visitors while the deck owned the wheel — which meant the
+   * one system that could have made scrolling feel good was running only for
+   * the people who had asked for less of it. Off under reduced motion, where
+   * interpolating someone's scroll is the opposite of what they requested.
    */
-  useSmoothScroll(Boolean(reduceMotion));
+  useSmoothScroll(!reduceMotion);
+
+  // Every section's heading and content block, revealed as it is scrolled to
+  // rather than on the deck's old fixed clock. See useScrollReveals.
+  useScrollReveals(!reduceMotion);
 
   // The starfield is faded up by the Hero as its assembly finishes, so the page
   // opens on flat black and the stars arrive with the reveal.

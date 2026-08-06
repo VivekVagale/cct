@@ -212,7 +212,7 @@ export function Hero({
    * fallback, where the window is the right answer and framer's default
    * already is that.
    */
-  const { scroller, active } = useScene();
+  const { scroller, active, inDeck } = useScene();
   /*
    * Whether this scene is the one on screen, readable from inside a motion
    * value subscription without re-subscribing on every change.
@@ -227,7 +227,10 @@ export function Hero({
    * and the nav lost its glass.
    */
   const activeRef = useRef(active);
-  activeRef.current = active;
+  // Outside a deck there is no "current scene" and the hero is simply on the
+  // page, so it always speaks. Guarding on `active` alone left the starfield
+  // at zero for the whole document.
+  activeRef.current = inDeck ? active : true;
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
     container: scroller ? { current: scroller } : undefined,

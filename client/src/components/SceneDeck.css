@@ -103,8 +103,8 @@
  * markup, and a class on a wrapper is a far smaller change to each of them
  * than a new component around their contents.
  */
-.scene-heading,
-.scene-body > * {
+.scene-deck .scene-heading,
+.scene-deck .scene-body > * {
   /*
    * `backwards`, emphatically not `both`.
    *
@@ -123,7 +123,7 @@
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.scene-heading {
+.scene-deck .scene-heading {
   animation-name: scene-heading-in;
   animation-duration: 1.9s;
   animation-delay: 0.55s;
@@ -143,16 +143,17 @@
  * transform while it runs and its fill mode is `backwards`, so it hands the
  * property back the moment it finishes rather than holding it forever.
  */
-.scene-heading,
-.scene-body {
-  transform: translate3d(0, calc(var(--push, 0) * -5px), 0);
+.scene-deck .scene-heading,
+.scene-deck .scene-body {
+  transform: translate3d(0, calc(var(--push, 0) * -14px), 0);
 }
 
-.scene-body {
+.scene-deck .scene-body {
   /* Half the heading's travel. The supporting content is nearer the plane the
      scene itself is on; if it moved as far as the heading the two would read
-     as one object again. */
-  transform: translate3d(0, calc(var(--push, 0) * -2.5px), 0);
+     as one object again — and it is the gap between the two rates, not the
+     size of either, that the eye reads as depth. */
+  transform: translate3d(0, calc(var(--push, 0) * -7px), 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -166,24 +167,24 @@
    section here; past that they share the last step rather than drifting ever
    later, since a seventh element arriving four seconds in has been waited for
    rather than revealed. */
-.scene-body > * {
+.scene-deck .scene-body > * {
   animation-name: scene-content-in;
   animation-duration: 1.2s;
   animation-delay: 3.05s;
 }
-.scene-body > *:nth-child(2) {
+.scene-deck .scene-body > *:nth-child(2) {
   animation-delay: 3.23s;
 }
-.scene-body > *:nth-child(3) {
+.scene-deck .scene-body > *:nth-child(3) {
   animation-delay: 3.41s;
 }
-.scene-body > *:nth-child(4) {
+.scene-deck .scene-body > *:nth-child(4) {
   animation-delay: 3.59s;
 }
-.scene-body > *:nth-child(5) {
+.scene-deck .scene-body > *:nth-child(5) {
   animation-delay: 3.77s;
 }
-.scene-body > *:nth-child(n + 6) {
+.scene-deck .scene-body > *:nth-child(n + 6) {
   animation-delay: 3.95s;
 }
 
@@ -196,16 +197,16 @@
  * seven parts, and stepping them 0.18s apart put the last one five seconds
  * into the scene. Half the step, capped two rows in.
  */
-.scene-body--tight > * {
+.scene-deck .scene-body--tight > * {
   animation-delay: 3.05s;
 }
-.scene-body--tight > *:nth-child(2) {
+.scene-deck .scene-body--tight > *:nth-child(2) {
   animation-delay: 3.14s;
 }
-.scene-body--tight > *:nth-child(3) {
+.scene-deck .scene-body--tight > *:nth-child(3) {
   animation-delay: 3.23s;
 }
-.scene-body--tight > *:nth-child(n + 4) {
+.scene-deck .scene-body--tight > *:nth-child(n + 4) {
   animation-delay: 3.32s;
 }
 
@@ -251,5 +252,59 @@
   .scene-heading,
   .scene-body > * {
     animation: none;
+  }
+}
+
+
+/*
+ * The document's reveals.
+ *
+ * The same two markers the deck stages, driven by the scroll instead of by a
+ * scene's clock — see useScrollReveals. Transform and opacity only, which is
+ * the whole budget: both are compositor properties, so a reveal costs nothing
+ * a scroll can feel.
+ *
+ * 24px and 650ms, on the page's own curve. Far enough to read as arriving,
+ * short enough that a fast scroll never leaves a trail of half-arrived blocks
+ * behind it.
+ */
+.reveal-pending {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  will-change: transform, opacity;
+}
+
+.reveal-pending,
+.reveal-in {
+  transition:
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-in {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Children of a body block follow the one before them. 70ms is close enough to
+   read as one movement and far enough that the eye follows it down the block. */
+.scene-body > *:nth-child(2) { transition-delay: 0.07s; }
+.scene-body > *:nth-child(3) { transition-delay: 0.14s; }
+.scene-body > *:nth-child(4) { transition-delay: 0.21s; }
+.scene-body > *:nth-child(n + 5) { transition-delay: 0.28s; }
+
+/* Inside the deck the scene's own clock does the staging, so the scroll
+   reveal must not also hold these at zero. */
+.scene-deck .reveal-pending {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-pending {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

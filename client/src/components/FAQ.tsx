@@ -13,7 +13,7 @@ export function FAQ() {
         <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4 sm:mb-5 text-center">
           Questions
         </p>
-        <h2 className="font-display text-5xl sm:text-7xl lg:text-8xl text-[#F5F7FA] text-center leading-[0.98] mb-10 sm:mb-20">
+        <h2 className="scene-heading font-display text-5xl sm:text-7xl lg:text-8xl text-[#F5F7FA] text-center leading-[0.98] mb-10 sm:mb-20">
           FAQ
         </h2>
         <Accordion type="single" collapsible className="w-full">

@@ -93,12 +93,17 @@ export function About() {
             </motion.p>
 
             <motion.h2
-              {...entrance(30)}
-              /* Two figures and two words, so it is already the longest line
+              /* No framer entrance here any more: `scene-heading` means the
+                 deck stages this, and two systems animating one element's
+                 transform is what pinned the project cards flat for a whole
+                 session. The deck's staging also carries the scroll float,
+                 which a hand-written entrance cannot.
+
+                 Two figures and two words, so it is already the longest line
                  on the page — a step under the one-or-two-word headings, and
                  the measure goes with it so it still breaks after the first
                  figure rather than mid-number. */
-              className="font-display text-5xl sm:text-7xl lg:text-8xl text-[#F5F7FA] leading-[0.98] mb-4 sm:mb-6 max-w-5xl"
+              className="scene-heading font-display text-5xl sm:text-7xl lg:text-8xl text-[#F5F7FA] leading-[0.98] mb-4 sm:mb-6 max-w-5xl"
             >
               <FoldHeading
                 text={`${headline.followers} followers. ${headline.views} views.`}
