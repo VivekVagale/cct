@@ -68,12 +68,23 @@ export interface Project {
   description: string;
   image: string;
   comingSoon?: boolean;
+  /**
+   * What this build costs, already formatted.
+   *
+   * A string rather than a number, and deliberately: "1.7k" is how the studio
+   * quotes it and how a client reads it, and a formatter given 1700 would
+   * produce "1,700" or "1.7K" depending on locale. Set only where a price is
+   * actually fixed — the rest are quoted after a conversation, and the form
+   * says so rather than inventing a figure.
+   */
+  price?: string;
 }
 
 export const projects: Project[] = [
   {
     id: "bike-free-fall",
     title: "Project Free Fall",
+    price: "₹799",
     description: "Suspended motion, gravity rendered with intent.",
     // The studio's own frame, not a stock photograph — the same render the
     // sphere carries as "It Say Grrr". The card crops it 4:3 from a 9:16
@@ -83,6 +94,7 @@ export const projects: Project[] = [
   {
     id: "jet-escort",
     title: "Project Jet Mist",
+    price: "₹1.7k",
     description: "Formation flight alongside your machine, to scale.",
     // The studio's own frame. The bike, the cruiser and the jet all sit in the
     // lower two-thirds, so the card's 4:3 crop of a 9:16 source keeps the whole

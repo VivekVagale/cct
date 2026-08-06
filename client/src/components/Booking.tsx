@@ -144,6 +144,11 @@ export function Booking() {
 
   // Resolved once here rather than in two places: the summary above the form
   // and the label sent with the request must never name different machines.
+  // Priced builds carry their own figure; the rest are quoted in conversation.
+  const selectedPrice = projects.find(
+    (p) => p.title === selectedProject,
+  )?.price;
+
   const chosenVehicle = vehicles.find((v) => v.id === vehicleId);
   const chosenColor = chosenVehicle?.colors.find((c) => c.id === colorId);
 
@@ -471,6 +476,30 @@ export function Booking() {
             button that was centred on something else again. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-4 text-center">
           <Step number="06" title="Send it." />
+
+          {/* The price, and when it is due.
+          
+              Said here rather than on the cards: it depends on the build the
+              visitor has just chosen, and a figure on every card would be a
+              price list on a page that is selling a conversation. A build with
+              no fixed price says so — the form never invents one.
+          
+              The second line is the part that matters legally and practically.
+              Nothing is taken on this page: the form sends a request, the
+              studio comes back on WhatsApp or Instagram, and payment happens
+              in that conversation before any work starts. A visitor who reads
+              a number without that sentence reasonably assumes they are about
+              to be charged. */}
+          <div className="max-w-md">
+            <p className="font-display text-2xl sm:text-3xl text-[#F5F7FA]">
+              {selectedPrice ?? "Quoted after we talk"}
+            </p>
+            <p className="mt-3 text-sm text-[#B8C4D6] leading-relaxed">
+              Nothing is charged here. We&rsquo;ll reach out on WhatsApp or
+              Instagram to talk the build through, and payment happens then —
+              work starts once it&rsquo;s done.
+            </p>
+          </div>
           {/* Stated, not offered.
           
               This was a toggle, defaulting to off, because the collab used to
