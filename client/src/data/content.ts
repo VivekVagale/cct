@@ -42,7 +42,10 @@ export const processStages: ProcessStage[] = [
     title: "Delivery",
     pose: "thumbsUp",
     description:
-      "Final color, final grade, delivered in the formats your platform needs — from a single hero frame to a full cinematic sequence.",
+      /* Says what arrives, and stops there. The collab post is offered without
+         a word about what it costs — the studio charges for it, and copy that
+         mentions it alongside everything else included would imply otherwise. */
+      "Final colour, final grade, cut for Instagram and delivered post-ready — a reel you can put straight up, from a single hero frame to a full cinematic sequence. A collab post on your handle if you want one.",
   },
 ];
 
