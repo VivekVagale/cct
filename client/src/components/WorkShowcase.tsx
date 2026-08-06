@@ -19,9 +19,17 @@ import { useScene } from "@/components/SceneDeck";
  * and there is nothing left to pad with.
  */
 /**
- * Phones get a nearer camera. `scale` is a camera-distance multiplier, so the
- * desktop's 2.2 pulls back far enough to hold a wide arc of discs — on a narrow
- * viewport that same framing renders each disc too small to read as a project.
+ * Phones pull the camera back further than the desktop, not nearer.
+ *
+ * `scale` is a camera-distance multiplier: higher means further away and more
+ * of the sphere in shot. The original reasoning here was the opposite — come in
+ * closer so each disc is large enough to read — and it was the wrong trade. A
+ * phone showing three or four discs does not read as a sphere of work at all,
+ * it reads as a few pictures; the thing being sold is the size of the body of
+ * work, and that only lands when a wide arc of it is on screen.
+ *
+ * 3 against the desktop's 2.2, because the narrow viewport is what needs the
+ * extra distance to hold the same arc.
  */
 const NARROW_QUERY = "(max-width: 640px)";
 
@@ -157,7 +165,7 @@ export function WorkShowcase() {
       className="relative h-[74svh] sm:h-[100svh] w-full overflow-hidden pointer-events-auto"
     >
       <div className="scene-body absolute inset-0">
-        {near && <InfiniteMenu items={items} scale={narrow ? 1.5 : 2.2} />}
+        {near && <InfiniteMenu items={items} scale={narrow ? 3 : 2.2} />}
       </div>
 
       <div className="scene-heading absolute inset-x-0 top-0 z-10 px-6 sm:px-10 pt-20 sm:pt-28 pointer-events-none">
