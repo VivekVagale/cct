@@ -884,34 +884,6 @@ export function SceneDeck({
       aria-roledescription="carousel"
       aria-label="Cold Chain Theory, in scenes"
     >
-      {/*
-        Where you are, and how much is left.
-
-        A deck takes the scrollbar away, and with it the one thing every page
-        has that says "you are a third of the way down and there is more". Eleven
-        scenes with no such cue is a story someone can be lost inside — they
-        cannot tell whether the next push ends it or whether they are still near
-        the start. This is that scrollbar, rebuilt as chapters: one tick each,
-        the current one lit, the ones already read dimmed rather than blank.
-
-        They are real buttons, so the whole story is reachable by keyboard and
-        by pointer without scrolling at all.
-      */}
-      <nav className="scene-rail" aria-label="Chapters">
-        {scenes.map((scene, i) => (
-          <button
-            key={scene.id}
-            type="button"
-            className={`scene-rail-tick${i === index ? " is-current" : ""}${
-              seen.current.has(scene.id) ? " is-read" : ""
-            }`}
-            aria-current={i === index ? "step" : undefined}
-            aria-label={`Chapter ${i + 1} of ${count}`}
-            onClick={() => jump(i, i > index ? 1 : -1, 0)}
-          />
-        ))}
-      </nav>
-
       {scenes.map((scene, i) => {
         if (!mounted.includes(scene.id)) return null;
         const isCurrent = i === index;
