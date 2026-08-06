@@ -1,21 +1,22 @@
 import type { AccordionGalleryItem } from "@/components/AccordionGallery";
 
 /**
- * The strip that opens What We Build.
+ * The strip that opens What We Build: one scene, three stages of building it.
  *
- * Placeholders until the real set arrives — these are the sphere's renders,
- * which are the only portrait-ish frames on the site today.
+ * Viewport captures from the studio's own file rather than finished frames —
+ * the same jet, pursuit car and motorcycle in each, from wireframe through to
+ * lit. That progression is the argument the section is making, and it is one
+ * only a studio that actually built the thing can show.
  *
- * **Shape the replacements 3:4 portrait, around 1200x1600.** The gallery gives
- * every panel the same height and splits the width between them, so one image
- * has to survive two very different crops: a tall sliver while its panel is
- * closed, and something near square while it is open. It is `object-fit:
- * cover`, so nothing distorts — but everything outside the centre column is
- * gone in the closed state. Keep the subject centred, and keep anything that
- * matters away from the left and right edges.
+ * The images are square, where 3:4 portrait would suit the panels better. It
+ * costs a harder horizontal crop while a panel is closed: the gallery gives
+ * every panel the same height and splits the width between them, so a closed
+ * one is a tall sliver and `object-fit: cover` takes it from the centre. The
+ * subject sits centre-frame in all three, so what is lost at the edges is
+ * background.
  */
 export const galleryItems: AccordionGalleryItem[] = [
-  { image: "/showcase/it-say-grrr.webp", label: "Free Fall" },
-  { image: "/showcase/project-jet-mist.webp", label: "Jet Mist" },
-  { image: "/showcase/project-re-9.webp", label: "RE 9" },
+  { image: "/gallery/modelling.webp", label: "Modelling" },
+  { image: "/gallery/shading.webp", label: "Shading" },
+  { image: "/gallery/lighting.webp", label: "Lighting" },
 ];
