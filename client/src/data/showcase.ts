@@ -1,177 +1,215 @@
 export interface ShowcaseItem {
-  id: string;
+  /** Shown on the focused disc. */
   title: string;
-  /** Only where it is known for certain. Never guessed. */
-  vehicle?: string;
+  /** The second line. Category today; a real caption when there is one. */
   category: string;
-  year: string;
-  description: string;
+  /** Only where it is genuinely known — never inferred from the frame. */
+  vehicle?: string;
   image: string;
-  /**
-   * Where the sphere takes its square crop from, vertically. 0 top, 1 bottom,
-   * omitted means the middle.
-   *
-   * The discs are circles cut from a square, so a 9:16 export loses 44% of its
-   * height before it is even masked. Set this per image rather than
-   * re-exporting: a bike low in a reel frame wants about 0.65, a helmet high in
-   * one wants about 0.3.
-   */
+  /** Where the square crop is taken from a taller source. Unused here: these
+   *  are already square, so there is nothing to choose. */
   focusY?: number;
 }
 
-/**
- * The sphere's discs — real frames from Project Free Fall, not stock.
+/*
+ * The sphere's discs: 37 frames from the studio's own work.
  *
- * These replace five Unsplash photographs of other people's motorcycles, which
- * is the last thing a studio selling CAD-accurate rendering should have been
- * showing on the section called Selected Work.
+ * The sphere has 42 disc positions — a once-subdivided icosahedron — so at 37
+ * almost every disc is a different frame, and the greedy colouring in
+ * InfiniteMenu can place them with no two identical frames adjacent. The
+ * twelve it replaces had to repeat three or four times each.
  *
- * There are exactly twelve because the sphere has exactly twelve. The discs sit
- * on the vertices of an icosahedron — `DISC_INSTANCE_COUNT` is
- * `icoGeo.vertices.length`, and that geometry has twelve, unsubdivided — and
- * the assignment is `index % items.length`. Any fewer and images repeat around
- * the back; any more and the extras are never drawn. This list is a fixed
- * length for a geometric reason, so count before adding.
- *
- * The section used to top up its five with three entries borrowed from
- * `projects`. It no longer does: those carry Unsplash imagery of their own, and
- * with twelve real renders there is nothing left to pad with.
- *
- * Sources are 1080x1920 PNGs at ~2.6MB each, re-encoded to 720x1280 WebP —
- * 34MB down to 736KB. The full 9:16 frame is kept rather than a square export
- * so `focusY` still has something to choose from; 720 wide still gives the
- * 512px atlas cell more pixels than it samples.
- *
- * No `vehicle` on any of them. It was filled in from what the frames appeared
- * to show — tank shape, wheel, a badge caught in the light — and only two of
- * the twelve were actually legible. A studio that sells model-accurate work
- * cannot publish a guess at a model name, and the user does not need the line,
- * so the discs read as the shot and the project. The field stays on the type
- * for the day something is known for certain.
+ * **The titles are frame numbers, and they are placeholders.** They are the
+ * source filenames, which is honest — a shot ID is a real thing — but it is not
+ * what these are. Each should carry what the shot actually is, the way the
+ * previous set did with "Tibetan Flags" and "Too Clean", and the vehicle where
+ * it is known. Nothing here guesses at either: a title invented from looking at
+ * a render is exactly the sort of claim this site is careful not to make.
  */
 export const showcaseItems: ShowcaseItem[] = [
   {
-    id: "too-clean",
-    title: "Too Clean",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Chrome tank and polished cases against a mountain dusk. Every reflection is calculated — there is no photograph underneath this.",
-    image: "/showcase/too-clean.webp",
+    title: "Frame 0001",
+    category: "Selected Work",
+    image: "/showcase/f-0001.webp",
   },
   {
-    id: "spot-on-angles",
-    title: "Spot On Angles",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "The number board and the fins, lit from behind at the hour the light goes orange and stays there for four minutes.",
-    image: "/showcase/spot-on-angles.webp",
+    title: "Frame 0148",
+    category: "Selected Work",
+    image: "/showcase/f-0148.webp",
   },
   {
-    id: "white-beauty",
-    title: "White Beauty",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Falling in formation with a flight of fighters. Nothing here was shot, which is the only way this frame exists.",
-    image: "/showcase/white-beauty.webp",
+    title: "Frame 0153",
+    category: "Selected Work",
+    image: "/showcase/f-0153.webp",
   },
   {
-    id: "stealth-bombers",
-    title: "Sci-Fi Stealth Bombers",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Two flying wings and a twin, all at the same altitude and all built to the same tolerances.",
-    image: "/showcase/stealth-bombers.webp",
-    /* The bombers are the picture, and the top one runs from about a twentieth
-       to a third of the way down — a centred crop cut it off and left a bike on
-       an empty sky. A square taken from a 9:16 source covers 0.5625 of the
-       height, so from the very top it holds the whole upper bomber and the
-       bike's tank and engine under it. The second bomber, bottom right, cannot
-       be in the same square as the first; the legible one wins. */
-    focusY: 0,
+    title: "Frame 0156",
+    category: "Selected Work",
+    image: "/showcase/f-0156.webp",
   },
   {
-    id: "braking-power",
-    title: "Braking Power",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "A disc, a caliper and the drilling through both, close enough that a modelled part has nowhere to hide.",
-    image: "/showcase/braking-power.webp",
+    title: "Frame 0164",
+    category: "Selected Work",
+    image: "/showcase/f-0164.webp",
   },
   {
-    id: "batmobile",
-    title: "Batmobile",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Filigree over matte black, with the sun coming in low across the tank seam.",
-    image: "/showcase/batmobile.webp",
-    // The tank sits above the middle of the frame.
-    focusY: 0.45,
+    title: "Frame 0168",
+    category: "Selected Work",
+    image: "/showcase/f-0168.webp",
   },
   {
-    id: "tank-decor",
-    title: "Tank Decor FTW",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Made Like A Gun, and every sticker over it placed by hand — the decals are geometry, not a texture painted flat.",
-    image: "/showcase/tank-decor.webp",
+    title: "Frame 0185",
+    category: "Selected Work",
+    image: "/showcase/f-0185.webp",
   },
   {
-    id: "tibetan-flags",
-    title: "Tibetan Flags",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Sand paint under prayer flags, with the front wheel catching the last of the light off the snow.",
-    image: "/showcase/tibetan-flags.webp",
-    /* The flags are strung across the top-left corner, roughly the first
-       fifteenth of the frame — at the 0.55 this used to be they were cropped
-       away entirely and the disc showed a front wheel. From the top the square
-       keeps the flags, the headlight and most of the front end. */
-    focusY: 0,
+    title: "Frame 0192",
+    category: "Selected Work",
+    image: "/showcase/f-0192.webp",
   },
   {
-    id: "it-say-grrr",
-    title: "It Say Grrr",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Front three-quarter, blue rim lit from behind the spokes. The flare is rendered, not added afterwards.",
-    image: "/showcase/it-say-grrr.webp",
+    title: "Frame 0242",
+    category: "Selected Work",
+    image: "/showcase/f-0242.webp",
   },
   {
-    id: "custom-plates",
-    title: "Custom Plates",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "CHAOS, standing proud of the plate. Modelled rather than decalled, so it casts and catches its own light.",
-    image: "/showcase/custom-plates.webp",
-    // The plate is high in the frame.
-    focusY: 0.4,
+    title: "Frame 0255",
+    category: "Selected Work",
+    image: "/showcase/f-0255.webp",
   },
   {
-    id: "peak-customisation",
-    title: "Peak Customisation",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "A saloon at altitude between two fighters, holding its own shadows against the cloud deck.",
-    image: "/showcase/peak-customisation.webp",
+    title: "Frame 0262",
+    category: "Selected Work",
+    image: "/showcase/f-0262.webp",
   },
   {
-    id: "chopper-delivery",
-    title: "Chopper Delivery",
-    category: "Project Free Fall",
-    year: "2026",
-    description:
-      "Slung under a gunship above the weather. The rig is four cables and the physics that go with them.",
-    image: "/showcase/chopper-delivery.webp",
+    title: "Frame 0268",
+    category: "Selected Work",
+    image: "/showcase/f-0268.webp",
+  },
+  {
+    title: "Frame 0273",
+    category: "Selected Work",
+    image: "/showcase/f-0273.webp",
+  },
+  {
+    title: "Frame 0275",
+    category: "Selected Work",
+    image: "/showcase/f-0275.webp",
+  },
+  {
+    title: "Frame 0276",
+    category: "Selected Work",
+    image: "/showcase/f-0276.webp",
+  },
+  {
+    title: "Frame 0284",
+    category: "Selected Work",
+    image: "/showcase/f-0284.webp",
+  },
+  {
+    title: "Frame 0298",
+    category: "Selected Work",
+    image: "/showcase/f-0298.webp",
+  },
+  {
+    title: "Frame 0299",
+    category: "Selected Work",
+    image: "/showcase/f-0299.webp",
+  },
+  {
+    title: "Frame 0302",
+    category: "Selected Work",
+    image: "/showcase/f-0302.webp",
+  },
+  {
+    title: "Frame 0314",
+    category: "Selected Work",
+    image: "/showcase/f-0314.webp",
+  },
+  {
+    title: "Frame 0318",
+    category: "Selected Work",
+    image: "/showcase/f-0318.webp",
+  },
+  {
+    title: "Frame 0350",
+    category: "Selected Work",
+    image: "/showcase/f-0350.webp",
+  },
+  {
+    title: "Frame 0415",
+    category: "Selected Work",
+    image: "/showcase/f-0415.webp",
+  },
+  {
+    title: "Frame 0442",
+    category: "Selected Work",
+    image: "/showcase/f-0442.webp",
+  },
+  {
+    title: "Frame 0443",
+    category: "Selected Work",
+    image: "/showcase/f-0443.webp",
+  },
+  {
+    title: "Frame 0463",
+    category: "Selected Work",
+    image: "/showcase/f-0463.webp",
+  },
+  {
+    title: "Frame 0470",
+    category: "Selected Work",
+    image: "/showcase/f-0470.webp",
+  },
+  {
+    title: "Frame 0475",
+    category: "Selected Work",
+    image: "/showcase/f-0475.webp",
+  },
+  {
+    title: "Frame 0481",
+    category: "Selected Work",
+    image: "/showcase/f-0481.webp",
+  },
+  {
+    title: "Frame 0486",
+    category: "Selected Work",
+    image: "/showcase/f-0486.webp",
+  },
+  {
+    title: "Frame 0507",
+    category: "Selected Work",
+    image: "/showcase/f-0507.webp",
+  },
+  {
+    title: "Frame 0511",
+    category: "Selected Work",
+    image: "/showcase/f-0511.webp",
+  },
+  {
+    title: "Frame 0514",
+    category: "Selected Work",
+    image: "/showcase/f-0514.webp",
+  },
+  {
+    title: "Frame 0518",
+    category: "Selected Work",
+    image: "/showcase/f-0518.webp",
+  },
+  {
+    title: "Frame 0526",
+    category: "Selected Work",
+    image: "/showcase/f-0526.webp",
+  },
+  {
+    title: "Frame 0564",
+    category: "Selected Work",
+    image: "/showcase/f-0564.webp",
+  },
+  {
+    title: "Frame 0600",
+    category: "Selected Work",
+    image: "/showcase/f-0600.webp",
   },
 ];
