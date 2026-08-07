@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import type { Vehicle } from "@/data/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { ColorCard } from "@/components/ColorCard";
+import { useBouncyScroll } from "@/hooks/useBouncyScroll";
 
 interface VehicleFocusProps {
   vehicle: Vehicle;
@@ -38,6 +39,12 @@ export function VehicleFocus({
   const reduceMotion = useReducedMotion();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+
+  /* Damped wheel scrolling and a rubber band at the ends, for the one list on
+     the site that still moved in hard steps. Under reduced motion it keeps the
+     browser's plain scroll, which is the setting's whole point. */
+  const colorListRef = useRef<HTMLDivElement>(null);
+  useBouncyScroll(colorListRef, !reduceMotion);
 
   /*
    * Focus goes in on open and comes back out on close.
@@ -243,6 +250,7 @@ export function VehicleFocus({
             is what made scrolling here move the site instead of the colours.
           */}
           <div
+            ref={colorListRef}
             role="radiogroup"
             aria-label={`Colour for ${vehicle.manufacturer} ${vehicle.name}`}
             /* Two across, not three.
@@ -266,16 +274,21 @@ export function VehicleFocus({
                `data-lenis-prevent` is the library's own opt-out for exactly
                this case. */
             data-lenis-prevent
-            className="grid grid-cols-2 gap-3 max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain pr-1"
+            className="max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain pr-1"
           >
-            {vehicle.colors.map((color) => (
-              <ColorCard
-                key={color.id}
-                color={color}
-                selected={color.id === selectedColorId}
-                onSelect={() => onSelectColor(color.id)}
-              />
-            ))}
+            {/* The scroller and the grid are two elements now. useBouncyScroll
+                stretches the wrapper's single child past the ends, so the thing
+                being stretched has to be the whole grid rather than each card. */}
+            <div className="grid grid-cols-2 gap-3">
+              {vehicle.colors.map((color) => (
+                <ColorCard
+                  key={color.id}
+                  color={color}
+                  selected={color.id === selectedColorId}
+                  onSelect={() => onSelectColor(color.id)}
+                />
+              ))}
+            </div>
           </div>
         </motion.div>
         </div>
