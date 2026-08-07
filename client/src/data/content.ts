@@ -127,19 +127,26 @@ export const projects: Project[] = [
     title: "Project Drop Zone",
     description:
       "Two machines, a drop zone and a lot of smoke — game-key art staging, rendered as stills.",
-    /* A real render of the studio's own, standing in until this one is shot.
-       The other coming-soon cards carry Unsplash photographs of other people's
-       motorcycles, which is the thing this section was cleaned of once already
-       — a placeholder that is at least the studio's work is the lesser wrong. */
-    image: "/showcase/too-clean.webp",
+    /* The studio's own render, and now one that argues the description: a gunship
+       carrying a car out over the cloud deck on four cables is two machines and a
+       delivery. It replaces a chrome Continental at sunset, which was the studio's
+       work — the point of that swap — but had nothing to do with this brief.
+       Still a stand-in until the card's own frames are shot. */
+    image: "/showcase/chopper-delivery.webp",
     comingSoon: true,
   },
   {
     id: "hellfire",
     title: "Project Hellfire",
     description: "A rider wreathed in fire — volumetric flame and heat haze, simulated frame by frame.",
-    image:
-      "https://images.unsplash.com/photo-1495954380655-01ec3939a26f?q=80&w=1200&auto=format&fit=crop",
+    /* The nearest thing the studio has to this shot, which is not very near:
+       there is no flame render in the library at all, so this is the hottest
+       frame in it — black and red under a low sun, embers along the frame rails.
+       It is the same frame the sphere shows, and reusing it is the lesser wrong
+       against a stock photograph of somebody else's motorcycle. Replace it the
+       moment a flame sim exists; the description is writing a cheque this image
+       does not cash. */
+    image: "/showcase/f-0475.webp",
     comingSoon: true,
   },
   {
