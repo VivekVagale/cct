@@ -108,6 +108,12 @@ temp/
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
 
+# Environment. The anon key is publishable, but a .env is where the next one
+# will not be — and nothing here was ignored at all until the form got a key.
+.env
+.env.*
+!.env.example
+
 # Manus version file (auto-generated, not part of source)
 client/public/__manus__/version.json
 .project-config.json
