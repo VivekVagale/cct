@@ -6,6 +6,7 @@ import type { Vehicle } from "@/data/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { ColorCard } from "@/components/ColorCard";
 import { useBouncyScroll } from "@/hooks/useBouncyScroll";
+import { useIsPhone } from "@/hooks/useIsPhone";
 
 interface VehicleFocusProps {
   vehicle: Vehicle;
@@ -37,6 +38,7 @@ export function VehicleFocus({
   onDismiss,
 }: VehicleFocusProps) {
   const reduceMotion = useReducedMotion();
+  const isPhone = useIsPhone();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -137,7 +139,24 @@ export function VehicleFocus({
            its colours are taller than the viewport, and an absolute scrim is
            positioned against that scroll container — so it slid up with the
            content and left the bottom of the page sharp behind the colours. */
-        className="fixed inset-0 bg-[#05070A]/80 backdrop-blur-md"
+        /*
+         * Opaque on a phone rather than blurred.
+         *
+         * A full-viewport backdrop-filter recomposites everything beneath it on
+         * every frame, and beneath it is the whole page plus a WebGL starfield
+         * that is now drawing there too. On top of that this is the moment the
+         * card is flying to the middle of the screen, so the blur is being
+         * recomputed for each frame of a layout animation — which is what makes
+         * opening a vehicle stutter on a phone and not on a desktop.
+         *
+         * At 94% black almost nothing shows through anyway, so the blur was
+         * buying very little of the separation it costs. A desktop keeps it.
+         */
+        className={
+          isPhone
+            ? "fixed inset-0 bg-[#05070A]/[0.94]"
+            : "fixed inset-0 bg-[#05070A]/80 backdrop-blur-md"
+        }
       />
 
       <div

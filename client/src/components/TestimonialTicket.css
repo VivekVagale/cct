@@ -354,9 +354,15 @@
    compositor the filter is about to change, which is an instruction not to.
 
    That is affordable on a desktop GPU and it is what makes the tickets lag on a
-   phone. So a phone gets the object and not the performance of it: the card
-   still has depth, the holographic sheen is still there, and neither of them
-   moves. The one drop-shadow left is static, so it is rasterised once.
+   phone. What a phone loses is the movement, and only the movement.
+
+   Nothing here touches how the ticket looks. An earlier pass also dropped the
+   bump filter and collapsed the five drop-shadows into one, and that changed the
+   card — the grain went and the paper read differently. It was also the wrong
+   economy: a static filter is rasterised once, however many shadows are in it.
+   The cost was never the shadows, it was animating them, so stopping the
+   animation is the whole saving and the ticket keeps its colour, its texture and
+   its depth.
 
    Matched to useIsPhone's query, so the site has one definition of a phone.
    --------------------------------------------------------------------------- */
@@ -364,13 +370,6 @@
   .card {
     animation: none;
     will-change: auto;
-    filter: drop-shadow(0 10px 18px #00000035);
-  }
-
-  /* The bump map is a per-card SVG filter, which is the single most expensive
-     thing here and the least visible — it is paper grain. */
-  .bg {
-    filter: none;
   }
 
   .holographic::after {

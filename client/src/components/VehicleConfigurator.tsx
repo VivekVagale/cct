@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
 import { VehicleCard, VEHICLE_NAME_CLASS } from "@/components/VehicleCard";
@@ -27,6 +27,34 @@ export function VehicleConfigurator({
    * in is not them changing their mind. Tapping the card again re-opens it.
    */
   const [focusedId, setFocusedId] = useState<string | null>(null);
+
+  /*
+   * Whether the search bar is currently pinned, so the glass behind it exists
+   * only while there is something to hide behind it.
+   *
+   * A sentinel rather than a scroll position: a 1px marker sits where the bar
+   * would be if it were not sticky, and the moment that marker passes under the
+   * fixed nav the bar has left the flow and cards are running beneath it. No
+   * listener on scroll, and nothing to keep in step with the `top` offset except
+   * the margin below, which is that offset.
+   *
+   * Mounted, not faded. A backdrop-filter costs its blur whether or not it is
+   * visible, so the layer is absent rather than transparent — the same reason
+   * the nav bar's glass is conditionally rendered instead of animated.
+   */
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [pinned, setPinned] = useState(false);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setPinned(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { rootMargin: "-64px 0px 0px 0px", threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   /*
    * Two lists, because a pinned selection must not be mistaken for a match.
@@ -76,20 +104,32 @@ export function VehicleConfigurator({
         correction, because it also means the query can be changed or cleared
         without scrolling back up to find the field.
 
-        The offset clears the fixed bar, and the background is on this element
-        rather than on the search's own wrapper: that wrapper is the isolation
-        context GlowButton's bloom is drawn behind, and giving it a background
-        would paint over the bloom. See GlowButton.css.
+        The offset clears the fixed bar, and whatever sits behind the field goes
+        on this element rather than on the search's own wrapper: that wrapper is
+        the isolation context GlowButton's bloom is drawn behind, and giving it a
+        background would paint over the bloom. See GlowButton.css.
 
         None of it from lg up. The band exists only to stop cards showing
         through a bar they scroll under, so it belongs exactly where the bar is
         pinned and nowhere else — and a 1,600px container makes it a full-width
-        opaque stripe behind a field that is 28rem wide, which is a lot of
-        furniture for a problem a desktop does not have. Three and four column
-        grids collapse far less on filtering, and the bar stays near enough to
-        the top of a tall viewport to still be there afterwards.
+        stripe behind a field that is 28rem wide, which is a lot of furniture for
+        a problem a desktop does not have.
       */}
-      <div className="sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 bg-[#05070A]/90 px-6 py-3 backdrop-blur-sm sm:px-10 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
+      <div ref={sentinelRef} aria-hidden className="h-px lg:hidden" />
+      <div className="sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 px-6 py-3 sm:px-10 lg:static lg:mx-0 lg:px-0 lg:py-0">
+        {/* The nav bar's glass, and only while the bar is pinned.
+
+            It was a flat 90% black band that was there the whole time, which is
+            a solid stripe across the section even when nothing is behind it to
+            hide. This is the same tint, blur and hairline the nav uses, so the
+            two surfaces that float over this page are the same surface — and it
+            arrives when the bar starts floating and goes when it stops. */}
+        {pinned && (
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-[#05070A]/55 backdrop-blur-md border-b border-white/[0.06] lg:hidden"
+          />
+        )}
         <VehicleSearch
           value={query}
           onChange={setQuery}

@@ -56,8 +56,13 @@ function ProjectCard({ project }: { project: Project }) {
         style={{ background: glowBackground }}
       />
 
-      {/* 9:16 on a phone, which is the shape the renders actually are. */}
-      <div className="relative aspect-[9/16] sm:aspect-[4/3] overflow-hidden">
+      {/* 4:3 everywhere, matching the build cards in step 04 of the form.
+          These were 9:16 on a phone, which is the shape the renders are — and
+          three of them across a 375px screen made each one a tall sliver about
+          110px wide, so the range read as a filmstrip rather than as a set of
+          projects. The two card grids in this flow are now the same shape at
+          every width, which is the point of them looking alike at all. */}
+      <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={project.image}
           alt={project.title}

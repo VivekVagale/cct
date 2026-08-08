@@ -398,7 +398,22 @@ export function Hero({
       <motion.div
         onMouseMove={handlePointer}
         style={{ opacity: stageOpacity }}
-        className="sticky top-0 h-[100svh] w-full overflow-hidden"
+        /*
+         * `dvh`, not `svh`, and this is the cut across the bottom of the hero.
+         *
+         * `svh` is the viewport with the browser's chrome showing. The moment
+         * the URL bar retracts the visible area grows by its height and the
+         * stage does not, so a band of whatever is behind — now the starfield,
+         * which is why it became obvious — appears under a mascot sliced off
+         * flat along the stage's bottom edge. `dvh` is the viewport as it
+         * currently is, so the stage tracks the bar instead of being caught out
+         * by it and there is no band at any point in the slide.
+         *
+         * The cost is that the canvas is resized as the bar animates rather
+         * than never. That is a handful of resize events and one redraw each,
+         * against a visible seam across the first thing anyone sees.
+         */
+        className="sticky top-0 h-[100dvh] w-full overflow-hidden"
       >
         {/* Overscanned just enough for the parallax to move without pulling the
             canvas' own edge into frame.

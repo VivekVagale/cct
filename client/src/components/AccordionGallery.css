@@ -121,19 +121,28 @@
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
+/*
+ * A phone keeps the columns.
+ *
+ * This used to turn the row into a stack below 520px — three wide, short bands
+ * one above the other. The images are tall renders and the gallery's whole idea
+ * is a closed panel being a sliver of one, so stacked they were cropped to a
+ * letterbox of the middle of each frame and the accordion had nothing left to
+ * open. Narrow columns are the same shape the desktop shows, and a 327px
+ * content width across three panels is still ~100px each, which is a sliver
+ * rather than a stripe.
+ *
+ * The perspective goes, though. The 3D tilt is a pointer affordance and there is
+ * no pointer here, and a perspective on the container makes every panel a
+ * composited layer for a transform that no longer happens.
+ */
 @media (max-width: 520px) {
   .accordion-gallery {
-    flex-direction: column;
     perspective: none;
-    height: auto !important;
   }
   .ag-panel {
-    min-height: 84px;
+    min-width: 0;
     transform: none !important;
-  }
-  .accordion-gallery .ag-panel__media {
-    width: 100%;
-    height: var(--ag-media-size);
   }
 }
 

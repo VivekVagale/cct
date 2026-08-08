@@ -154,15 +154,19 @@ export function WorkShowcase() {
     // Full-bleed: the sphere is the section, not a panel sitting inside one.
     // The heading floats over it so nothing steals vertical space from the
     // canvas, and stays click-through so it never blocks a drag.
-    // Shorter than a viewport on phones. At a full 100svh the sphere was the
-    // entire screen for the whole section, which left a reader mid-section with
-    // nothing on screen to tell them the page continued past it. Leaving a strip
-    // of the sections either side keeps it a panel you scroll through rather
-    // than a screen you land in.
+    // A full screen at every width.
+    //
+    // It was 74svh on a phone, on the argument that a strip of the sections
+    // either side keeps this a panel you scroll through rather than a screen you
+    // land in. That reasoning cost more than it bought: the sphere is the one
+    // thing on this page you are meant to grab and turn, and a quarter of the
+    // screen given to the edges of other sections took the room to do it from
+    // the smallest viewport, which had the least to spare. The heading floating
+    // over the top and the cue underneath already say the page continues.
     <section
       id="work"
       ref={sectionRef}
-      className="relative h-[74svh] sm:h-[100svh] w-full overflow-hidden pointer-events-auto"
+      className="relative h-[100svh] w-full overflow-hidden pointer-events-auto"
     >
       <div className="scene-body absolute inset-0">
         {near && <InfiniteMenu items={items} scale={narrow ? 3 : 2.2} />}
