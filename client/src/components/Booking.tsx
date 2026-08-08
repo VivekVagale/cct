@@ -221,14 +221,19 @@ export function Booking() {
 
   if (status === "success") {
     return (
+      /* Full bleed, and no vertical padding.
+
+         The confirmation is a lanyard now: the band hangs from the top of the
+         screen and the card drops into the middle of it. A centred column with
+         40 units of padding above it would have started the rope a third of the
+         way down the section and hung it in a 672px box, which is neither the
+         top of the screen nor the middle of it. */
       <section
         id="booking"
         ref={thanksRef}
-        className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
+        className="relative pointer-events-auto scroll-mt-16 sm:scroll-mt-20"
       >
-        <div className="max-w-2xl mx-auto px-6 flex justify-center">
-          <ThankYouCard />
-        </div>
+        <ThankYouCard />
       </section>
     );
   }

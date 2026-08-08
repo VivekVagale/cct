@@ -1,171 +1,43 @@
 /*
- * The confirmation: a pass on a lanyard, and the sentence underneath it.
+ * The confirmation is a pass on a lanyard, and the scene is the whole section.
  *
- * The words are deliberately not on the pass. Its faces are textures and the
- * component takes images for them, but text baked into a texture cannot be
- * selected, read aloud, translated or found, and a confirmation is the one
- * piece of copy on the page that has to reach everybody.
+ * The band has to hang from the top of the screen for the card to drop into the
+ * middle of it, so this takes the viewport rather than sitting in a column. The
+ * component's own wrapper is already 100vh; this is here to make sure nothing
+ * around it is holding the scene to a smaller box, and to give the reduced
+ * motion fallback somewhere to live.
  */
-
-/*
- * The scene's own stylesheet sizes it to the whole viewport, which is right for
- * a page that is nothing else and wrong for a card in a section. Overridden
- * here rather than in Lanyard.css: that file came from the registry and running
- * the add again would overwrite it, which is the trap the project has already
- * been caught by once.
- */
-.thankyou-lanyard {
-  width: min(420px, 100%);
-  margin-inline: auto;
-}
-
-.thankyou-lanyard .lanyard-wrapper {
-  height: 340px;
-}
-
-@media (min-width: 640px) {
-  .thankyou-lanyard .lanyard-wrapper {
-    height: 420px;
-  }
+.thankyou-scene {
+  position: relative;
+  width: 100%;
+  /* dvh, for the same reason the hero uses it: svh leaves a band of page under
+     the scene the moment the phone's URL bar retracts. */
+  min-height: 100dvh;
 }
 
 /*
- * The host carries the lift, and the ring is what it lifts.
+ * No lanyard under reduced motion, so the words are the card.
  *
- * The card is the glow's opaque face, so scaling the card alone would have
- * grown it out of an edge that stayed where it was. The transform cannot go on
- * `.glow-button` either — a stacking context there paints the bloom over the
- * ring instead of behind it, which GlowButton.css spells out. The host is
- * already a stacking context by way of the `isolation` rule there, so it is the
- * one node in the stack that can take a transform and change nothing else.
+ * A swinging object with momentum has no gentler version — it is the movement.
+ * What is left is the message, set plainly, which is all it ever had to be.
  */
-.thankyou-host {
-  display: inline-block;
-  transition: transform 0.2s ease-in-out;
-}
-
-.thankyou-glow {
-  display: block;
-  width: min(420px, 100%);
-  /*
-   * Centred here rather than relying on the flex parent.
-   *
-   * The percentage in that width makes the host's max-content size resolve to
-   * the whole container, so `justify-center` centres a 624px box and the 420px
-   * ring inside it stays at the left edge — measured 102px off centre. Auto
-   * margins centre the block inside whatever the host turns out to be, which is
-   * true whether the parent centres it or not.
-   */
+.thankyou-plain {
+  max-width: 34rem;
   margin-inline: auto;
-}
-
-.thankyou-card {
-  position: relative;
-  min-height: 285px;
-  padding: 2rem 1.75rem;
-  /* Black, and the same black the button's face uses — the ring reads as a band
-     of light around the card rather than around a grey panel that happens to be
-     near it. */
-  background: #000;
-  border-radius: calc(var(--glow-radius) - var(--glow-ring));
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-}
-
-.thankyou-mascot {
-  position: absolute;
-  height: 65%;
-  width: auto;
-  filter: blur(7px);
-  z-index: 1;
-  animation: thankyou-float 3s infinite;
-  transition:
-    height 0.2s ease-in-out,
-    filter 0.25s ease-in-out;
-  pointer-events: none;
-  /*
-   * Promoted, because it is a blurred image that moves.
-   *
-   * Without a layer of its own the 7px blur is recomputed on every frame of the
-   * float — a full-size gaussian per frame, which a phone cannot keep up with,
-   * and the float arrives in visible steps rather than as movement. Promoted,
-   * the blur is rasterised once into the layer and the animation is the
-   * compositor translating that layer, which costs nothing per frame.
-   */
-  will-change: transform;
-}
-
-.thankyou-text {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: 4rem 1.5rem;
   text-align: center;
-  gap: 15px;
+  color: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.thankyou-head {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 0;
+.thankyou-plain__head {
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
-.thankyou-body {
-  font-size: 15px;
-  font-weight: bold;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.thankyou-text > span {
-  font-size: 12px;
-  color: lightgrey;
-}
-
-.thankyou-host:hover {
-  transform: scale(1.04) rotate(-1deg);
-}
-
-/*
- * Hover brings the pose into focus as well as up in size.
- *
- * The blur is what lets the copy sit over the mascot and still be the first
- * thing read, so it stays the resting state — and it has to, because a
- * touchscreen never hovers and a confirmation cannot depend on a gesture that
- * is not available. On a pointer it is a reward for looking: the reader has
- * already read the message by the time they are moving a cursor over it.
- */
-.thankyou-card:hover .thankyou-mascot {
-  height: 78%;
-  filter: blur(0);
-}
-
-@keyframes thankyou-float {
-  0% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-20px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
-
-/* The float is decoration on top of a message that is already legible, so it
-   is the first thing to go — the same contract CountUp and ViewsChart keep. */
-.thankyou-card--still .thankyou-mascot {
-  animation: none;
-}
-
-.thankyou-host--still:hover {
-  transform: none;
+.thankyou-plain__small {
+  font-size: 0.875rem;
+  color: rgba(184, 196, 214, 0.75);
 }
