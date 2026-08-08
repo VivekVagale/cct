@@ -44,7 +44,8 @@ export interface Vehicle {
 }
 
 /*
- * The full Royal Enfield range the studio works with, as supplied.
+ * The machines the studio works with, as supplied: the Royal Enfield range, and
+ * whatever else has been added since.
  *
  * Two things about this data are placeholders and are meant to be replaced,
  * and neither is hidden:
@@ -1052,6 +1053,34 @@ export const vehicles: Vehicle[] = [
         name: "Battleship Blue",
         swatch: "#22406E",
         render: "/vehicles/bullet-650/battleship-blue.webp",
+        image: PLACEHOLDER,
+      },
+    ],
+  },
+  /*
+   * The first machine here that is not a Royal Enfield.
+   *
+   * Nothing in the configurator cared about the marque — it is printed on the
+   * card and searched against, and that is all — so this needed no code. It is
+   * worth noticing anyway: the list is no longer one manufacturer's range, and
+   * the search matching marque as well as model is what stops "bajaj" finding
+   * nothing.
+   */
+  {
+    id: "pulsar-150",
+    name: "Pulsar 150",
+    manufacturer: "Bajaj",
+    render: "/vehicles/pulsar-150/cover.webp",
+    image: PLACEHOLDER,
+    colors: [
+      {
+        id: "metallic-black-red",
+        name: "Metallic Black Red",
+        /* Inferred from the name like every other swatch on this page: a black
+           carrying red rather than a red. Sample it from the render when there
+           is one. */
+        swatch: "#2A1216",
+        render: "/vehicles/pulsar-150/metallic-black-red.webp",
         image: PLACEHOLDER,
       },
     ],
