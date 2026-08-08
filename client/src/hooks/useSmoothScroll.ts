@@ -3,30 +3,43 @@ import type { MotionValue } from "framer-motion";
 import Lenis from "lenis";
 
 /**
- * Fired when an anchor click has moved the page instantly.
+ * Snap a spring across a discontinuity in what it is following.
  *
- * Scroll-derived springs cannot tell a teleport from a very fast scroll, and
- * will animate across the whole distance either way. This says which it was.
- */
-export const SCROLL_JUMP_EVENT = "cct:scroll-jump";
-
-/**
- * Snap a spring to wherever its source now is, for as long as the component
- * lives, whenever the page jumps.
+ * A spring cannot tell a teleport from a very fast scroll: handed a target a
+ * whole page away it travels there, which on the hero's frame index is the
+ * assembly playing backwards for a second after a click that was supposed to be
+ * a cut.
  *
- * `jump` sets the value and stops the animation outright, which is the whole
- * point: `set` would leave the spring travelling to the same place from a
- * standing start.
+ * This watches the source for a step no scroll could produce. A wheel or a
+ * touch moves a section's progress by a fraction of a percent per event; an
+ * anchor jump moves it by most of its range at once. Anything past the
+ * threshold is a position the reader was carried to rather than scrolled
+ * through, so the spring is placed there instead of sent there.
+ *
+ * Written against the source rather than against the click, which is where this
+ * started and why it did not work. `lenis.scrollTo` sets the position
+ * synchronously but the scroll event that updates the source is dispatched
+ * afterwards, so a snap fired from the click handler read the value the page
+ * was leaving and pinned the spring to that — and the real change arrived a
+ * moment later with nothing left to catch it. A discontinuity cannot be
+ * mistimed: it is observed in the value itself, whenever it happens to move.
+ *
+ * `jump` rather than `set`: it stops the running animation outright, where
+ * `set` would leave the spring travelling to the same place from a standstill.
  */
 export function useSnapOnScrollJump(
   spring: MotionValue<number>,
   source: MotionValue<number>,
+  threshold = 0.2,
 ) {
   useEffect(() => {
-    const snap = () => spring.jump(source.get());
-    window.addEventListener(SCROLL_JUMP_EVENT, snap);
-    return () => window.removeEventListener(SCROLL_JUMP_EVENT, snap);
-  }, [spring, source]);
+    let previous = source.get();
+    return source.on("change", (value) => {
+      const step = Math.abs(value - previous);
+      previous = value;
+      if (step > threshold) spring.jump(value);
+    });
+  }, [spring, source, threshold]);
 }
 
 /**
@@ -120,21 +133,11 @@ export function useSmoothScroll(enabled = true) {
          without the utility got a different number again. The clearance is
          decided once, in CSS, where the browser's own anchor jump reads it too:
          see the section[id] rule in index.css. */
+      /* Nothing is announced here. Springs that scrub on scroll notice the jump
+         themselves, by the size of the step it puts in their source — see
+         useSnapOnScrollJump, and the note there about why announcing it from
+         this handler could not work. */
       lenis.scrollTo(target as HTMLElement, { immediate: true });
-      /*
-       * Tell the springs the page teleported.
-       *
-       * The scroll is instant, and the values derived from it are not: the
-       * hero's frame index runs through a spring, so a jump from the bottom of
-       * the page to the top hands that spring a target one full sequence away
-       * and it travels there — playing all 298 frames backwards, which is the
-       * assembly in reverse and the exact thing cutting was supposed to avoid.
-       * Anything scrubbing on scroll has the same shape of problem.
-       *
-       * An event rather than a callback, because the things that need to know
-       * are scattered across the tree and none of them is a child of this hook.
-       */
-      window.dispatchEvent(new CustomEvent(SCROLL_JUMP_EVENT));
       /* The hash the click would have set, without the history entry a real
          navigation would leave — going "back" to a scroll position the page no
          longer holds is worse than not offering it. */

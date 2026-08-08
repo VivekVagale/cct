@@ -310,7 +310,14 @@ export function VehicleFocus({
                `data-lenis-prevent` is the library's own opt-out for exactly
                this case. */
             data-lenis-prevent
-            className="max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain pr-1"
+            /* Padded on every side, not just the right.
+
+               The selected ring is drawn one pixel outside its card, and the
+               top row of cards sits flush against this container's edge — so
+               `overflow-y-auto` clipped the ring's top line and left the violet
+               open above the card it belongs to. The padding is the ring's own
+               overhang plus room for the bloom to start before it is cut. */
+            className="max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain p-1"
           >
             {/* The scroller and the grid are two elements now. useBouncyScroll
                 stretches the wrapper's single child past the ends, so the thing
