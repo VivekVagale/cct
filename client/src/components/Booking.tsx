@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { Mascot } from "@/components/Mascot";
 import Cubes from "@/components/ui/Cubes";
 import { Magnet } from "@/components/Magnet";
@@ -151,6 +151,8 @@ export function Booking() {
    * two different jobs.
    */
   const [usage, setUsage] = useState("personal");
+  /** The section the thank-you card lands in. See the layout effect below. */
+  const thanksRef = useRef<HTMLElement>(null);
 
   // Resolved once here rather than in two places: the summary above the form
   // and the label sent with the request must never name different machines.
@@ -193,10 +195,31 @@ export function Booking() {
     setStatus(ok ? "success" : "error");
   }
 
+  /*
+   * Take the reader to the answer, because the page has just moved out from
+   * under them.
+   *
+   * A successful submission replaces the entire form — six steps, a vehicle
+   * grid and a configurator, several thousand pixels of it — with one small
+   * card. The document shortens by that much in a single commit while the
+   * scroll position stays the number it was, so the reader is left staring at
+   * whatever has slid up into that place: the FAQ. They submitted a booking and
+   * the site appeared to change the subject.
+   *
+   * In a layout effect, so it lands before the browser paints: the card is the
+   * first thing seen rather than something that arrives after a jump. The
+   * section's own scroll-margin keeps it clear of the fixed bar.
+   */
+  useLayoutEffect(() => {
+    if (status !== "success") return;
+    thanksRef.current?.scrollIntoView({ block: "start" });
+  }, [status]);
+
   if (status === "success") {
     return (
       <section
         id="booking"
+        ref={thanksRef}
         className="relative pointer-events-auto py-20 sm:py-40 scroll-mt-16 sm:scroll-mt-20"
       >
         <div className="max-w-2xl mx-auto px-6 flex justify-center">
