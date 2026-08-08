@@ -22,7 +22,13 @@ create table if not exists public.bookings (
 
   -- Personal, brand, dealership or agency — the chips above the submit button.
   -- See USAGE_OPTIONS in Booking.tsx.
-  usage text not null default '' check (char_length(usage) <= 100)
+  usage text not null default '' check (char_length(usage) <= 100),
+
+  -- Where the job has got to. Studio-side only: nothing in the site writes it
+  -- or can read it, and it is edited in the dashboard. The check exists so a
+  -- typo cannot quietly become a third spelling of a status.
+  progress text not null default 'new'
+    check (progress in ('new','contacted','quoted','in production','delivered','closed'))
 );
 
 -- There is no collab_post column. The collab used to be a toggle and is now
@@ -51,6 +57,21 @@ create policy "Anyone may submit a booking"
   for insert
   to anon, authenticated
   with check (true);
+
+-- Which columns a submission may write.
+--
+-- The policy above decides whether a row may be inserted; this decides what it
+-- is allowed to contain. Without it, `with check (true)` lets a hand-written
+-- POST set anything on the row it creates — its own created_at, or a progress
+-- of 'delivered' on a job that does not exist. It could never read the result,
+-- but it could poison the column the studio works from.
+--
+-- Revoke first, then grant. A table-level INSERT privilege implies every
+-- column, and a column-level revoke does not take it back: the table grant has
+-- to go before per-column grants mean anything.
+revoke insert on public.bookings from anon, authenticated;
+grant insert (full_name, email, instagram, whatsapp, project_type, vehicle, description, usage)
+  on public.bookings to anon, authenticated;
 
 -- Newest first is how these get read.
 create index if not exists bookings_created_at_idx
