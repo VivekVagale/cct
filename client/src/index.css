@@ -301,10 +301,19 @@
    * is not.
    *
    * The background cannot simply be set: the UA rule wins whatever specificity
-   * is thrown at it. What it does instead is animate the colour in, so a
-   * transition delay measured in days means the animation never arrives and the
-   * field stays transparent. `-webkit-text-fill-color` is the matching trick for
-   * the text, which `color` alone will not move.
+   * is thrown at it. An enormous inset box-shadow can be, and it paints inside
+   * the field's own box, over the top of it.
+   *
+   * The transition trick was tried first — the UA animates the colour in, so a
+   * delay measured in days should mean it never arrives — and it does not hold
+   * in every Chromium build. When it failed it failed badly: the text colour
+   * override still applied, so a near-white background got near-white text, and
+   * the field went from ugly to unreadable. This is deterministic instead.
+   *
+   * The cost is that an autofilled field is filled with the page's own black
+   * rather than being transparent, so the starfield does not show through that
+   * one strip. That is the trade for never showing a white slab, and it is only
+   * visible on fields the browser has filled.
    *
    * Firefox implements the standard `:autofill` and lets the background be
    * overridden outright, so it gets the plain version.
@@ -315,9 +324,14 @@
   input:-webkit-autofill:active,
   textarea:-webkit-autofill,
   textarea:-webkit-autofill:hover,
-  textarea:-webkit-autofill:focus {
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #05070a inset;
+    box-shadow: 0 0 0 1000px #05070a inset;
     -webkit-text-fill-color: #f5f7fa;
     caret-color: #f5f7fa;
+    /* Belt and braces: where the delay does work, the colour never animates in
+       underneath the shadow either. */
     transition:
       background-color 600000s 0s,
       color 600000s 0s;

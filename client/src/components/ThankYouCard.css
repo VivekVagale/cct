@@ -10,20 +10,41 @@
  * for: the card lifts and the pose grows behind the type.
  */
 
+/*
+ * The host carries the lift, and the ring is what it lifts.
+ *
+ * The card is the glow's opaque face, so scaling the card alone would have
+ * grown it out of an edge that stayed where it was. The transform cannot go on
+ * `.glow-button` either — a stacking context there paints the bloom over the
+ * ring instead of behind it, which GlowButton.css spells out. The host is
+ * already a stacking context by way of the `isolation` rule there, so it is the
+ * one node in the stack that can take a transform and change nothing else.
+ */
+.thankyou-host {
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+}
+
+.thankyou-glow {
+  display: block;
+  width: min(420px, 100%);
+}
+
 .thankyou-card {
   position: relative;
-  width: min(420px, 100%);
   min-height: 285px;
   padding: 2rem 1.75rem;
-  background: #313131;
-  border-radius: 20px;
+  /* Black, and the same black the button's face uses — the ring reads as a band
+     of light around the card rather than around a grey panel that happens to be
+     near it. */
+  background: #000;
+  border-radius: calc(var(--glow-radius) - var(--glow-ring));
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  transition: transform 0.2s ease-in-out;
 }
 
 .thankyou-mascot {
@@ -68,7 +89,7 @@
   color: lightgrey;
 }
 
-.thankyou-card:hover {
+.thankyou-host:hover {
   transform: scale(1.04) rotate(-1deg);
 }
 
@@ -106,6 +127,6 @@
   animation: none;
 }
 
-.thankyou-card--still:hover {
+.thankyou-host--still:hover {
   transform: none;
 }
