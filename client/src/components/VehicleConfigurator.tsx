@@ -80,8 +80,16 @@ export function VehicleConfigurator({
         rather than on the search's own wrapper: that wrapper is the isolation
         context GlowButton's bloom is drawn behind, and giving it a background
         would paint over the bloom. See GlowButton.css.
+
+        None of it from lg up. The band exists only to stop cards showing
+        through a bar they scroll under, so it belongs exactly where the bar is
+        pinned and nowhere else — and a 1,600px container makes it a full-width
+        opaque stripe behind a field that is 28rem wide, which is a lot of
+        furniture for a problem a desktop does not have. Three and four column
+        grids collapse far less on filtering, and the bar stays near enough to
+        the top of a tall viewport to still be there afterwards.
       */}
-      <div className="sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 bg-[#05070A]/90 px-6 py-3 backdrop-blur-sm sm:px-10">
+      <div className="sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 bg-[#05070A]/90 px-6 py-3 backdrop-blur-sm sm:px-10 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
         <VehicleSearch
           value={query}
           onChange={setQuery}
