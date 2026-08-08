@@ -20,9 +20,18 @@ const BODY =
 const FOLLOW =
   "Follow @coldchaintheory so our reply reaches you instead of sitting in your message requests.";
 
-/** The pass, in texture pixels. Portrait, at the proportions of a real one. */
-const CARD_W = 640;
-const CARD_H = 1024;
+/*
+ * The pass, in texture pixels, at the proportions of the face it is painted on.
+ *
+ * The ratio is the point. `contain` fits the image inside the face and leaves
+ * the model's own texture showing around it — which is the pale frame the pass
+ * had down its sides. `cover` fills the face and crops whatever does not fit, so
+ * the closer this is to the real thing the less there is to crop. The margins
+ * below are the rest of the answer: nothing is drawn near an edge that a few
+ * per cent of crop could reach.
+ */
+const CARD_W = 720;
+const CARD_H = 1040;
 
 /** Wrap `text` to `width`, returning the lines. Canvas has no text box. */
 function wrap(ctx: CanvasRenderingContext2D, text: string, width: number) {
@@ -94,35 +103,68 @@ async function paintPass(): Promise<string | null> {
   const poseW = (mascot.width / mascot.height) * poseH;
   ctx.drawImage(mascot, (CARD_W - poseW) / 2, CARD_H * 0.06, poseW, poseH);
 
-  const margin = 56;
+  /* Generous, because `cover` crops from the edges and because this is read at
+     whatever size a swinging card happens to present. */
+  const margin = 64;
   const textW = CARD_W - margin * 2;
-  let y = CARD_H * 0.56;
+  let y = CARD_H * 0.54;
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#F5F7FA";
-  ctx.font = "700 46px Inter, system-ui, sans-serif";
+  ctx.font = "700 62px Inter, system-ui, sans-serif";
   for (const line of wrap(ctx, HEAD, textW)) {
     ctx.fillText(line, CARD_W / 2, y);
-    y += 54;
+    y += 72;
   }
 
-  y += 26;
-  ctx.fillStyle = "#B8C4D6";
-  ctx.font = "400 28px Inter, system-ui, sans-serif";
+  y += 28;
+  ctx.fillStyle = "#D5DEEA";
+  ctx.font = "400 38px Inter, system-ui, sans-serif";
   for (const line of wrap(ctx, BODY, textW)) {
     ctx.fillText(line, CARD_W / 2, y);
-    y += 38;
+    y += 50;
   }
 
-  y += 26;
-  ctx.fillStyle = "rgba(184, 196, 214, 0.65)";
-  ctx.font = "400 23px Inter, system-ui, sans-serif";
+  y += 28;
+  ctx.fillStyle = "rgba(184, 196, 214, 0.8)";
+  ctx.font = "400 30px Inter, system-ui, sans-serif";
   for (const line of wrap(ctx, FOLLOW, textW)) {
     ctx.fillText(line, CARD_W / 2, y);
-    y += 31;
+    y += 40;
   }
 
   return canvas.toDataURL("image/png");
+}
+
+/*
+ * The painted pass, kept once it exists.
+ *
+ * Painting it costs a decode, a font wait and a canvas readback, and the result
+ * never changes — so it is done once and held, whether it was started by the
+ * submit button or by this component mounting.
+ */
+let passCache: Promise<string | null> | null = null;
+
+function getPass() {
+  passCache ??= paintPass();
+  return passCache;
+}
+
+/**
+ * Start everything the confirmation needs, while the request is still in flight.
+ *
+ * Called from the submit handler. Without it the sequence is: the insert
+ * returns, then a 3MB chunk is fetched, then a model is parsed, then the pass is
+ * painted — and only then does anything appear, which reads as the button
+ * having done nothing. Started at the click, all of that happens against the
+ * network round trip and the scene is ready when the answer is.
+ *
+ * Deliberately not awaited and deliberately silent. It is a head start, not a
+ * step: if it fails the component will simply do the work itself on mount.
+ */
+export function preloadThankYou() {
+  void import("./Lanyard");
+  void getPass();
 }
 
 /**
@@ -150,7 +192,7 @@ export function ThankYouCard() {
   useEffect(() => {
     if (reduceMotion) return;
     let live = true;
-    void paintPass().then((url) => {
+    void getPass().then((url) => {
       if (live) setPass(url);
     });
     return () => {
@@ -182,12 +224,20 @@ export function ThankYouCard() {
           spinner here would be asking them to wait for the decoration. */}
       <Suspense fallback={null}>
         {pass && (
+          /* Closer than the component's own default, because this pass has to be
+             read rather than admired — at 20 the card was a thumbnail in the
+             middle of a large dark screen and the message on it was too small to
+             take in.
+
+             `cover` rather than `contain`: contain fits the image inside the
+             face and leaves the model's own texture showing around it, which is
+             the pale frame the pass had down its sides. */
           <Lanyard
-            position={[0, 0, 20]}
+            position={[0, 0, 13]}
             gravity={[0, -40, 0]}
             frontImage={pass}
             backImage={pass}
-            imageFit="contain"
+            imageFit="cover"
           />
         )}
       </Suspense>

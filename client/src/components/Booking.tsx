@@ -6,7 +6,7 @@ import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import { SparkleButton } from "@/components/SparkleButton";
 import { MarqueChips, type MarqueChip } from "@/components/MarqueChips";
-import { ThankYouCard } from "@/components/ThankYouCard";
+import { ThankYouCard, preloadThankYou } from "@/components/ThankYouCard";
 import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
@@ -175,6 +175,11 @@ export function Booking() {
        than the first — a form can still be submitted by pressing Enter in a
        field, and a request naming no machine is not a request. */
     if (!vehicleId) return;
+    /* Build the confirmation while the request is in flight. It is a 3MB chunk,
+       a model to parse and a texture to paint; started after the insert returns
+       it is a wait the reader spends looking at a button that appears to have
+       done nothing. See preloadThankYou. */
+    preloadThankYou();
     setStatus("submitting");
     const form = e.currentTarget;
     const data = new FormData(form);
