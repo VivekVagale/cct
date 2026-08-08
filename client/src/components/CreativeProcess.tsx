@@ -8,6 +8,7 @@ import {
   useStableViewportHeight,
   useStableScrollProgress,
 } from "@/hooks/useStableViewport";
+import { useSnapOnScrollJump } from "@/hooks/useSmoothScroll";
 import { FoldHeading } from "@/components/FoldHeading";
 import DepthText from "@/components/DepthText";
 
@@ -70,6 +71,10 @@ export function CreativeProcess() {
     mass: 0.4,
     restDelta: 0.0005,
   });
+  /* Same as the hero's scrub: an anchor click moves the page in one step, and a
+     spring left to find its own way there crossfades back through all five
+     stages on the way. */
+  useSnapOnScrollJump(progress, scrollYProgress);
 
   // The heading recedes as the first stage takes over, so the section reads as
   // one continuous move rather than a titled block followed by content.

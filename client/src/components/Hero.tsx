@@ -18,6 +18,7 @@ import {
   useStableViewportHeight,
   useStableScrollProgress,
 } from "@/hooks/useStableViewport";
+import { useSnapOnScrollJump } from "@/hooks/useSmoothScroll";
 
 /**
  * The pin's phases, in vh of scroll rather than as fractions of the section.
@@ -308,6 +309,10 @@ export function Hero({
     mass: 0.35,
     restDelta: 0.0005,
   });
+  /* A logo click is a teleport, not a very fast scroll, and this spring cannot
+     tell the difference on its own — it would travel the whole way and play the
+     assembly backwards to get there. See useSnapOnScrollJump. */
+  useSnapOnScrollJump(sequenceProgress, rawSeq);
 
   // Cursor parallax, applied to the whole stage so the character drifts as one
   // rather than sliding around inside a box.
