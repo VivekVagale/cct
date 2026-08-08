@@ -342,3 +342,38 @@
   height: 28px;
   transform: translateX(-74px);
 }
+
+/* ---------------------------------------------------------------------------
+   What a phone does not run.
+
+   Every ticket on screen was carrying, permanently and all at once: a filter of
+   five stacked drop-shadows that the float animates — so all five are recomputed
+   every frame — an SVG filter on the background, two blend-mode layers, and a
+   second infinite animation moving a gradient's background-position under a
+   `difference` blend. None of it is cached: `will-change: filter` tells the
+   compositor the filter is about to change, which is an instruction not to.
+
+   That is affordable on a desktop GPU and it is what makes the tickets lag on a
+   phone. So a phone gets the object and not the performance of it: the card
+   still has depth, the holographic sheen is still there, and neither of them
+   moves. The one drop-shadow left is static, so it is rasterised once.
+
+   Matched to useIsPhone's query, so the site has one definition of a phone.
+   --------------------------------------------------------------------------- */
+@media (pointer: coarse) and (max-width: 900px) {
+  .card {
+    animation: none;
+    will-change: auto;
+    filter: drop-shadow(0 10px 18px #00000035);
+  }
+
+  /* The bump map is a per-card SVG filter, which is the single most expensive
+     thing here and the least visible — it is paper grain. */
+  .bg {
+    filter: none;
+  }
+
+  .holographic::after {
+    animation: none;
+  }
+}

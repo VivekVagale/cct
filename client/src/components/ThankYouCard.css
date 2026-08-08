@@ -68,6 +68,16 @@
     height 0.2s ease-in-out,
     filter 0.25s ease-in-out;
   pointer-events: none;
+  /*
+   * Promoted, because it is a blurred image that moves.
+   *
+   * Without a layer of its own the 7px blur is recomputed on every frame of the
+   * float — a full-size gaussian per frame, which a phone cannot keep up with,
+   * and the float arrives in visible steps rather than as movement. Promoted,
+   * the blur is rasterised once into the layer and the animation is the
+   * compositor translating that layer, which costs nothing per frame.
+   */
+  will-change: transform;
 }
 
 .thankyou-text {
