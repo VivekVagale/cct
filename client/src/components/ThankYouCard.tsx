@@ -99,15 +99,29 @@ async function paintPass(): Promise<string | null> {
 
   /* Contained, not cropped: the pose is the subject and a pass that cuts its
      head off is worse than one with space around it. */
-  const poseH = CARD_H * 0.44;
+  const poseH = CARD_H * 0.4;
   const poseW = (mascot.width / mascot.height) * poseH;
-  ctx.drawImage(mascot, (CARD_W - poseW) / 2, CARD_H * 0.06, poseW, poseH);
+  ctx.drawImage(mascot, (CARD_W - poseW) / 2, CARD_H * 0.05, poseW, poseH);
 
   /* Generous, because `cover` crops from the edges and because this is read at
      whatever size a swinging card happens to present. */
   const margin = 64;
   const textW = CARD_W - margin * 2;
-  let y = CARD_H * 0.54;
+  /*
+   * Where the type starts, and it is the number that decides whether the last
+   * line survives.
+   *
+   * Nothing here reflows: `fillText` draws at a baseline and a baseline past the
+   * bottom of the canvas is simply not drawn. At 0.54 the block ran to about
+   * 1,082 on a 1,040 canvas, so the follow line lost its last row — and `cover`
+   * crops a little more off the edges on top of that. Starting at 0.46 with
+   * tighter leading ends it around 976, which leaves a margin the crop cannot
+   * reach.
+   *
+   * Changing the copy changes this. Anything longer wants a smaller start, or
+   * fewer words.
+   */
+  let y = CARD_H * 0.46;
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#F5F7FA";
@@ -117,20 +131,20 @@ async function paintPass(): Promise<string | null> {
     y += 72;
   }
 
-  y += 28;
+  y += 24;
   ctx.fillStyle = "#D5DEEA";
   ctx.font = "400 38px Inter, system-ui, sans-serif";
   for (const line of wrap(ctx, BODY, textW)) {
     ctx.fillText(line, CARD_W / 2, y);
-    y += 50;
+    y += 48;
   }
 
-  y += 28;
+  y += 24;
   ctx.fillStyle = "rgba(184, 196, 214, 0.8)";
   ctx.font = "400 30px Inter, system-ui, sans-serif";
   for (const line of wrap(ctx, FOLLOW, textW)) {
     ctx.fillText(line, CARD_W / 2, y);
-    y += 40;
+    y += 38;
   }
 
   return canvas.toDataURL("image/png");
