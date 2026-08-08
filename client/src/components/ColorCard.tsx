@@ -29,32 +29,43 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
       className="group relative h-full text-left rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
     >
       {/*
-        The lift happens here, not on the button.
+        Nothing about this card's box moves on hover, and that is the fix.
 
-        It used to be `whileHover={{ y: -3 }}` on the button itself, with the
-        card inside it shrinking to 0.98 at the same time — a lift and a shrink
-        pulling against each other, on the element that is also the hover target.
-        Both move the box out from under the cursor: near an edge the pointer
-        stops being over the card, the hover ends, the card returns, the pointer
-        is over it again, and it oscillates. That flicker is what reads as glitch
-        rather than as a lift, and it is worst on the ranges with only two
-        colours, where each card is wide enough that most of its area is edge.
+        It was `whileHover={{ y: -3 }}` on the button with the card inside it
+        scaling to 0.98 — a lift and a shrink pulling against each other on the
+        element that is also the hover target. Moving the box out from under the
+        cursor lets hover end, which returns the box, which starts hover again.
+        That was corrected once by moving the lift to this wrapper so the button
+        itself held still, and it was reported flickering again on the same
+        two-colour range afterwards, on a build carrying that change.
 
-        The button never moves now, so the hover test is stable, and everything
-        the reader sees moves together on this wrapper — the ring included, which
-        would otherwise have stayed behind while the card rose off it.
+        So the lift is gone rather than relocated. A 3px rise is not worth a
+        third attempt at explaining why it flickers, and the ring below does the
+        same job — it says which card the pointer is on without any part of the
+        card changing size or position. What is left that still moves is the
+        photograph, and it is sealed inside `overflow-hidden`: it cannot reach
+        the hit area at any scale.
       */}
-      <div className="relative h-full transition-transform duration-300 ease-out group-hover:-translate-y-[3px]">
-      {/* The ring, violet once chosen. Same two custom properties the vehicle
-          and project cards use, so the three pickers in this flow cannot drift
-          apart — a colour is as chosen as the machine it belongs to. */}
+      <div className="relative h-full">
+      {/* The ring, violet once chosen, and brighter under the pointer.
+          Same two custom properties the vehicle and project cards use, so the
+          three pickers in this flow cannot drift apart — a colour is as chosen
+          as the machine it belongs to.
+
+          Class-driven while unselected so `group-hover` can reach it; inline
+          only for the selected state, which an inline style has to own because
+          it is built from those custom properties. */}
       <div
-        className="absolute -inset-px rounded-sm transition-all duration-300"
-        style={{
-          boxShadow: selected
-            ? "var(--selected-ring), var(--selected-bloom)"
-            : "0 0 0 1px rgba(255,255,255,0.10)",
-        }}
+        className={`absolute -inset-px rounded-sm transition-all duration-300 ${
+          selected
+            ? ""
+            : "shadow-[0_0_0_1px_rgba(255,255,255,0.10)] group-hover:shadow-[0_0_0_1px_rgba(255,255,255,0.34)]"
+        }`}
+        style={
+          selected
+            ? { boxShadow: "var(--selected-ring), var(--selected-bloom)" }
+            : undefined
+        }
       />
       {/* Full height with the caption pushed to the bottom, so a two-line
           colour name makes its own card no taller than its neighbour — the
@@ -65,11 +76,16 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
         <div className="aspect-[4/3] overflow-hidden">
           {/* Driven by the group rather than by its own hover, so it answers to
               the caption as well as to the image. Inside overflow-hidden, so it
-              cannot reach the hit area no matter how far it scales. */}
+              cannot reach the hit area no matter how far it scales.
+
+              `transform-gpu` keeps it on its own compositing layer for good
+              rather than being promoted at the start of each hover and dropped
+              at the end — that churn is a repaint, and a repaint under a moving
+              pointer is the other thing that reads as flicker. */}
           <img
             src={color.image}
             alt={color.name}
-            className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-[1.03]"
+            className="w-full h-full object-cover transform-gpu transition-transform duration-300 ease-out group-hover:scale-[1.03]"
           />
         </div>
         <div className="mt-auto px-3 py-2.5 sm:px-4 sm:py-3 bg-[#0D1117] flex items-center gap-2 sm:gap-2.5">
