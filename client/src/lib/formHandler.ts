@@ -8,14 +8,14 @@ export interface BookingFormData {
   vehicle: string;
   description: string;
   /**
-   * Whether the client wants the reel posted as an Instagram collab, which
-   * puts it in both accounts' feeds at once. Sent on every submission,
-   * including the ones that say no — "they did not ask for it" and "they were
-   * never asked" are different things to read in an inbox.
+   * Personal, brand, dealership or agency — the chips above the submit button.
+   * See USAGE_OPTIONS in Booking.
+   *
+   * There is no collab flag beside it any more. The collab post was a toggle
+   * once; it is included in every job now, so the field was true on every
+   * submission and told an inbox nothing it did not already know.
    */
-  /** Personal, brand, dealership or agency — see USAGE_OPTIONS in Booking. */
   usage: string;
-  collabPost: boolean;
 }
 
 /**
@@ -98,7 +98,6 @@ export async function submitBookingForm(data: BookingFormData): Promise<boolean>
       vehicle: data.vehicle,
       description: data.description,
       usage: data.usage,
-      collab_post: data.collabPost,
     }),
   });
 

@@ -20,13 +20,16 @@ create table if not exists public.bookings (
   vehicle text not null default '' check (char_length(vehicle) <= 200),
   description text not null default '' check (char_length(description) <= 5000),
 
-  -- Personal, brand, dealership or agency. See USAGE_OPTIONS in Booking.tsx.
-  usage text not null default '' check (char_length(usage) <= 100),
-
-  -- Always true today: the collab post is included rather than chosen. Stored
-  -- anyway, so the day it becomes a choice the old rows still say what they meant.
-  collab_post boolean not null default true
+  -- Personal, brand, dealership or agency — the chips above the submit button.
+  -- See USAGE_OPTIONS in Booking.tsx.
+  usage text not null default '' check (char_length(usage) <= 100)
 );
+
+-- There is no collab_post column. The collab used to be a toggle and is now
+-- simply included in every job, so the field was true on every row and recorded
+-- nothing. If it ever becomes a choice again, add it then; rows written before
+-- that date are collab-included by their date alone.
+alter table public.bookings drop column if exists collab_post;
 
 -- The length checks above are not validation — the form does that, and anyone
 -- can post here without going near the form. They are a ceiling on what a

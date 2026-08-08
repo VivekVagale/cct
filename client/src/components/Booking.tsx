@@ -188,8 +188,6 @@ export function Booking() {
       vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
       usage,
-      // Always. See the note above the button — the collab is not a choice.
-      collabPost: true,
     }).catch(() => false);
 
     setStatus(ok ? "success" : "error");
