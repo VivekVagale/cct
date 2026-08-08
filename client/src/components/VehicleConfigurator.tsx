@@ -2,8 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
 import { VehicleCard, VEHICLE_NAME_CLASS } from "@/components/VehicleCard";
+import { MarqueChips } from "@/components/MarqueChips";
 import { VehicleFocus } from "@/components/VehicleFocus";
 import { VehicleSearch } from "@/components/VehicleSearch";
+
+/** The chip that filters by nothing. Not a marque, so it cannot collide with one. */
+const ALL_MARQUES = "__all__";
 
 interface VehicleConfiguratorProps {
   selectedVehicleId: string | null;
@@ -19,6 +23,31 @@ export function VehicleConfigurator({
   onSelectColor,
 }: VehicleConfiguratorProps) {
   const [query, setQuery] = useState("");
+  const [marque, setMarque] = useState(ALL_MARQUES);
+
+  /*
+   * The chips, read off the machines rather than written out.
+   *
+   * A hardcoded list is a second place to remember, and it fails silently: add a
+   * marque to vehicles.ts, forget the chips, and the new machine is unreachable
+   * by anything but the search box. Derived, adding a manufacturer to the data
+   * is the whole job — the chip appears, in alphabetical order, with no other
+   * edit anywhere.
+   *
+   * Below two marques the row is not offered at all. One chip beside "All" is a
+   * control with nothing to decide, and this list was a single manufacturer's
+   * range until very recently.
+   */
+  const marques = useMemo(() => {
+    const names = [...new Set(vehicles.map((v) => v.manufacturer))].sort((a, b) =>
+      a.localeCompare(b),
+    );
+    if (names.length < 2) return [];
+    return [
+      { id: ALL_MARQUES, label: "All" },
+      ...names.map((name) => ({ id: name, label: name })),
+    ];
+  }, []);
 
   /*
    * Which vehicle is held at centre stage, as distinct from which one is
@@ -69,18 +98,21 @@ export function VehicleConfigurator({
    * The marque is matched as well as the model: someone typing "kawasaki" wants
    * the two Ninjas, and the marque is printed on the card, so a name-only match
    * would read as broken rather than strict.
+   *
+   * The chips narrow the same list rather than replacing it, so a marque and a
+   * query compose — "Bajaj" plus "150" is both, not the last one pressed.
    */
   const { matched, shown } = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return { matched: vehicles, shown: vehicles };
     const matches = (v: Vehicle) =>
-      `${v.manufacturer} ${v.name}`.toLowerCase().includes(q);
+      (marque === ALL_MARQUES || v.manufacturer === marque) &&
+      (!q || `${v.manufacturer} ${v.name}`.toLowerCase().includes(q));
     const matched = vehicles.filter(matches);
     const pinned = vehicles.filter(
       (v) => v.id === selectedVehicleId && !matches(v),
     );
     return { matched, shown: [...matched, ...pinned] };
-  }, [query, selectedVehicleId]);
+  }, [query, marque, selectedVehicleId]);
 
   const focusedVehicle = vehicles.find((v) => v.id === focusedId) ?? null;
 
@@ -137,13 +169,39 @@ export function VehicleConfigurator({
         />
       </div>
 
+      {/* Under the search, because it narrows the same list the search does.
+          Its own name so the radios cannot be confused with the usage chips
+          further down the form, which are a real answer the studio reads. */}
+      {marques.length > 0 && (
+        <div className="mb-8 sm:mb-10">
+          <MarqueChips
+            name="vehicle-marque"
+            label="Filter machines by manufacturer"
+            options={marques}
+            value={marque}
+            onChange={setMarque}
+          />
+        </div>
+      )}
+
+      {/* Says which filter emptied the list, because there are two of them now
+          and "no machines match" with an empty query read as a bug. Clearing
+          resets both — the reader wants the list back, not an audit of which
+          control they last touched. */}
       {matched.length === 0 && (
         <p className="mb-8 text-sm text-[#B8C4D6]">
-          No machines match “{query.trim()}”.{" "}
+          {query.trim() && marque !== ALL_MARQUES
+            ? `No ${marque} machines match “${query.trim()}”. `
+            : query.trim()
+              ? `No machines match “${query.trim()}”. `
+              : `No ${marque} machines here yet. `}
           {shown.length > 0 && "Still showing your current pick. "}
           <button
             type="button"
-            onClick={() => setQuery("")}
+            onClick={() => {
+              setQuery("");
+              setMarque(ALL_MARQUES);
+            }}
             className="border-b border-white/30 text-[#F5F7FA] transition-colors duration-300 hover:border-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
           >
             Show all
