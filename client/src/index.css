@@ -301,19 +301,26 @@
    * is not.
    *
    * The background cannot simply be set: the UA rule wins whatever specificity
-   * is thrown at it. An enormous inset box-shadow can be, and it paints inside
-   * the field's own box, over the top of it.
+   * is thrown at it. It can be clipped, though. `background-clip: text` confines
+   * a background to the shape of the glyphs, and the glyphs are then painted
+   * over by `-webkit-text-fill-color` — so the fill has nowhere left to show and
+   * the field keeps the transparency the rest of the form has.
    *
-   * The transition trick was tried first — the UA animates the colour in, so a
-   * delay measured in days should mean it never arrives — and it does not hold
-   * in every Chromium build. When it failed it failed badly: the text colour
-   * override still applied, so a near-white background got near-white text, and
-   * the field went from ugly to unreadable. This is deterministic instead.
+   * Two attempts came before this one, and both are worth knowing about.
    *
-   * The cost is that an autofilled field is filled with the page's own black
-   * rather than being transparent, so the starfield does not show through that
-   * one strip. That is the trade for never showing a white slab, and it is only
-   * visible on fields the browser has filled.
+   * A transition delay measured in days, on the theory that the UA animates the
+   * colour in and an animation that never arrives never paints. It does not hold
+   * in every Chromium build, and when it failed it failed badly: the text colour
+   * override still applied, so a near-white background got near-white text.
+   *
+   * Then an inset box-shadow a thousand pixels deep, which does beat it, in
+   * every engine, always — and fills the field with solid black. Against
+   * neighbours that are transparent over a starfield, one filled field reads as
+   * a bar across the form.
+   *
+   * If this one ever fails, the fallback is not another trick: give every field
+   * the same fill in `fieldClass`, so an autofilled field and a typed one are
+   * the same colour and the browser's choice stops mattering.
    *
    * Firefox implements the standard `:autofill` and lets the background be
    * overridden outright, so it gets the plain version.
@@ -326,12 +333,12 @@
   textarea:-webkit-autofill:hover,
   textarea:-webkit-autofill:focus,
   select:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 1000px #05070a inset;
-    box-shadow: 0 0 0 1000px #05070a inset;
+    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: #f5f7fa;
     caret-color: #f5f7fa;
     /* Belt and braces: where the delay does work, the colour never animates in
-       underneath the shadow either. */
+       behind the clip either. */
     transition:
       background-color 600000s 0s,
       color 600000s 0s;

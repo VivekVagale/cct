@@ -47,9 +47,13 @@ export function ThankYouCard() {
           <img className="thankyou-mascot" src={MASCOT_POSES.thankYou} alt="" />
           <div className="thankyou-text">
             <p className="thankyou-head">Thank you for booking!</p>
+            {/* Asks them to check what they sent rather than reminding them what
+                they may not have. The reply goes to the handle on the form, so a
+                typo in it is the one thing that stops this arriving — and this
+                card is the last moment anyone is still looking at the page. */}
             <p className="thankyou-body">
-              We'll come back to you on your Instagram handle — or on WhatsApp, if
-              you left a handle or number.
+              We'll reply on your Instagram handle, or on WhatsApp. Double-check
+              you left the right handle and number.
             </p>
             <span>
               Follow @coldchaintheory so our reply reaches you instead of sitting in

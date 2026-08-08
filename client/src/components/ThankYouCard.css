@@ -28,6 +28,16 @@
 .thankyou-glow {
   display: block;
   width: min(420px, 100%);
+  /*
+   * Centred here rather than relying on the flex parent.
+   *
+   * The percentage in that width makes the host's max-content size resolve to
+   * the whole container, so `justify-center` centres a 624px box and the 420px
+   * ring inside it stays at the left edge — measured 102px off centre. Auto
+   * margins centre the block inside whatever the host turns out to be, which is
+   * true whether the parent centres it or not.
+   */
+  margin-inline: auto;
 }
 
 .thankyou-card {
