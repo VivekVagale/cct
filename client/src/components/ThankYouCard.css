@@ -1,14 +1,33 @@
 /*
- * The confirmation card. Adapted from a hover-reveal product card, with one
- * deliberate change: the message is never hidden.
+ * The confirmation: a pass on a lanyard, and the sentence underneath it.
  *
- * The original holds .textBox at opacity 0 until :hover. A confirmation is the
- * one piece of copy on the page that must be readable the instant it arrives —
- * and on a touchscreen there is no hover to reveal it with, so the visitor
- * would submit the form and be told nothing at all. The mascot is blurred and
- * floating from the start instead, and hover keeps the flourish it was there
- * for: the card lifts and the pose grows behind the type.
+ * The words are deliberately not on the pass. Its faces are textures and the
+ * component takes images for them, but text baked into a texture cannot be
+ * selected, read aloud, translated or found, and a confirmation is the one
+ * piece of copy on the page that has to reach everybody.
  */
+
+/*
+ * The scene's own stylesheet sizes it to the whole viewport, which is right for
+ * a page that is nothing else and wrong for a card in a section. Overridden
+ * here rather than in Lanyard.css: that file came from the registry and running
+ * the add again would overwrite it, which is the trap the project has already
+ * been caught by once.
+ */
+.thankyou-lanyard {
+  width: min(420px, 100%);
+  margin-inline: auto;
+}
+
+.thankyou-lanyard .lanyard-wrapper {
+  height: 340px;
+}
+
+@media (min-width: 640px) {
+  .thankyou-lanyard .lanyard-wrapper {
+    height: 420px;
+  }
+}
 
 /*
  * The host carries the lift, and the ring is what it lifts.

@@ -74,6 +74,10 @@ export default defineConfig({
     // "Cannot read properties of null (reading 'useRef')" on first render.
     dedupe: ["react", "react-dom"],
   },
+  /* Vite parses what it does not recognise. A .glb is a binary model and has to
+     be handed through as a URL instead — the lanyard on the thank-you card
+     imports one. */
+  assetsInclude: ["**/*.glb"],
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
   build: {

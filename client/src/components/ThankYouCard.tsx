@@ -1,56 +1,68 @@
 import { useReducedMotion } from "framer-motion";
-import type { CSSProperties } from "react";
+import { lazy, Suspense, type CSSProperties } from "react";
 import { MASCOT_POSES } from "@/data/mascot";
 import "./GlowButton.css";
 import "./ThankYouCard.css";
 
+/*
+ * The lanyard is loaded on demand, and this is not optional.
+ *
+ * It pulls a physics engine, a mesh-line library and a 2.4MB model, none of
+ * which any visitor needs until they have actually sent a booking — which is
+ * once, at the end, if at all. Imported normally it would be in the bundle every
+ * visitor downloads before the hero's first frame.
+ */
+const Lanyard = lazy(() => import("./Lanyard"));
+
 /**
  * What replaces the form once a request is in.
  *
- * `role="status"` because this arrives without the visitor moving focus: the
- * form they were looking at is simply gone, and a screen reader that is not
- * told so has nothing to announce.
+ * A pass holding the studio's mascot, hanging from a lanyard that swings — a
+ * rope simulation you can pick up and throw. It is the one moment on the site
+ * with nothing else to do, which is what makes it the right place for the most
+ * expensive thing on it.
  *
- * The mascot is decorative here — it carries no information the text does not,
- * so it is `alt=""` rather than the Mascot component, which would announce the
- * character on a card whose whole job is one sentence of confirmation.
+ * The words are not on the pass. They could be: the card's faces are textures
+ * and the component takes images for them. They are underneath instead, because
+ * text baked into a texture cannot be selected, read aloud, translated, or found
+ * — and this is a confirmation, which is the one piece of copy on the page that
+ * has to reach everybody. So the pass carries the mascot and the card below
+ * carries the sentence, with `role="status"` on the words rather than on the
+ * scene: a screen reader should announce the confirmation, not a canvas.
  *
- * It wears the primary button's ring and bloom, borrowed the same way the
- * search field borrows them: the gradient is the wrapper's own background
- * showing through its padding, and the card is the opaque face sitting in it.
- * One gradient, one ring width, one blur, shared by every control on the page
- * that carries this treatment. The radius is set here because a card wants a
- * far softer corner than a button; the face derives its own from it, so the two
- * curves stay concentric.
- *
- * The lift on hover moves to the host rather than the card. The card is the
- * face, and scaling the face inside a ring that stayed put would have grown the
- * card out of its own edge — and the ring cannot take the transform itself,
- * because a stacking context on `.glow-button` inverts the bloom over it. See
- * GlowButton.css. The host is already a stacking context by way of the
- * `isolation` rule there, so a transform on it changes nothing about where the
- * bloom lands.
+ * Under reduced motion there is no lanyard at all. It is a swinging object with
+ * momentum; there is no gentler version of it, and the message does not need
+ * one to be read.
  */
 export function ThankYouCard() {
   const reduceMotion = useReducedMotion();
 
   return (
     <div className={`thankyou-host${reduceMotion ? " thankyou-host--still" : ""}`}>
+      {!reduceMotion && (
+        /* No fallback of its own: the copy below is the confirmation and it is
+           already on screen. A spinner over a card that has arrived would be
+           telling the reader to wait for the decoration. */
+        <Suspense fallback={null}>
+          <div className="thankyou-lanyard" aria-hidden>
+            <Lanyard
+              position={[0, 0, 20]}
+              gravity={[0, -40, 0]}
+              frontImage={MASCOT_POSES.thankYou}
+              backImage={MASCOT_POSES.thankYou}
+              imageFit="contain"
+            />
+          </div>
+        </Suspense>
+      )}
+
       <span
         className="glow-button thankyou-glow"
         style={{ "--glow-radius": "20px" } as CSSProperties}
       >
-        <div
-          role="status"
-          className={`thankyou-card${reduceMotion ? " thankyou-card--still" : ""}`}
-        >
-          <img className="thankyou-mascot" src={MASCOT_POSES.thankYou} alt="" />
+        <div role="status" className="thankyou-card">
           <div className="thankyou-text">
             <p className="thankyou-head">Thank you for booking!</p>
-            {/* Asks them to check what they sent rather than reminding them what
-                they may not have. The reply goes to the handle on the form, so a
-                typo in it is the one thing that stops this arriving — and this
-                card is the last moment anyone is still looking at the page. */}
             <p className="thankyou-body">
               We'll reply on your Instagram handle, or on WhatsApp. Double-check
               you left the right handle and number.
