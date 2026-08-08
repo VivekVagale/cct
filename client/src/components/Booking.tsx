@@ -101,7 +101,7 @@ function ChosenMachine({
         >
           Step 01 is at the top of this section.
         </a>{" "}
-        You can send the form without one.
+        The form needs one before it can be sent.
       </p>
     );
   }
@@ -171,6 +171,10 @@ export function Booking() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    /* The button is disabled without one, so this is the second lock rather
+       than the first — a form can still be submitted by pressing Enter in a
+       field, and a request naming no machine is not a request. */
+    if (!vehicleId) return;
     setStatus("submitting");
     const form = e.currentTarget;
     const data = new FormData(form);
@@ -581,10 +585,31 @@ export function Booking() {
             in both feeds at once, in front of both sets of followers.
           </p>
           <Magnet padding={40} strength={5}>
-            <SparkleButton type="submit" disabled={status === "submitting"}>
+            <SparkleButton
+              type="submit"
+              disabled={status === "submitting" || !vehicleId}
+            >
               {status === "submitting" ? "Sending..." : "Submit Request"}
             </SparkleButton>
           </Magnet>
+          {/* Says why the button is dead, and takes them to the fix.
+
+              A disabled control with no explanation is a dead end — the reader
+              can see they cannot send and not what to do about it, and step 01
+              is several screens up by the time anyone reaches this button. The
+              request is a quote for a specific machine; without one there is
+              nothing to quote. */}
+          {!vehicleId && (
+            <p className="max-w-md text-sm text-[#B8C4D6] normal-case tracking-normal leading-relaxed">
+              Pick a machine before you send this —{" "}
+              <a
+                href="#booking"
+                className="inline-block py-1.5 -my-1.5 text-[#F5F7FA] border-b border-white/30 transition-colors duration-300 hover:border-white"
+              >
+                step 01 is at the top of this section.
+              </a>
+            </p>
+          )}
           {status === "error" && (
             <span className="text-xs text-[#FF4444]">
               Something went wrong — please email us directly.
