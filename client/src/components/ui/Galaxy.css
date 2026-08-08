@@ -3,3 +3,18 @@
   height: 100%;
   position: relative;
 }
+
+/*
+ * The canvas fills the container whatever it was rendered at.
+ *
+ * `resolutionScale` below 1 gives the renderer a smaller buffer on purpose, and
+ * without this the canvas would sit at that smaller intrinsic size in the corner
+ * instead of being stretched back over the container. A starfield is the one
+ * thing that survives being upscaled — it is soft, dark and has no edges to go
+ * soft — which is what makes rendering fewer pixels worth doing at all.
+ */
+.galaxy-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

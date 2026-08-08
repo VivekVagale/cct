@@ -203,6 +203,29 @@ interface GalaxyProps {
    * full viewport of fragment shader per frame there to show nothing at all.
    */
   opacity?: MotionValue<number>;
+  /**
+   * How many pixels to actually draw, as a fraction of the container's size.
+   *
+   * The fragment shader is the entire cost of this component — four star layers
+   * of nine cells each, for every pixel, every frame — so the pixel count is the
+   * only lever that changes what it costs by a multiple. At 0.6 a phone draws
+   * 36% of the fragments it otherwise would.
+   *
+   * A starfield is the one backdrop that survives being upscaled: it is soft and
+   * dark and has no edges to lose. The canvas is stretched back over the
+   * container by CSS — see Galaxy.css.
+   */
+  resolutionScale?: number;
+  /**
+   * Frames per second to draw at, or 0 to draw on every animation frame.
+   *
+   * Halving the frame rate halves the GPU work outright, and a slowly rotating
+   * starfield is the rare thing that cannot show it — nothing in the image moves
+   * fast enough for 30 to read differently from 60. Worth it on a phone, where
+   * this is a cost that runs from first paint to the footer and where the
+   * complaint it answers was heat rather than stutter.
+   */
+  fpsCap?: number;
 }
 
 export default function Galaxy({
@@ -223,6 +246,8 @@ export default function Galaxy({
   autoCenterRepulsion = 0,
   transparent = true,
   opacity,
+  resolutionScale = 1,
+  fpsCap = 0,
   ...rest
 }: GalaxyProps) {
   const ctnDom = useRef<HTMLDivElement>(null);
@@ -265,8 +290,25 @@ export default function Galaxy({
     let program: Program;
 
     function resize() {
-      const scale = 1;
-      renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
+      /* Never zero, however small the scale or the container: a zero-sized
+         drawing buffer is a GL error and a division by zero in uResolution. */
+      const scale = Math.max(0.1, resolutionScale);
+      renderer.setSize(
+        Math.max(1, Math.round(ctn.offsetWidth * scale)),
+        Math.max(1, Math.round(ctn.offsetHeight * scale)),
+      );
+      /*
+       * Stretch the buffer back over the container.
+       *
+       * setSize writes the size it was given to the canvas' inline style as
+       * well as to the drawing buffer, and an inline style outranks the
+       * stylesheet — so below a scale of 1 the canvas was drawn small and then
+       * displayed small, in the corner of the container, rather than drawn
+       * small and shown full size. Measured at 0.6: a 225x487 buffer laid out
+       * at 225x487 inside a 375x812 box.
+       */
+      gl.canvas.style.width = "100%";
+      gl.canvas.style.height = "100%";
       if (program) {
         program.uniforms.uResolution.value = new Color(
           gl.canvas.width,
@@ -310,6 +352,9 @@ export default function Galaxy({
 
     const mesh = new Mesh(gl, { geometry, program });
     let animateId: number;
+    /* Last frame actually drawn, for the cap below. */
+    let lastDraw = 0;
+    const minFrameMs = fpsCap > 0 ? 1000 / fpsCap : 0;
 
     function update(t: number) {
       animateId = requestAnimationFrame(update);
@@ -320,6 +365,20 @@ export default function Galaxy({
       // it would have been when it comes back rather than resuming from where
       // it stopped.
       if (!visible.current || document.hidden) return;
+
+      /*
+       * The frame cap, applied before any work rather than after it.
+       *
+       * The loop still runs at the display's rate — it has to, since that is
+       * the only way to be offered the next frame — but the shader is the whole
+       * cost here, so skipping the draw skips essentially all of it. uTime is
+       * read from the timestamp rather than accumulated, so a skipped frame
+       * does not slow the animation down; it just is not shown.
+       */
+      if (minFrameMs > 0) {
+        if (t - lastDraw < minFrameMs) return;
+        lastDraw = t;
+      }
 
       if (!disableAnimation) {
         program.uniforms.uTime.value = t * 0.001;
@@ -384,7 +443,9 @@ export default function Galaxy({
     rotationSpeed,
     repulsionStrength,
     autoCenterRepulsion,
-    transparent
+    transparent,
+    resolutionScale,
+    fpsCap
   ]);
 
   return <div ref={ctnDom} className="galaxy-container" {...rest} />;

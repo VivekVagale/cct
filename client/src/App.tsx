@@ -190,37 +190,49 @@ function App() {
             {/* The one thing that does not change between scenes. A fixed
                 camera needs a fixed background, and this is it — the deck
                 dissolves its scenes in front of a starfield that never cuts. */}
-            {/* The starfield is desktop-only.
-            
-                It is a full-screen WebGL canvas that rotates, twinkles and
-                tracks the pointer, and it draws every frame from first paint to
-                the footer — the single largest continuous cost on the page, for
-                something that is a backdrop. On a phone it is replaced by the
-                still gradient below, which the eye reads as the same dark sky
-                and which costs nothing at all. */}
+            {/* The starfield everywhere, and on a phone at a fraction of what
+                it costs on a desktop.
+
+                It was desktop-only, with a still gradient in its place, because
+                a full-screen WebGL canvas drawing every frame from first paint
+                to the footer is the single largest continuous cost on the page
+                — and the report that removed it was a phone getting hot, not a
+                phone stuttering. The gradient reads as flat black, which is
+                worse to look at for the length of this page than it is cheap.
+
+                So the phone gets the same sky, drawn as a wallpaper rather than
+                as an instrument:
+
+                - Nothing reactive. No pointer to track on a touchscreen anyway,
+                  and no listeners bound for one.
+                - 60% resolution, which is 36% of the fragments. The shader is
+                  four star layers of nine cells for every pixel of every frame,
+                  so pixel count is the only lever that divides the cost rather
+                  than trimming it. A soft, dark, edgeless image is exactly what
+                  survives being upscaled.
+                - 30fps rather than 60, halving what is left. Nothing in a
+                  slowly rotating starfield moves fast enough to show it.
+                - Slower rotation and less twinkle, so what is drawn at half the
+                  rate is also asking to move half as much.
+
+                Together that is roughly a fifth of the desktop cost. It still
+                runs continuously, which is the thing to watch if the heat ever
+                comes back — the next lever is fpsCap, then dropping it below
+                the fold entirely. */}
             <motion.div style={{ opacity: galaxyOpacity }} className="fixed inset-0 z-0">
-              {isPhone ? (
-                <div
-                  aria-hidden
-                  className="h-full w-full"
-                  style={{
-                    background:
-                      "radial-gradient(120% 80% at 50% 0%, #10131c 0%, #05070A 60%)",
-                  }}
-                />
-              ) : (
               <Galaxy
                 opacity={galaxyOpacity}
                 density={0.8}
                 glowIntensity={0.4}
                 saturation={0}
                 hueShift={140}
-                mouseInteraction
-                mouseRepulsion
-                twinkleIntensity={0.35}
-                rotationSpeed={0.05}
+                mouseInteraction={!isPhone}
+                mouseRepulsion={!isPhone}
+                twinkleIntensity={isPhone ? 0.2 : 0.35}
+                rotationSpeed={isPhone ? 0.03 : 0.05}
+                resolutionScale={isPhone ? 0.6 : 1}
+                fpsCap={isPhone ? 30 : 0}
               />
-              )}
             </motion.div>
 
             {/* Above the deck, not inside it: the bar is the one element that
