@@ -76,17 +76,37 @@ async function paintPass(): Promise<string | null> {
   const mascot = new Image();
   mascot.crossOrigin = "anonymous";
   mascot.src = MASCOT_POSES.thankYou;
+  /*
+   * The load event, not `decode()`.
+   *
+   * `decode()` is the tidier call and it does not resolve while the page is
+   * hidden — the browser has no reason to decode a picture nobody is looking
+   * at. Submit the form, switch tabs while it saves, and the confirmation is
+   * still waiting on that promise when you come back. `load` fires either way,
+   * and `drawImage` decodes when it needs to.
+   */
   try {
-    await mascot.decode();
+    await new Promise<void>((resolve, reject) => {
+      if (mascot.complete && mascot.naturalWidth > 0) return resolve();
+      mascot.onload = () => resolve();
+      mascot.onerror = () => reject(new Error("mascot failed to load"));
+    });
   } catch {
     return null;
   }
 
   /* The page's own faces, once they are actually available — a canvas asked for
      a font it does not have yet silently draws the fallback, and unlike the DOM
-     it never redraws when the real one arrives. */
+     it never redraws when the real one arrives.
+
+     Capped, because this is the last thing between a booking and its
+     confirmation. A face that has not arrived in two seconds is not worth
+     holding the card back for; the stack falls through to something readable. */
   try {
-    await document.fonts.ready;
+    await Promise.race([
+      document.fonts.ready,
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+    ]);
   } catch {
     /* No font loading API. The stack below still resolves to something. */
   }

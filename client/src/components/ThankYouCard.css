@@ -7,12 +7,101 @@
  * around it is holding the scene to a smaller box, and to give the reduced
  * motion fallback somewhere to live.
  */
+/*
+ * Taller than the screen, because the card is draggable.
+ *
+ * The pass is a 3D object and the canvas is where it can be seen. At exactly one
+ * viewport there is no room under the card at all, so pulling it down runs it
+ * straight off the bottom edge and it is cut in half. The extra 60% is the
+ * length of leash — the height of the canvas is the height of the world you can
+ * throw it around in.
+ *
+ * The section is that tall too, rather than the canvas overflowing it. An
+ * overflowing canvas would hang over the section below and swallow every click
+ * meant for it, which is a worse problem than a page that scrolls a little
+ * further after a booking.
+ *
+ * `--thankyou-scene-height` is the number to change if the leash is short. The
+ * card's resting position is set by the physics and the camera and does not
+ * move with it — this only adds room underneath.
+ *
+ * dvh for the same reason the hero uses it: svh leaves a band of page under the
+ * scene the moment the phone's URL bar retracts.
+ */
 .thankyou-scene {
+  /*
+   * How far above the screen the canvas begins.
+   *
+   * The band is a strip with a top edge, and that edge was in frame — the
+   * lanyard visibly started somewhere rather than coming from off-screen.
+   * Lifting the canvas past the top of the viewport puts the cut where nobody
+   * can see it, and the band appears to come down from behind the nav bar.
+   * Comfortably more than the bar is tall, so it holds at either of the bar's
+   * two heights and while a phone's chrome is sliding.
+   */
+  --thankyou-band-hide: 140px;
+  /*
+   * How much canvas there is under the card.
+   *
+   * The pass is draggable and the canvas is the world it can be dragged around
+   * in. At exactly one screen there is nothing beneath it, so pulling it down
+   * ran it into the bottom edge and cut it in half. This is the length of the
+   * leash.
+   */
+  --thankyou-scene-height: 170dvh;
+
   position: relative;
   width: 100%;
-  /* dvh, for the same reason the hero uses it: svh leaves a band of page under
-     the scene the moment the phone's URL bar retracts. */
-  min-height: 100dvh;
+  min-height: var(--thankyou-scene-height);
+  /* The scene is wider than it looks once the card is thrown sideways, and a
+     page that scrolls sideways is worse than a card that stops. */
+  overflow-x: clip;
+  /*
+   * A formatting context, so the canvas' negative top margin lifts the canvas.
+   *
+   * Without one that margin collapses through this element and moves the whole
+   * section up instead — measured, the band's cut stayed exactly where it was
+   * and the section had quietly shifted. `flow-root` is the version of this
+   * that changes nothing else.
+   */
+  display: flow-root;
+}
+
+/*
+ * Pinned, so the lanyard hangs from the top of the screen rather than from a
+ * position in the document.
+ *
+ * Sticky at a negative offset: the canvas is taller than the section shows and
+ * the excess is spent above the fold, hiding where the band begins. Scrolling
+ * the section moves the page under a lanyard that stays where it is, which is
+ * how something hanging from the ceiling behaves.
+ */
+.thankyou-scene .lanyard-wrapper {
+  position: sticky;
+  top: calc(var(--thankyou-band-hide) * -1);
+  /*
+   * One screen, plus the overhang that hides where the band starts.
+   *
+   * It was the full height of the section, and a sticky element that fills its
+   * container has nowhere to stick — measured, it scrolled away exactly as if
+   * `position: sticky` were not there. The section is taller than this on
+   * purpose: the difference is how far it can travel while staying put.
+   *
+   * A screen is also all the canvas that is worth having. The room below the
+   * card has to be room you can see, and while the scene is pinned the visible
+   * window is one screen whatever the canvas measures — so the extra goes into
+   * the overhang at the top, where it is doing something.
+   */
+  height: calc(100dvh + var(--thankyou-band-hide));
+  /*
+   * Lifted before it ever sticks.
+   *
+   * `top` only applies once the element would have scrolled past it, and the
+   * section's own scroll-margin lands its first paint 80px down the screen —
+   * which is 80px of visible band edge before sticky has anything to do. The
+   * negative margin puts the cut above the screen from the first frame.
+   */
+  margin-top: calc(var(--thankyou-band-hide) * -1);
 }
 
 /* Centred in the empty scene, and gone the moment the scene is not empty. */
