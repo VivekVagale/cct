@@ -3,6 +3,27 @@
 -- Run this once in the Supabase dashboard: SQL Editor -> New query -> Run.
 -- It is written to be safe to run twice.
 
+-- The studio's pipeline, as a type rather than as a rule.
+--
+-- An enum, not text with a check constraint, because the Table Editor renders
+-- an enum column as a dropdown and a checked text column as a box you can type
+-- anything into — the constraint would catch a bad value on save, which is a
+-- worse place to learn about it than not being offered it.
+--
+-- The order is declaration order, and that is also how the column sorts.
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'booking_progress') then
+    create type public.booking_progress as enum (
+      'yet to do',
+      'next one',
+      'in progress',
+      'completed'
+    );
+  end if;
+end
+$$;
+
 create table if not exists public.bookings (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
@@ -24,11 +45,9 @@ create table if not exists public.bookings (
   -- See USAGE_OPTIONS in Booking.tsx.
   usage text not null default '' check (char_length(usage) <= 100),
 
-  -- Where the job has got to. Studio-side only: nothing in the site writes it
-  -- or can read it, and it is edited in the dashboard. The check exists so a
-  -- typo cannot quietly become a third spelling of a status.
-  progress text not null default 'new'
-    check (progress in ('new','contacted','quoted','in production','delivered','closed'))
+  -- Where the job has got to. Studio-side only: nothing on the site writes it
+  -- or can read it, and it is edited in the dashboard.
+  progress public.booking_progress not null default 'yet to do'
 );
 
 -- There is no collab_post column. The collab used to be a toggle and is now
@@ -36,6 +55,40 @@ create table if not exists public.bookings (
 -- nothing. If it ever becomes a choice again, add it then; rows written before
 -- that date are collab-included by their date alone.
 alter table public.bookings drop column if exists collab_post;
+
+-- Bringing an existing table up to the shape above.
+--
+-- `progress` shipped first as text with a check constraint and six statuses.
+-- These statements convert it in place and are no-ops on a table created fresh
+-- by the block above, which is already an enum.
+alter table public.bookings drop constraint if exists bookings_progress_check;
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'bookings'
+      and column_name = 'progress' and data_type <> 'USER-DEFINED'
+  ) then
+    alter table public.bookings alter column progress drop default;
+    alter table public.bookings
+      alter column progress type public.booking_progress
+      using (
+        case progress
+          when 'new' then 'yet to do'
+          when 'contacted' then 'next one'
+          when 'quoted' then 'next one'
+          when 'in production' then 'in progress'
+          when 'delivered' then 'completed'
+          when 'closed' then 'completed'
+          else 'yet to do'
+        end::public.booking_progress
+      );
+    alter table public.bookings alter column progress set default 'yet to do';
+    alter table public.bookings alter column progress set not null;
+  end if;
+end
+$$;
 
 -- The length checks above are not validation — the form does that, and anyone
 -- can post here without going near the form. They are a ceiling on what a
