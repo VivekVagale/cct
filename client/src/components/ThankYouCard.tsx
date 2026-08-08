@@ -1,6 +1,11 @@
 import { useReducedMotion } from "framer-motion";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { MASCOT_POSES } from "@/data/mascot";
+import { Loader } from "./Loader";
+/* The same module specifier Lanyard.tsx uses, so this is the same URL and the
+   same cache entry — importing it here warms the fetch without duplicating the
+   asset. */
+import cardGLB from "./card.glb";
 import "./ThankYouCard.css";
 
 /*
@@ -164,6 +169,26 @@ function getPass() {
   return passCache;
 }
 
+/*
+ * The model, pulled into the browser's cache before the scene asks for it.
+ *
+ * Rendering the lanyard is not the end of the wait — it mounts, then fetches
+ * 2.4MB, and the screen is empty for all of it. Fetching it here means the
+ * loader is still up while that happens and the scene has the bytes in hand the
+ * moment it is allowed to draw.
+ */
+let modelCache: Promise<void> | null = null;
+
+function warmModel() {
+  modelCache ??= fetch(cardGLB)
+    .then((response) => response.arrayBuffer())
+    .then(() => undefined)
+    /* A failed warm is not a failed scene: three will ask for it again, and the
+       loader has already done its job by then. */
+    .catch(() => undefined);
+  return modelCache;
+}
+
 /**
  * Start everything the confirmation needs, while the request is still in flight.
  *
@@ -179,6 +204,7 @@ function getPass() {
 export function preloadThankYou() {
   void import("./Lanyard");
   void getPass();
+  void warmModel();
 }
 
 /**
@@ -202,13 +228,50 @@ export function preloadThankYou() {
 export function ThankYouCard() {
   const reduceMotion = useReducedMotion();
   const [pass, setPass] = useState<string | null>(null);
+  const [scene, setScene] = useState<HTMLDivElement | null>(null);
+  /*
+   * Whether the lanyard is actually on screen, which is when the loader stops.
+   *
+   * Not when the pass is painted, and not when the scene's module arrives:
+   * those both happen a beat before React mounts the canvas, and measured, that
+   * beat is a blank screen with the loader already gone. The canvas element
+   * appearing is the first moment there is something to look at, so that is
+   * what is watched — a mutation observer rather than a timer, because the
+   * duration is a download and a parse on someone else's machine.
+   */
+  const [sceneUp, setSceneUp] = useState(false);
 
+  useEffect(() => {
+    if (!scene || sceneUp) return;
+    if (scene.querySelector("canvas")) {
+      setSceneUp(true);
+      return;
+    }
+    const observer = new MutationObserver(() => {
+      if (scene.querySelector("canvas")) setSceneUp(true);
+    });
+    observer.observe(scene, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [scene, sceneUp]);
+
+  /*
+   * Everything the scene needs, waited on together.
+   *
+   * The loader has to come down when the lanyard appears, not when this
+   * component decides to render one — and those are different moments. The pass
+   * has to be painted, the scene's 3MB chunk has to arrive, and the 2.4MB model
+   * has to be fetched; render before any of them and the screen is blank again
+   * behind a loader that has already gone. Waiting on all three leaves three.js
+   * with a parse to do and nothing to download.
+   */
   useEffect(() => {
     if (reduceMotion) return;
     let live = true;
-    void getPass().then((url) => {
-      if (live) setPass(url);
-    });
+    void Promise.all([getPass(), import("./Lanyard"), warmModel()]).then(
+      ([url]) => {
+        if (live) setPass(url);
+      },
+    );
     return () => {
       live = false;
     };
@@ -225,7 +288,7 @@ export function ThankYouCard() {
   }
 
   return (
-    <div className="thankyou-scene">
+    <div className="thankyou-scene" ref={setScene}>
       {/* Announced and searchable, while the pass is the thing on screen. */}
       <div role="status" className="sr-only">
         <p>{HEAD}</p>
@@ -233,9 +296,20 @@ export function ThankYouCard() {
         <p>{FOLLOW}</p>
       </div>
 
-      {/* Nothing while the scene loads. The card has already arrived as far as
-          the reader is concerned — the announcement above fires on render — so a
-          spinner here would be asking them to wait for the decoration. */}
+      {/* The wait, shown.
+
+          This was deliberately empty once, on the reasoning that the
+          confirmation had already arrived and a spinner would be asking the
+          reader to wait for decoration. That was wrong about what is on screen:
+          the form is gone, the scene is a full viewport of nothing, and several
+          megabytes are in flight. An empty screen after a submit reads as a
+          failure, whatever the markup says. */}
+      {!sceneUp && (
+        <div className="thankyou-loading">
+          <Loader />
+        </div>
+      )}
+
       <Suspense fallback={null}>
         {pass && (
           /* Closer than the component's own default, because this pass has to be
