@@ -33,7 +33,9 @@
   filter: blur(7px);
   z-index: 1;
   animation: thankyou-float 3s infinite;
-  transition: height 0.2s ease-in-out;
+  transition:
+    height 0.2s ease-in-out,
+    filter 0.25s ease-in-out;
   pointer-events: none;
 }
 
@@ -70,8 +72,18 @@
   transform: scale(1.04) rotate(-1deg);
 }
 
+/*
+ * Hover brings the pose into focus as well as up in size.
+ *
+ * The blur is what lets the copy sit over the mascot and still be the first
+ * thing read, so it stays the resting state — and it has to, because a
+ * touchscreen never hovers and a confirmation cannot depend on a gesture that
+ * is not available. On a pointer it is a reward for looking: the reader has
+ * already read the message by the time they are moving a cursor over it.
+ */
 .thankyou-card:hover .thankyou-mascot {
   height: 78%;
+  filter: blur(0);
 }
 
 @keyframes thankyou-float {
