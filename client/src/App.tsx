@@ -220,16 +220,27 @@ function App() {
                 comes back — the next lever is fpsCap, then dropping it below
                 the fold entirely. */}
             <motion.div style={{ opacity: galaxyOpacity }} className="fixed inset-0 z-0">
+              {/* The phone runs the component's own defaults: density 1,
+                  glowIntensity 0.3, twinkleIntensity 0.3, rotationSpeed 0.1.
+                  Desktop keeps the values this site tuned — a dimmer, slower
+                  sky under a page that already has a great deal moving on it.
+
+                  The pointer props are the one default not taken. There is no
+                  cursor on a touchscreen, and a tap arrives as a synthetic
+                  mousemove with no mouseleave behind it — so the starfield
+                  would lean toward wherever a thumb last landed and stay
+                  leaning, which is the fault the submit button had. Off is also
+                  what "not reactive, like a live wallpaper" asked for. */}
               <Galaxy
                 opacity={galaxyOpacity}
-                density={0.8}
-                glowIntensity={0.4}
                 saturation={0}
                 hueShift={140}
+                density={isPhone ? 1 : 0.8}
+                glowIntensity={isPhone ? 0.3 : 0.4}
+                twinkleIntensity={isPhone ? 0.3 : 0.35}
+                rotationSpeed={isPhone ? 0.1 : 0.05}
                 mouseInteraction={!isPhone}
                 mouseRepulsion={!isPhone}
-                twinkleIntensity={isPhone ? 0.2 : 0.35}
-                rotationSpeed={isPhone ? 0.03 : 0.05}
                 resolutionScale={isPhone ? 0.6 : 1}
                 fpsCap={isPhone ? 30 : 0}
               />
