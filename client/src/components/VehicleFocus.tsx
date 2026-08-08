@@ -68,11 +68,28 @@ export function VehicleFocus({
     const root = document.documentElement;
     const gap = window.innerWidth - root.clientWidth;
     const { overflow, paddingRight } = root.style;
+    /*
+     * Where the reader was, remembered rather than assumed.
+     *
+     * `overflow: hidden` on the root is supposed to hold the scroll position
+     * while it makes the page unscrollable, and on a desktop it does. On a
+     * phone it is not dependable: the root stops being a scroll container, and
+     * what the position means while it is not one — and where it resolves to
+     * when it becomes one again — differs by engine. Choosing a colour then
+     * returned the reader somewhere up the page rather than to the picker they
+     * were using, which is the whole complaint: picking a colour is not a
+     * request to go anywhere.
+     *
+     * Restored only if it actually drifted, so on every browser that already
+     * held it this costs nothing and cannot fight the page's own smooth scroll.
+     */
+    const y = window.scrollY;
     root.style.overflow = "hidden";
     if (gap > 0) root.style.paddingRight = `${gap}px`;
     return () => {
       root.style.overflow = overflow;
       root.style.paddingRight = paddingRight;
+      if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
     };
   }, []);
 

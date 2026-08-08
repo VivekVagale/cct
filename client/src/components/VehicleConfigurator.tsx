@@ -63,12 +63,31 @@ export function VehicleConfigurator({
 
   return (
     <div className="max-w-[1600px] mx-auto px-6 sm:px-10">
-      <VehicleSearch
-        value={query}
-        onChange={setQuery}
-        resultCount={matched.length}
-        className="mb-8 sm:mb-10"
-      />
+      {/*
+        The search stays on screen for as long as the grid it filters.
+
+        Filtering changes the height of everything below it — typing "bullet"
+        takes fifteen cards down to two and 1,498px out of the document — while
+        the bar itself sits above the grid and does not move with it. Scrolled
+        down among the cards, which is where anyone is when they decide to
+        search, the bar is already off the top of the screen: the list under
+        your thumb collapses and the control that did it is nowhere, with
+        nothing to bring it back. Sticky is the fix rather than a scroll
+        correction, because it also means the query can be changed or cleared
+        without scrolling back up to find the field.
+
+        The offset clears the fixed bar, and the background is on this element
+        rather than on the search's own wrapper: that wrapper is the isolation
+        context GlowButton's bloom is drawn behind, and giving it a background
+        would paint over the bloom. See GlowButton.css.
+      */}
+      <div className="sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 bg-[#05070A]/90 px-6 py-3 backdrop-blur-sm sm:px-10">
+        <VehicleSearch
+          value={query}
+          onChange={setQuery}
+          resultCount={matched.length}
+        />
+      </div>
 
       {matched.length === 0 && (
         <p className="mb-8 text-sm text-[#B8C4D6]">
