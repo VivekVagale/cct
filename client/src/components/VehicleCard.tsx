@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { PendingRender } from "@/components/PendingRender";
 import type { Vehicle } from "@/data/vehicles";
 import { useTilt } from "@/hooks/useTilt";
 
@@ -76,14 +77,22 @@ export function VehicleCard({
       )}
 
       <div className="relative aspect-[4/3] overflow-hidden">
-        <motion.img
-          src={vehicle.image}
-          alt={vehicle.name}
-          className="w-full h-full object-cover"
-          animate={{ scale: selected ? 1.06 : 1 }}
-          whileHover={tilt ? { scale: 1.08, y: -4 } : undefined}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        />
+        {/* A machine with no render at all takes the paint of its first
+            colourway. It is the one the cover would have been shot in — the
+            covers on this page are all the first colour's file — so the grid
+            keeps the ordering it would have had. */}
+        {vehicle.pending ? (
+          <PendingRender swatch={vehicle.colors[0]?.swatch ?? "#6E7378"} />
+        ) : (
+          <motion.img
+            src={vehicle.image}
+            alt={vehicle.name}
+            className="w-full h-full object-cover"
+            animate={{ scale: selected ? 1.06 : 1 }}
+            whileHover={tilt ? { scale: 1.08, y: -4 } : undefined}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
       </div>
 

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { PendingRender } from "@/components/PendingRender";
 import type { VehicleColor } from "@/data/vehicles";
 
 interface ColorCardProps {
@@ -82,11 +83,19 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
               rather than being promoted at the start of each hover and dropped
               at the end — that churn is a repaint, and a repaint under a moving
               pointer is the other thing that reads as flicker. */}
-          <img
-            src={color.image}
-            alt={color.name}
-            className="w-full h-full object-cover transform-gpu transition-transform duration-300 ease-out group-hover:scale-[1.03]"
-          />
+          {color.pending ? (
+            /* No scale on hover here, and nothing to scale: the lift on the
+               photograph is what tells a visitor there is a picture under the
+               pointer, and a colour with no picture should not claim one. The
+               ring outside still answers the hover. */
+            <PendingRender swatch={color.swatch} />
+          ) : (
+            <img
+              src={color.image}
+              alt={color.name}
+              className="w-full h-full object-cover transform-gpu transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+            />
+          )}
         </div>
         <div className="mt-auto px-3 py-2.5 sm:px-4 sm:py-3 bg-[#0D1117] flex items-center gap-2 sm:gap-2.5">
           <span

@@ -4,6 +4,7 @@ import Cubes from "@/components/ui/Cubes";
 import { Magnet } from "@/components/Magnet";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
+import { PendingRender } from "@/components/PendingRender";
 import { SparkleButton } from "@/components/SparkleButton";
 import { MarqueChips, type MarqueChip } from "@/components/MarqueChips";
 import { ThankYouCard, preloadThankYou } from "@/components/ThankYouCard";
@@ -108,11 +109,24 @@ function ChosenMachine({
 
   return (
     <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
-      <img
-        src={color?.image ?? vehicle.image}
-        alt=""
-        className="h-14 w-20 shrink-0 rounded-sm object-cover sm:h-16 sm:w-24"
-      />
+      {/* 80px wide, so the full "Render in progress" cannot sit on one line and
+          wraps to three. The echo is captioned by the marque, the model and the
+          colour name immediately beside it — this only has to say which of the
+          two kinds of thing the picture is. */}
+      {(color?.pending ?? vehicle.pending) ? (
+        <div className="h-14 w-20 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-24">
+          <PendingRender
+            swatch={color?.swatch ?? vehicle.colors[0]?.swatch ?? "#6E7378"}
+            label="No render"
+          />
+        </div>
+      ) : (
+        <img
+          src={color?.image ?? vehicle.image}
+          alt=""
+          className="h-14 w-20 shrink-0 rounded-sm object-cover sm:h-16 sm:w-24"
+        />
+      )}
       <div className="min-w-0 normal-case tracking-normal">
         <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]">
           {vehicle.manufacturer}
