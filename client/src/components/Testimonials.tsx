@@ -3,6 +3,16 @@ import { Reveal } from "@/components/Reveal";
 import { TestimonialTicket, TicketBumpFilter } from "@/components/TestimonialTicket";
 
 export function Testimonials() {
+  /*
+   * No quotes, no section.
+   *
+   * Rendering the band with an empty grid leaves "Client Words" sitting over a
+   * gap, which reads worse than the section not being there — an empty heading
+   * is a claim the page cannot back. It comes back the moment data/content.ts
+   * has a real quote in it; nothing else has to be switched on.
+   */
+  if (testimonials.length === 0) return null;
+
   return (
     <section id="testimonials" className="relative pointer-events-auto py-20 sm:py-40">
       {/* One filter for the whole section — see TicketBumpFilter. */}

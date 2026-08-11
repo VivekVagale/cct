@@ -181,26 +181,19 @@ export interface Testimonial {
   role: string;
 }
 
-export const testimonials: Testimonial[] = [
-  {
-    quote:
-      "They didn't just render our bike — they gave it a scene, a mood, a reason to look twice. It didn't feel like CGI.",
-    name: "Aarav Mehta",
-    role: "Founder, Torque Collective",
-  },
-  {
-    quote:
-      "Every frame came back looking like it had been shot, lit, and graded by a real crew. The precision is the whole point.",
-    name: "Elena Kovač",
-    role: "Marketing Lead, Velocity Moto",
-  },
-  {
-    quote:
-      "We gave them a concept that had no physical way of existing. Three weeks later it looked like it always had.",
-    name: "Rohan Iyer",
-    role: "Creative Director, Apex Studios",
-  },
-];
+/*
+ * Empty, and the section is hidden until it is not.
+ *
+ * Three invented quotes lived here — Aarav Mehta, Elena Kovač, Rohan Iyer, and
+ * the studios they were attributed to — none of them real. On a page whose whole
+ * argument is that its numbers are measured and its captions are not guessed,
+ * three fictional clients were the one thing on it that could not survive being
+ * asked about.
+ *
+ * Add real ones here and the section returns on its own, tickets and all. The
+ * shape is the shape: a quote, who said it, and what they do.
+ */
+export const testimonials: Testimonial[] = [];
 
 export interface FaqItem {
   question: string;
