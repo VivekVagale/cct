@@ -100,14 +100,6 @@ export const vehicles: Vehicle[] = [
         image: "/vehicles/himalayan-450/slate-poppy-blue.webp",
       },
       {
-        id: "mana-black",
-        name: "Mana Black",
-        swatch: "#14161A",
-        render: "/vehicles/himalayan-450/mana-black.webp",
-        image: PLACEHOLDER,
-        pending: true,
-      },
-      {
         id: "slate-himalayan-salt",
         name: "Slate Himalayan Salt",
         swatch: "#6E7378",
@@ -286,6 +278,13 @@ export const vehicles: Vehicle[] = [
         render: "/vehicles/guerrilla-450/gold-dip.webp",
         image: "/vehicles/guerrilla-450/gold-dip.webp",
       },
+      {
+        id: "peix-bronze",
+        name: "Peix Bronze",
+        swatch: "#8A6A3B",
+        render: "/vehicles/guerrilla-450/peix-bronze.webp",
+        image: "/vehicles/guerrilla-450/peix-bronze.webp",
+      },
     ],
   },
   {
@@ -361,20 +360,6 @@ export const vehicles: Vehicle[] = [
         image: "/vehicles/classic-350/medallion-bronze.webp",
       },
       {
-        id: "purple-haze",
-        name: "Purple Haze",
-        swatch: "#4A3468",
-        render: "/vehicles/classic-350/purple-haze.webp",
-        image: PLACEHOLDER,
-      },
-      {
-        id: "shack-black",
-        name: "Shack Black",
-        swatch: "#14161A",
-        render: "/vehicles/classic-350/shack-black.webp",
-        image: PLACEHOLDER,
-      },
-      {
         id: "signals-commando-sand",
         name: "Signals Commando Sand",
         swatch: "#B7A283",
@@ -387,13 +372,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/classic-350/stealth-black.webp",
         image: "/vehicles/classic-350/stealth-black.webp",
-      },
-      {
-        id: "trip-teal-green",
-        name: "Trip Teal Green",
-        swatch: "#1E6E6A",
-        render: "/vehicles/classic-350/trip-teal-green.webp",
-        image: PLACEHOLDER,
       },
       {
         id: "gun-grey",
@@ -435,7 +413,7 @@ export const vehicles: Vehicle[] = [
         name: "Chrome Red",
         swatch: "#C9CDD2",
         render: "/vehicles/classic-350/chrome-red.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/classic-350/chrome-red.webp",
       },
       {
         id: "halcyon-green",
@@ -449,7 +427,7 @@ export const vehicles: Vehicle[] = [
         name: "Halcyon Grey",
         swatch: "#6E7378",
         render: "/vehicles/classic-350/halcyon-grey.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/classic-350/halcyon-grey.webp",
       },
       {
         id: "jodhpur-blue",
@@ -480,6 +458,20 @@ export const vehicles: Vehicle[] = [
         swatch: "#5A5F66",
         render: "/vehicles/classic-500/desert-storm.webp",
         image: "/vehicles/classic-500/desert-storm.webp",
+      },
+      {
+        id: "battle-green",
+        name: "Battle Green",
+        swatch: "#3F4A38",
+        render: "/vehicles/classic-500/battle-green.webp",
+        image: "/vehicles/classic-500/battle-green.webp",
+      },
+      {
+        id: "squadron-blue",
+        name: "Squadron Blue",
+        swatch: "#2E4A6B",
+        render: "/vehicles/classic-500/squadron-blue.webp",
+        image: "/vehicles/classic-500/squadron-blue.webp",
       },
     ],
   },
@@ -532,7 +524,7 @@ export const vehicles: Vehicle[] = [
         name: "Barcelona Blue",
         swatch: "#22406E",
         render: "/vehicles/interceptor-650/barcelona-blue.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/interceptor-650/barcelona-blue.webp",
       },
       {
         id: "black-ray",
@@ -560,7 +552,7 @@ export const vehicles: Vehicle[] = [
         name: "Orange Crush",
         swatch: "#C4622A",
         render: "/vehicles/interceptor-650/orange-crush.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/interceptor-650/orange-crush.webp",
       },
       {
         id: "cali-green",
@@ -588,7 +580,7 @@ export const vehicles: Vehicle[] = [
         name: "Glitter & Dust",
         swatch: "#9C9384",
         render: "/vehicles/interceptor-650/glitter-and-dust.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/interceptor-650/glitter-and-dust.webp",
       },
       {
         id: "baker-express",
@@ -797,7 +789,7 @@ export const vehicles: Vehicle[] = [
         name: "Stellar Matt Grey",
         swatch: "#6E7378",
         render: "/vehicles/meteor-350/stellar-matt-grey.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/meteor-350/stellar-matt-grey.webp",
       },
       {
         id: "fireball-orange",
@@ -978,42 +970,42 @@ export const vehicles: Vehicle[] = [
     name: "Bullet 350",
     manufacturer: "Royal Enfield",
     render: "/vehicles/bullet-350/cover.webp",
-        image: PLACEHOLDER,
+    image: "/vehicles/bullet-350/cover.webp",
     colors: [
       {
         id: "battalion-black",
         name: "Battalion Black",
         swatch: "#14161A",
         render: "/vehicles/bullet-350/battalion-black.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/bullet-350/battalion-black.webp",
       },
       {
         id: "standard-black",
         name: "Standard Black",
         swatch: "#14161A",
         render: "/vehicles/bullet-350/standard-black.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/bullet-350/standard-black.webp",
       },
       {
         id: "standard-maroon",
         name: "Standard Maroon",
         swatch: "#5E1F26",
         render: "/vehicles/bullet-350/standard-maroon.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/bullet-350/standard-maroon.webp",
       },
       {
         id: "black-gold",
         name: "Black Gold",
         swatch: "#14161A",
         render: "/vehicles/bullet-350/black-gold.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/bullet-350/black-gold.webp",
       },
       {
         id: "military-black",
         name: "Military Black",
         swatch: "#14161A",
         render: "/vehicles/bullet-350/military-black.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/bullet-350/military-black.webp",
       },
       {
         id: "military-silver-black",
@@ -1027,7 +1019,7 @@ export const vehicles: Vehicle[] = [
         name: "Military Silver Red",
         swatch: "#C3C7CC",
         render: "/vehicles/bullet-350/military-silver-red.webp",
-        image: PLACEHOLDER,
+        image: "/vehicles/bullet-350/military-silver-red.webp",
       },
     ],
   },
@@ -1079,6 +1071,134 @@ export const vehicles: Vehicle[] = [
         swatch: "#2A1216",
         render: "/vehicles/pulsar-150/metallic-black-red.webp",
         image: "/vehicles/pulsar-150/metallic-black-red.webp",
+      },
+    ],
+  },
+  {
+    id: "honda-cb-350-rs",
+    name: "CB 350 RS",
+    manufacturer: "Honda",
+    render: "/vehicles/honda-cb-350-rs/cover.webp",
+    image: "/vehicles/honda-cb-350-rs/cover.webp",
+    colors: [
+      {
+        id: "mat-axis-grey-metallic",
+        name: "Mat Axis Grey Metallic",
+        swatch: "#6E7378",
+        render: "/vehicles/honda-cb-350-rs/mat-axis-grey-metallic.webp",
+        image: "/vehicles/honda-cb-350-rs/mat-axis-grey-metallic.webp",
+      },
+      {
+        id: "pearl-igneous-black",
+        name: "Pearl Igneous Black",
+        swatch: "#14161A",
+        render: "/vehicles/honda-cb-350-rs/pearl-igneous-black.webp",
+        image: "/vehicles/honda-cb-350-rs/pearl-igneous-black.webp",
+      },
+      {
+        id: "pearl-deep-ground-gray",
+        name: "Pearl Deep Ground Gray",
+        swatch: "#4A4F55",
+        render: "/vehicles/honda-cb-350-rs/pearl-deep-ground-gray.webp",
+        image: "/vehicles/honda-cb-350-rs/pearl-deep-ground-gray.webp",
+      },
+      {
+        id: "rebel-red-metallic",
+        name: "Rebel Red Metallic",
+        swatch: "#A32330",
+        render: "/vehicles/honda-cb-350-rs/rebel-red-metallic.webp",
+        image: "/vehicles/honda-cb-350-rs/rebel-red-metallic.webp",
+      },
+    ],
+  },
+  {
+    id: "aprilia-rs-457",
+    name: "RS 457",
+    manufacturer: "Aprilia",
+    render: "/vehicles/aprilia-rs-457/cover.webp",
+    image: "/vehicles/aprilia-rs-457/cover.webp",
+    colors: [
+      {
+        id: "opalescent-white",
+        name: "Opalescent White",
+        swatch: "#EDEFF2",
+        render: "/vehicles/aprilia-rs-457/opalescent-white.webp",
+        image: "/vehicles/aprilia-rs-457/opalescent-white.webp",
+      },
+      {
+        id: "prismatic-dark",
+        name: "Prismatic Dark",
+        swatch: "#1B1D22",
+        render: "/vehicles/aprilia-rs-457/prismatic-dark.webp",
+        image: "/vehicles/aprilia-rs-457/prismatic-dark.webp",
+      },
+      /* No hue in the name, so a neutral — the same rule Two Four Nine and
+         Mark 2 get. Sample it from the render rather than guessing at what a
+         livery is mostly made of.
+
+         The comment sits above the entry rather than inside it: every colour in
+         this file reads `id` then `name` on consecutive lines, and enough small
+         scripts have now been pointed at that shape to make breaking it a real
+         cost for a stylistic gain. */
+      {
+        id: "racing-stripes",
+        name: "Racing Stripes",
+        swatch: "#5A5F66",
+        render: "/vehicles/aprilia-rs-457/racing-stripes.webp",
+        image: "/vehicles/aprilia-rs-457/racing-stripes.webp",
+      },
+    ],
+  },
+  {
+    id: "ktm-duke-250",
+    name: "Duke 250",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-duke-250/cover.webp",
+    image: "/vehicles/ktm-duke-250/cover.webp",
+    colors: [
+      {
+        id: "electric-orange",
+        name: "Electric Orange",
+        swatch: "#E2611F",
+        render: "/vehicles/ktm-duke-250/electric-orange.webp",
+        image: "/vehicles/ktm-duke-250/electric-orange.webp",
+      },
+      {
+        id: "metallic-orange",
+        name: "Metallic Orange",
+        swatch: "#C85A22",
+        render: "/vehicles/ktm-duke-250/metallic-orange.webp",
+        image: "/vehicles/ktm-duke-250/metallic-orange.webp",
+      },
+    ],
+  },
+  {
+    id: "yamaha-r15",
+    name: "R15",
+    manufacturer: "Yamaha",
+    render: "/vehicles/yamaha-r15/cover.webp",
+    image: "/vehicles/yamaha-r15/cover.webp",
+    colors: [
+      {
+        id: "dark-knight-black",
+        name: "Dark Knight",
+        swatch: "#14161A",
+        render: "/vehicles/yamaha-r15/dark-knight-black.webp",
+        image: "/vehicles/yamaha-r15/dark-knight-black.webp",
+      },
+      {
+        id: "metallic-red",
+        name: "Metallic Red",
+        swatch: "#A32330",
+        render: "/vehicles/yamaha-r15/metallic-red.webp",
+        image: "/vehicles/yamaha-r15/metallic-red.webp",
+      },
+      {
+        id: "racing-blue",
+        name: "Racing Blue",
+        swatch: "#22406E",
+        render: "/vehicles/yamaha-r15/racing-blue.webp",
+        image: "/vehicles/yamaha-r15/racing-blue.webp",
       },
     ],
   },

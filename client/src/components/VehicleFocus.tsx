@@ -317,7 +317,7 @@ export function VehicleFocus({
                `overflow-y-auto` clipped the ring's top line and left the violet
                open above the card it belongs to. The padding is the ring's own
                overhang plus room for the bloom to start before it is cut. */
-            className="max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain p-1"
+            className="colour-list max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain p-1"
           >
             {/* The scroller and the grid are two elements now. useBouncyScroll
                 stretches the wrapper's single child past the ends, so the thing

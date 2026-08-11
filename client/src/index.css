@@ -351,6 +351,27 @@
   }
 
   /*
+   * The colour list scrolls without a scrollbar.
+   *
+   * useBouncyScroll gives the list its rubber band by translating the grid
+   * inside it, and a translated child changes how far the container can
+   * scroll — so the native thumb was resizing and jumping on every frame of the
+   * bounce. It reads as the scrollbar tearing, and it is worst on a machine with
+   * just enough colours to be scrollable at all, which is where it was reported.
+   *
+   * Hiding it costs nothing here: the grid is visibly cut off at the fold, the
+   * bounce is the affordance, and the wheel, the keyboard and a touch drag all
+   * still work. The page's own scrollbar is untouched.
+   */
+  .colour-list {
+    scrollbar-width: none;
+  }
+
+  .colour-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
    * The scrollbar, kept and made almost invisible.
    *
    * It was white once, which on a #05070A page is the brightest thing on
