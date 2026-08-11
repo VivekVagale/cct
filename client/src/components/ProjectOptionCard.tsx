@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/content";
 import { useTilt } from "@/hooks/useTilt";
 
@@ -12,6 +13,10 @@ import { useTilt } from "@/hooks/useTilt";
  * Coming-soon options cannot be selected, but they still tilt and glow. An
  * option that ignores the pointer entirely reads as broken rather than as
  * unavailable; the badge is what carries the state.
+ *
+ * A build carrying a `video` plays it in the thumbnail once it is the selected
+ * one — see the note on the element below for why it is selection and not hover
+ * that starts it.
  */
 export function ProjectOptionCard({
   project,
@@ -26,6 +31,44 @@ export function ProjectOptionCard({
     useTilt<HTMLButtonElement>();
 
   const disabled = Boolean(project.comingSoon);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  /* The loop is only shown once it is actually playing. A <video> with nothing
+     decoded yet paints its first frame — or a black box — over the still, and a
+     card that flashes black on selection is worse than one that simply does not
+     move. Set from `playing`, cleared by `pause`, `ended` and any error. */
+  const [videoReady, setVideoReady] = useState(false);
+  /* Reduced motion is read once rather than watched. A visitor changing the
+     system setting mid-form is not worth a listener, and the query cannot be
+     read at all where there is no matchMedia. */
+  const [wantsMotion] = useState(
+    () =>
+      typeof window === "undefined" ||
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+
+  const video = wantsMotion ? project.video : undefined;
+
+  /* Play on selection, and on deselection rewind rather than merely pause: the
+     next visit to this card should open on the shot the still promised, not on
+     whatever frame the loop happened to stop at.
+
+     `play()` rejects rather than throws — a browser that refuses it (a data
+     saver, a policy the muted attribute does not satisfy) leaves the still in
+     place, which is the same thing that happens when there is no loop at all. */
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !video) return;
+
+    if (selected) {
+      void el.play().catch(() => setVideoReady(false));
+      return;
+    }
+
+    el.pause();
+    el.currentTime = 0;
+    setVideoReady(false);
+  }, [selected, video]);
 
   return (
     <motion.button
@@ -61,11 +104,56 @@ export function ProjectOptionCard({
           className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
             disabled
               ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
-              : "opacity-60 group-hover:opacity-85"
+              : videoReady
+                ? "opacity-0"
+                : "opacity-60 group-hover:opacity-85"
           }`}
           animate={{ scale: selected ? 1.06 : 1 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         />
+
+        {/* The still stays mounted underneath rather than being swapped out.
+            It is the poster while the loop downloads, the fallback if it never
+            does, and what shows again the moment the build is deselected — one
+            element doing all three, instead of three states to keep in sync.
+
+            The two cross-fade rather than stack. They carry the same opacity,
+            and a card sitting on the starfield shows what is behind it: two
+            translucent copies of the same shot laid over each other would come
+            out brighter than every other card in the grid, which is a change of
+            state nobody asked for. Only one of them is ever visible.
+
+            Selection starts it, not hover. A click is a gesture every browser
+            accepts as permission to play, where a hover is not, and on a phone
+            there is no hover to speak of; picking a build is also the moment a
+            visitor has asked to see more of it. Muted and `playsInline` are
+            what stop iOS taking the video fullscreen.
+
+            The loop is decoration — the card is already labelled by its title
+            and description — so it is hidden from assistive technology and the
+            element carries no controls to tab into. */}
+        {video && (
+          <motion.video
+            ref={videoRef}
+            aria-hidden
+            src={video}
+            poster={project.image}
+            muted
+            loop
+            playsInline
+            preload="none"
+            tabIndex={-1}
+            onPlaying={() => setVideoReady(true)}
+            onPause={() => setVideoReady(false)}
+            onError={() => setVideoReady(false)}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+              videoReady ? "opacity-60 group-hover:opacity-85" : "opacity-0"
+            }`}
+            animate={{ scale: selected ? 1.06 : 1 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          />
+        )}
+
         <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
       </div>
 

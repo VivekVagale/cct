@@ -72,6 +72,21 @@ export interface Project {
   title: string;
   description: string;
   image: string;
+  /**
+   * A short silent loop, played in the card's thumbnail while this build is the
+   * selected one in the booking form.
+   *
+   * Optional, and most builds will not have one. The still is what the card is
+   * built around — it is the poster, the fallback, and what every unselected
+   * card shows — so a build with no loop loses nothing and a loop that fails to
+   * load is invisible rather than broken.
+   *
+   * Nothing is fetched until a visitor picks the build (`preload="none"`), which
+   * is what keeps nine of these off a phone's data plan. Keep them short and
+   * small: a card is roughly 320px wide and the file is downloaded during a
+   * click, not before it.
+   */
+  video?: string;
   comingSoon?: boolean;
   /**
    * Newly offered, and worth pointing at.
@@ -109,6 +124,10 @@ export const projects: Project[] = [
     // renaming the sphere's frame too, and the picture has not changed — only
     // what the build is called.
     image: "/showcase/project-jet-mist.webp",
+    /* The same set as the still: the jet, the two cars and the machine on wet
+       tarmac. A slow drift across it, so picking this build carries on the shot
+       the card was already showing rather than cutting to a different one. */
+    video: "/projects/jet-escort.mp4",
   },
   {
     id: "bike-free-fall",
@@ -119,6 +138,12 @@ export const projects: Project[] = [
     // sphere carries as "It Say Grrr". The card crops it 4:3 from a 9:16
     // source, which keeps the fork and front wheel and loses the sky.
     image: "/showcase/it-say-grrr.webp",
+    /* The last shot of the Guerrilla 450 reel, and the only one in it with no
+       aircraft: the machine alone, turning over the rock. The shots with a
+       helicopter or a bomber in frame are the build next to this one on the
+       page, and putting one here would make two cards argue about which is
+       which. Same reel and same grade as the still, a different moment of it. */
+    video: "/projects/bike-free-fall.mp4",
   },
   {
     id: "water-impact",
