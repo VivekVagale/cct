@@ -74,6 +74,15 @@ export interface Project {
   image: string;
   comingSoon?: boolean;
   /**
+   * Newly offered, and worth pointing at.
+   *
+   * Separate from `comingSoon` because they are opposite claims: one says a
+   * build cannot be ordered yet, this says it can and has not been here long.
+   * Take it off when it stops being true — a badge that never expires stops
+   * being read.
+   */
+  isNew?: boolean;
+  /**
    * What this build costs, already formatted.
    *
    * A string rather than a number, and deliberately: "1.7k" is how the studio
@@ -87,6 +96,21 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "jet-escort",
+    title: "Project Jet Escort",
+    price: "₹1.7k",
+    isNew: true,
+    description: "Formation flight alongside your machine, to scale.",
+    // The studio's own frame. The bike, the cruiser and the jet all sit in the
+    // lower two-thirds, so the card's 4:3 crop of a 9:16 source keeps the whole
+    // arrangement and loses only mist and mountain.
+    //
+    // The file is still named for the old title. Renaming it would mean
+    // renaming the sphere's frame too, and the picture has not changed — only
+    // what the build is called.
+    image: "/showcase/project-jet-mist.webp",
+  },
+  {
     id: "bike-free-fall",
     title: "Project Free Fall",
     price: "₹799",
@@ -95,16 +119,6 @@ export const projects: Project[] = [
     // sphere carries as "It Say Grrr". The card crops it 4:3 from a 9:16
     // source, which keeps the fork and front wheel and loses the sky.
     image: "/showcase/it-say-grrr.webp",
-  },
-  {
-    id: "jet-escort",
-    title: "Project Jet Mist",
-    price: "₹1.7k",
-    description: "Formation flight alongside your machine, to scale.",
-    // The studio's own frame. The bike, the cruiser and the jet all sit in the
-    // lower two-thirds, so the card's 4:3 crop of a 9:16 source keeps the whole
-    // arrangement and loses only mist and mountain.
-    image: "/showcase/project-jet-mist.webp",
   },
   {
     id: "water-impact",

@@ -86,6 +86,15 @@ export function ProjectOptionCard({
             Coming Soon
           </span>
         )}
+        {/* The same badge shape as Coming Soon, in the brand violet rather than
+            the muted grey — the two say opposite things and should not be told
+            apart by reading them. Never both: a build cannot be new and not yet
+            available. */}
+        {!disabled && project.isNew && (
+          <span className="inline-block mt-3 text-[10px] tracking-[0.18em] uppercase text-[#C9AEFF] border border-[#9F6EF2]/50 bg-[#7A44E0]/[0.12] px-2.5 py-1">
+            New
+          </span>
+        )}
       </div>
 
       {selected && (
