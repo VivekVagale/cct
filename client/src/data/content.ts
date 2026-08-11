@@ -234,6 +234,15 @@ export const faqItems: FaqItem[] = [
     answer:
       "To get started, simply provide your footage or assets, a project brief, any reference examples, and your vision for the final result. The more details you provide upfront, the more accurately your project can be brought to life.",
   },
+  /* Written here rather than supplied, unlike the six around it. The list in
+     step 01 is what has been modelled, not what can be — this is the one
+     question the configurator itself raises and had no answer to. Reword freely;
+     the address is the part that has to stay right. */
+  {
+    question: "What if my bike isn't listed in the models above?",
+    answer:
+      "Email coldchaintheory@gmail.com and tell me what you ride. The picker lists the machines already modelled, not the limit of what can be built — anything missing is a conversation, not a no.",
+  },
   {
     question: "Can I request revisions?",
     answer:
