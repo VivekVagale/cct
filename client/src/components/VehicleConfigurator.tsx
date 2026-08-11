@@ -104,12 +104,25 @@ export function VehicleConfigurator({
    */
   const { matched, shown } = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const inMarque = (v: Vehicle) =>
+      marque === ALL_MARQUES || v.manufacturer === marque;
     const matches = (v: Vehicle) =>
-      (marque === ALL_MARQUES || v.manufacturer === marque) &&
-      (!q || `${v.manufacturer} ${v.name}`.toLowerCase().includes(q));
+      inMarque(v) && (!q || `${v.manufacturer} ${v.name}`.toLowerCase().includes(q));
     const matched = vehicles.filter(matches);
+    /*
+     * The pin survives a query, not a marque.
+     *
+     * It exists so that typing into the search cannot make the machine you are
+     * part-way through configuring disappear from under you. A marque chip is a
+     * different question — asked "show me the Hondas", nobody means "and also
+     * the Royal Enfield I picked earlier", and a Bullet sitting under the KTM
+     * chip reads as the filter being broken rather than as a courtesy.
+     *
+     * Nothing is lost by dropping it: the choice is held in state, and the
+     * summary above the form goes on naming it whatever the grid is showing.
+     */
     const pinned = vehicles.filter(
-      (v) => v.id === selectedVehicleId && !matches(v),
+      (v) => v.id === selectedVehicleId && inMarque(v) && !matches(v),
     );
     return { matched, shown: [...matched, ...pinned] };
   }, [query, marque, selectedVehicleId]);

@@ -1,16 +1,16 @@
-/**
- * The render every card falls back to until the real ones exist.
- *
- * One of the studio's own frames rather than a stock photograph or a broken
- * link. It is obviously a stand-in — the same picture on every machine — which
- * is the point: it does not pretend to be the colour it sits under.
- */
-const PLACEHOLDER = "/showcase/too-clean.webp";
-
 export interface VehicleColor {
   id: string;
   name: string;
-  /** What is shown today. See PLACEHOLDER. */
+  /**
+   * What loads today.
+   *
+   * There was a PLACEHOLDER constant here — one of the studio's own frames,
+   * shown by every colourway that had no render of its own. Every colourway has
+   * one now, so it is gone. The field stays separate from `render` because the
+   * two still mean different things: one machine shares another colourway's shot
+   * where the paint is genuinely the same, and a colour added tomorrow will want
+   * something to point at before its render exists.
+   */
   image: string;
   /**
    * Where this colourway's own render belongs.
@@ -47,21 +47,15 @@ export interface Vehicle {
  * The machines the studio works with, as supplied: the Royal Enfield range, and
  * whatever else has been added since.
  *
- * Two things about this data are placeholders and are meant to be replaced,
- * and neither is hidden:
+ * Every colourway now has its own card render, at
+ * `/vehicles/<machine>/<colour>.webp`, 4:3 and WebP. One thing about this data
+ * is still inferred, and it is not hidden:
  *
- * 1. **`render` is a promise, `image` is what loads today.** Every colourway
- *    already names the path its own render will live at —
- *    `/vehicles/<machine>/<colour>.webp` — while `image` points at a single
- *    stand-in frame. Making a render real is dropping the file there and
- *    switching one field.
- *
- * 2. **The swatch hexes are inferred from the colour names**, not sampled from
- *    the paint. "Kaza Brown" is a brown, "Tokyo Black" is a black, and a name
- *    with no hue in it at all — Two Four Nine, Mark 2, Dux Deluxe — gets a
- *    neutral. They are close enough to tell one chip from another and are not
- *    accurate enough to choose a colour from. Sample them from the renders when
- *    the renders exist.
+ * **The swatch hexes are inferred from the colour names**, not sampled from the
+ * paint. "Kaza Brown" is a brown, "Tokyo Black" is a black, and a name with no
+ * hue in it at all — Two Four Nine, Mark 2, Dux Deluxe — gets a neutral. They
+ * are close enough to tell one chip from another and are not accurate enough to
+ * choose a colour from. The renders exist now, so they can be sampled.
  */
 export const vehicles: Vehicle[] = [
   {
@@ -1012,7 +1006,17 @@ export const vehicles: Vehicle[] = [
         name: "Military Silver Black",
         swatch: "#C3C7CC",
         render: "/vehicles/bullet-350/military-silver-black.webp",
-        image: PLACEHOLDER,
+        /*
+         * Military Black's render, on the studio's word that the two are the
+         * same paint — the manufacturer's own photography does not tell them
+         * apart either.
+         *
+         * Shared rather than copied: one file, and `render` still names where
+         * this colourway's own shot would go if it ever turns out to differ.
+         * This is the split working as intended — `render` is the promise,
+         * `image` is what loads today.
+         */
+        image: "/vehicles/bullet-350/military-black.webp",
       },
       {
         id: "military-silver-red",
