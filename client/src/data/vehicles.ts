@@ -1153,6 +1153,128 @@ export const vehicles: Vehicle[] = [
       },
     ],
   },
+  /*
+   * "X440 S" and "X440 T" are the studio's own folder names, kept verbatim.
+   * Harley-Davidson's trims have been called other things in other places and
+   * inventing a tidier name here would put a build on the page that nobody
+   * sells; if the studio calls them something else, that is a one-line change
+   * to `name` and nothing else.
+   */
+  {
+    id: "harley-davidson-x440-s",
+    name: "X440 S",
+    manufacturer: "Harley-Davidson",
+    render: "/vehicles/harley-davidson-x440-s/cover.webp",
+    image: "/vehicles/harley-davidson-x440-s/cover.webp",
+    colors: [
+      {
+        id: "baja-orange",
+        name: "Baja Orange",
+        swatch: "#C4622A",
+        render: "/vehicles/harley-davidson-x440-s/baja-orange.webp",
+        image: "/vehicles/harley-davidson-x440-s/baja-orange.webp",
+      },
+      {
+        id: "matte-black",
+        name: "Matte Black",
+        swatch: "#14161A",
+        render: "/vehicles/harley-davidson-x440-s/matte-black.webp",
+        image: "/vehicles/harley-davidson-x440-s/matte-black.webp",
+      },
+    ],
+  },
+  {
+    id: "harley-davidson-x440-t",
+    name: "X440 T",
+    manufacturer: "Harley-Davidson",
+    render: "/vehicles/harley-davidson-x440-t/cover.webp",
+    image: "/vehicles/harley-davidson-x440-t/cover.webp",
+    colors: [
+      {
+        id: "pearl-blue",
+        name: "Pearl Blue",
+        swatch: "#22406E",
+        render: "/vehicles/harley-davidson-x440-t/pearl-blue.webp",
+        image: "/vehicles/harley-davidson-x440-t/pearl-blue.webp",
+      },
+      {
+        id: "pearl-red",
+        name: "Pearl Red",
+        swatch: "#A32330",
+        render: "/vehicles/harley-davidson-x440-t/pearl-red.webp",
+        image: "/vehicles/harley-davidson-x440-t/pearl-red.webp",
+      },
+      {
+        id: "pearl-white",
+        name: "Pearl White",
+        swatch: "#EDEFF2",
+        render: "/vehicles/harley-davidson-x440-t/pearl-white.webp",
+        image: "/vehicles/harley-davidson-x440-t/pearl-white.webp",
+      },
+      {
+        id: "vivid-black",
+        name: "Vivid Black",
+        swatch: "#14161A",
+        render: "/vehicles/harley-davidson-x440-t/vivid-black.webp",
+        image: "/vehicles/harley-davidson-x440-t/vivid-black.webp",
+      },
+    ],
+  },
+  /*
+   * The KTM range, ascending: the Dukes, then the RCs, then the Adventures.
+   *
+   * Sampling the swatches off these renders was tried and does not work. Every
+   * KTM in the folder carries an orange trellis frame and orange wheels, so the
+   * most saturated paint on a Metallic Silver Duke 200 is the frame, not the
+   * tank. The names are what these hexes come from, the same as every other
+   * colourway on this page.
+   */
+  {
+    id: "ktm-duke-125",
+    name: "Duke 125",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-duke-125/cover.webp",
+    image: "/vehicles/ktm-duke-125/cover.webp",
+    colors: [
+      {
+        id: "ceramic-white",
+        name: "Ceramic White",
+        swatch: "#EDEFF2",
+        render: "/vehicles/ktm-duke-125/ceramic-white.webp",
+        image: "/vehicles/ktm-duke-125/ceramic-white.webp",
+      },
+      {
+        id: "electric-orange",
+        name: "Electric Orange",
+        swatch: "#E2611F",
+        render: "/vehicles/ktm-duke-125/electric-orange.webp",
+        image: "/vehicles/ktm-duke-125/electric-orange.webp",
+      },
+    ],
+  },
+  {
+    id: "ktm-duke-200",
+    name: "Duke 200",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-duke-200/cover.webp",
+    image: "/vehicles/ktm-duke-200/cover.webp",
+    colors: [
+      {
+        id: "electric-orange",
+        name: "Electric Orange",
+        swatch: "#E2611F",
+        render: "/vehicles/ktm-duke-200/electric-orange.webp",
+        image: "/vehicles/ktm-duke-200/electric-orange.webp",
+      },
+      {
+        id: "metallic-silver",
+        name: "Metallic Silver",
+        swatch: "#C3C7CC",
+        render: "/vehicles/ktm-duke-200/metallic-silver.webp",
+        image: "/vehicles/ktm-duke-200/metallic-silver.webp",
+      },
+    ],
+  },
   {
     id: "ktm-duke-250",
     name: "Duke 250",
@@ -1173,6 +1295,172 @@ export const vehicles: Vehicle[] = [
         swatch: "#C85A22",
         render: "/vehicles/ktm-duke-250/metallic-orange.webp",
         image: "/vehicles/ktm-duke-250/metallic-orange.webp",
+      },
+      /* These two arrived in a folder the studio labelled "ktm duke 250
+         (2022)", after the two above were already here. They are two more
+         colourways of the same machine rather than a second Duke 250 — the
+         page lists machines, not model years, and a client picking a colour is
+         choosing paint. Split it in two if the studio means two builds. */
+      {
+        id: "dark-galvano",
+        name: "Dark Galvano",
+        swatch: "#4A4F55",
+        render: "/vehicles/ktm-duke-250/dark-galvano.webp",
+        image: "/vehicles/ktm-duke-250/dark-galvano.webp",
+      },
+      {
+        id: "ebony-black",
+        name: "Ebony Black",
+        swatch: "#14161A",
+        render: "/vehicles/ktm-duke-250/ebony-black.webp",
+        image: "/vehicles/ktm-duke-250/ebony-black.webp",
+      },
+    ],
+  },
+  {
+    id: "ktm-duke-390",
+    name: "Duke 390",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-duke-390/cover.webp",
+    image: "/vehicles/ktm-duke-390/cover.webp",
+    colors: [
+      {
+        id: "dark-galvano",
+        name: "Dark Galvano",
+        swatch: "#4A4F55",
+        render: "/vehicles/ktm-duke-390/dark-galvano.webp",
+        image: "/vehicles/ktm-duke-390/dark-galvano.webp",
+      },
+      {
+        id: "liquid-metal",
+        name: "Liquid Metal",
+        swatch: "#B9BCC0",
+        render: "/vehicles/ktm-duke-390/liquid-metal.webp",
+        image: "/vehicles/ktm-duke-390/liquid-metal.webp",
+      },
+    ],
+  },
+  /* The RC 125's two colourways are named "Black" and "Blue" and nothing else.
+     That is what the studio's files say and what KTM's own brochure says, so
+     they are not dressed up here. */
+  {
+    id: "ktm-rc-125",
+    name: "RC 125",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-rc-125/cover.webp",
+    image: "/vehicles/ktm-rc-125/cover.webp",
+    colors: [
+      {
+        id: "black",
+        name: "Black",
+        swatch: "#14161A",
+        render: "/vehicles/ktm-rc-125/black.webp",
+        image: "/vehicles/ktm-rc-125/black.webp",
+      },
+      {
+        id: "blue",
+        name: "Blue",
+        swatch: "#22406E",
+        render: "/vehicles/ktm-rc-125/blue.webp",
+        image: "/vehicles/ktm-rc-125/blue.webp",
+      },
+    ],
+  },
+  {
+    id: "ktm-rc-200",
+    name: "RC 200",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-rc-200/cover.webp",
+    image: "/vehicles/ktm-rc-200/cover.webp",
+    colors: [
+      /* The file arrived as "matallic silver.png". Mapped in the conversion
+         script; the studio's copy keeps its own spelling. */
+      {
+        id: "metallic-silver",
+        name: "Metallic Silver",
+        swatch: "#C3C7CC",
+        render: "/vehicles/ktm-rc-200/metallic-silver.webp",
+        image: "/vehicles/ktm-rc-200/metallic-silver.webp",
+      },
+      /* An orange carrying black, the way Metallic Black Red is a black
+         carrying red — so the darker of the two oranges already on the page. */
+      {
+        id: "orange-black",
+        name: "Orange Black",
+        swatch: "#C85A22",
+        render: "/vehicles/ktm-rc-200/orange-black.webp",
+        image: "/vehicles/ktm-rc-200/orange-black.webp",
+      },
+    ],
+  },
+  {
+    id: "ktm-rc-390",
+    name: "RC 390",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-rc-390/cover.webp",
+    image: "/vehicles/ktm-rc-390/cover.webp",
+    colors: [
+      {
+        id: "electronic-orange",
+        name: "Electronic Orange",
+        swatch: "#E2611F",
+        render: "/vehicles/ktm-rc-390/electronic-orange.webp",
+        image: "/vehicles/ktm-rc-390/electronic-orange.webp",
+      },
+      {
+        id: "factory-racing-blue",
+        name: "Factory Racing Blue",
+        swatch: "#22406E",
+        render: "/vehicles/ktm-rc-390/factory-racing-blue.webp",
+        image: "/vehicles/ktm-rc-390/factory-racing-blue.webp",
+      },
+    ],
+  },
+  {
+    id: "ktm-250-adventure",
+    name: "250 Adventure",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-250-adventure/cover.webp",
+    image: "/vehicles/ktm-250-adventure/cover.webp",
+    colors: [
+      {
+        id: "electronic-orange",
+        name: "Electronic Orange",
+        swatch: "#E2611F",
+        render: "/vehicles/ktm-250-adventure/electronic-orange.webp",
+        image: "/vehicles/ktm-250-adventure/electronic-orange.webp",
+      },
+      {
+        id: "factory-racing-blue",
+        name: "Factory Racing Blue",
+        swatch: "#22406E",
+        render: "/vehicles/ktm-250-adventure/factory-racing-blue.webp",
+        image: "/vehicles/ktm-250-adventure/factory-racing-blue.webp",
+      },
+    ],
+  },
+  /* The folder is "ktm 390 avd (2022)". There is no such machine — "avd" is a
+     typo for "adv" and this is the 390 Adventure. */
+  {
+    id: "ktm-390-adventure",
+    name: "390 Adventure",
+    manufacturer: "KTM",
+    render: "/vehicles/ktm-390-adventure/cover.webp",
+    image: "/vehicles/ktm-390-adventure/cover.webp",
+    colors: [
+      {
+        id: "metallic-silver",
+        name: "Metallic Silver",
+        swatch: "#C3C7CC",
+        render: "/vehicles/ktm-390-adventure/metallic-silver.webp",
+        image: "/vehicles/ktm-390-adventure/metallic-silver.webp",
+      },
+      {
+        id: "racing-blue",
+        name: "Racing Blue",
+        swatch: "#22406E",
+        render: "/vehicles/ktm-390-adventure/racing-blue.webp",
+        image: "/vehicles/ktm-390-adventure/racing-blue.webp",
       },
     ],
   },
