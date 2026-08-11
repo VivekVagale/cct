@@ -1115,14 +1115,6 @@ export const vehicles: Vehicle[] = [
         pending: true,
       },
       {
-        id: "black-gold",
-        name: "Black Gold",
-        swatch: "#14161A",
-        render: "/vehicles/pulsar-150/black-gold.webp",
-        image: "/vehicles/pulsar-150/black-gold.webp",
-        pending: true,
-      },
-      {
         id: "ebony-black-cherry-red",
         name: "Ebony Black Cherry Red",
         swatch: "#2A1216",
@@ -1187,14 +1179,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#25543B",
         render: "/vehicles/pulsar-125/neon-green.webp",
         image: "/vehicles/pulsar-125/neon-green.webp",
-        pending: true,
-      },
-      {
-        id: "black-gold",
-        name: "Black Gold",
-        swatch: "#14161A",
-        render: "/vehicles/pulsar-125/black-gold.webp",
-        image: "/vehicles/pulsar-125/black-gold.webp",
         pending: true,
       },
       {
@@ -1269,14 +1253,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/pulsar-220f/sapphire-blue.webp",
         image: "/vehicles/pulsar-220f/sapphire-blue.webp",
-        pending: true,
-      },
-      {
-        id: "black-gold",
-        name: "Black Gold",
-        swatch: "#14161A",
-        render: "/vehicles/pulsar-220f/black-gold.webp",
-        image: "/vehicles/pulsar-220f/black-gold.webp",
         pending: true,
       },
       {
@@ -1749,14 +1725,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#3A3E44",
         render: "/vehicles/platina-100/black-and-silver.webp",
         image: "/vehicles/platina-100/black-and-silver.webp",
-        pending: true,
-      },
-      {
-        id: "black-and-gold",
-        name: "Black & Gold",
-        swatch: "#14161A",
-        render: "/vehicles/platina-100/black-and-gold.webp",
-        image: "/vehicles/platina-100/black-and-gold.webp",
         pending: true,
       },
       {
