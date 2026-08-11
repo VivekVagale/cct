@@ -215,13 +215,20 @@ export interface FaqItem {
 }
 
 /*
- * The studio's own answers, used as written.
+ * The studio's own answers, in the studio's plural voice.
  *
  * The turnaround here is days where the old set said two to three weeks for a
  * single hero frame, and the scope is the whole edit suite rather than vehicle
  * CGI alone. Both are the studio's to state and neither is inferred, so the
- * copy stands as they sent it — including the last one, which is the only
+ * substance stands as they sent it — including the last one, which is the only
  * charging term on the page and the reason the preview passes exist.
+ *
+ * Two edits to the wording, and only the wording. One answer arrived as "I
+ * specialize" while the rest said "we", so a reader met a person and a studio
+ * in the same list; it says "we" now. The question about a bike that is not
+ * listed was written here rather than supplied, and matches. Every other page
+ * on the site is already plural — About, Booking, the confirmation — so this is
+ * the set falling in with them rather than a new house style.
  */
 export const faqItems: FaqItem[] = [
   {
@@ -236,12 +243,13 @@ export const faqItems: FaqItem[] = [
   },
   /* Written here rather than supplied, unlike the six around it. The list in
      step 01 is what has been modelled, not what can be — this is the one
-     question the configurator itself raises and had no answer to. Reword freely;
-     the address is the part that has to stay right. */
+     question the configurator itself raises and had no answer to. Reword
+     freely; the address is the part that has to stay right, and it is the same
+     one the footer carries. */
   {
     question: "What if my bike isn't listed in the models above?",
     answer:
-      "Email coldchaintheory@gmail.com and tell me what you ride. The picker lists the machines already modelled, not the limit of what can be built — anything missing is a conversation, not a no.",
+      "Email coldchaintheory@gmail.com and tell us what you ride. The picker lists the machines already modelled, not the limit of what can be built — anything missing is a conversation, not a no.",
   },
   {
     question: "Can I request revisions?",
@@ -251,7 +259,7 @@ export const faqItems: FaqItem[] = [
   {
     question: "What types of content do you create?",
     answer:
-      "I specialize in cinematic video editing, VFX, CGI, 3D motion graphics, product animations, promotional videos, social media content, and custom visual experiences tailored to your brand or creative vision.",
+      "We specialize in cinematic video editing, VFX, CGI, 3D motion graphics, product animations, promotional videos, social media content, and custom visual experiences tailored to your brand or creative vision.",
   },
   {
     question: "How do we communicate during the project?",
