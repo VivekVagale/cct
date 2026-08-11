@@ -141,7 +141,20 @@ export function WorkShowcase() {
     () =>
       showcaseItems.map((p) => ({
         image: p.image,
-        link: "#projects",
+        /*
+         * No link, so no button.
+         *
+         * Every disc pointed at #projects — the same destination from all
+         * thirty-seven, which made the arrow a promise about the frame under it
+         * that it was not keeping. These are frames to look at, not entries to
+         * open, and the sphere is the one thing on the page that asks to be
+         * handled rather than clicked through.
+         *
+         * InfiniteMenu already treats an empty link as "no action": the button
+         * is not rendered at all, rather than rendered and inert. A control that
+         * looks pressable and does nothing is worse than no control.
+         */
+        link: "",
         title: p.title,
         // The vehicle only when it is actually known — see data/showcase.ts.
         description: p.vehicle ? `${p.vehicle} — ${p.category}` : p.category,
