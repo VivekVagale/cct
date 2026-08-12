@@ -21,6 +21,13 @@
  * something different, though, and the difference matters: Coming Soon is a
  * build that cannot be ordered. This one can be — there is simply no shot of it
  * yet.
+ *
+ * Three callers now, and the `label` is what tells them apart. The machine and
+ * colour cards say a render is in progress. The configurator's Other card says
+ * "Not listed", which is a different claim entirely — not "no shot of this
+ * paint yet" but "we do not know what this machine is". Every colourway on the
+ * page has a render as of writing, so that third caller is the only one a
+ * visitor is certain to meet.
  */
 export function PendingRender({
   swatch,

@@ -3,11 +3,114 @@ import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
 import { VehicleCard, VEHICLE_NAME_CLASS } from "@/components/VehicleCard";
 import { MarqueChips } from "@/components/MarqueChips";
+import { PendingRender } from "@/components/PendingRender";
 import { VehicleFocus } from "@/components/VehicleFocus";
 import { VehicleSearch } from "@/components/VehicleSearch";
+import { useTilt } from "@/hooks/useTilt";
 
 /** The chip that filters by nothing. Not a marque, so it cannot collide with one. */
 const ALL_MARQUES = "__all__";
+
+/**
+ * The card that is not a machine.
+ *
+ * This step is a hard gate — the form will not send without a vehicle — so a
+ * client riding something outside these fifty-seven had no way through it at
+ * all. This is their way through.
+ *
+ * The obvious implementation is a row in vehicles.ts, and it is the wrong one.
+ * That file is the machines the studio works with; an entry there would mint a
+ * marque chip out of whatever went in its manufacturer, answer the search as
+ * though it were a bike, and reach VehicleFocus with no colours for the colour
+ * step to show. So it is an id the data cannot produce, held here beside the
+ * other one, and `vehicles.find` resolving it to undefined is what every
+ * consumer already wants rather than a case any of them has to learn.
+ */
+export const OTHER_VEHICLE_ID = "__other__";
+
+/* The card's two lines. Exported because the echo above the form prints them
+   too and the two must never disagree — the same reason VEHICLE_NAME_CLASS is
+   exported rather than restated at each end. */
+export const OTHER_MACHINE_EYEBROW = "Other";
+export const OTHER_MACHINE_NAME = "My machine isn't here";
+
+/**
+ * The Other card, built to be indistinguishable from a VehicleCard in every way
+ * except what it says.
+ *
+ * The classes are copied from that component rather than re-derived. A card in
+ * this grid that does not tilt, glow, lift and ring like its fifty-seven
+ * neighbours reads as broken rather than as different, and the visitor most
+ * likely to need this one is already having a bad time.
+ */
+function OtherMachineCard({
+  selected,
+  onSelect,
+}: {
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
+    useTilt<HTMLButtonElement>();
+
+  return (
+    <motion.button
+      ref={ref}
+      type="button"
+      onClick={onSelect}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      whileTap={{ scale: 0.97 }}
+      style={{ rotateX, rotateY, transformPerspective: 900 }}
+      role="radio"
+      aria-checked={selected}
+      className={`group relative w-full text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
+        selected
+          ? "selected-glow bg-[#7A44E0]/[0.07]"
+          : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
+      }`}
+    >
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: glowBackground }}
+      />
+
+      <div className="relative aspect-[4/3] overflow-hidden">
+        {/* Not a photograph and not pretending to be one, which is the same
+            reasoning a machine with no render yet gets — and the same
+            component. The badge is what separates the two claims. The swatch is
+            the neutral this page falls back to when there is no paint to show,
+            because there is no machine here to have any. */}
+        <PendingRender swatch="#6E7378" label="Not listed" />
+        {/* Outside the picture, as on every other card. Left off, this card's
+            bottom edge is visibly lighter than its row. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
+      </div>
+
+      <motion.div
+        className="relative p-3.5 sm:p-5"
+        animate={{ y: selected ? -2 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        {/* The eyebrow is load-bearing, not decoration. Every cell in this grid
+            is sized by an invisible copy of a card that prints a marque line
+            unconditionally; a card with no eyebrow sits a line short of its
+            row and puts its name where its neighbours put their marque. */}
+        <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6] mb-1">
+          {OTHER_MACHINE_EYEBROW}
+        </p>
+        <h4 className={`${VEHICLE_NAME_CLASS} text-[#F5F7FA]`}>
+          {OTHER_MACHINE_NAME}
+          {/* Appended rather than substituted: an aria-label here would replace
+              the visible text instead of extending it, and the accessible name
+              has to contain what the eye reads. */}
+          <span className="sr-only"> — describe it in step 03</span>
+        </h4>
+      </motion.div>
+    </motion.button>
+  );
+}
 
 interface VehicleConfiguratorProps {
   selectedVehicleId: string | null;
@@ -127,6 +230,11 @@ export function VehicleConfigurator({
     return { matched, shown: [...matched, ...pinned] };
   }, [query, marque, selectedVehicleId]);
 
+  /* The `?? null` is load-bearing rather than defensive. OTHER_VEHICLE_ID
+     matches no machine, so even if a later edit routed the Other card through
+     handleSelectVehicle this resolves to null and the colour dialog never
+     mounts — which is why VehicleFocus needs no guard against a vehicle with
+     an empty colour list. */
   const focusedVehicle = vehicles.find((v) => v.id === focusedId) ?? null;
 
   const handleSelectVehicle = (id: string) => {
@@ -208,7 +316,12 @@ export function VehicleConfigurator({
             : query.trim()
               ? `No machines match “${query.trim()}”. `
               : `No ${marque} machines here yet. `}
+          {/* True only because Other is not in `shown` — it is always drawn,
+              and a card that is always drawn is not a pin. Push it into
+              `shown` and this sentence starts claiming a selection nobody
+              made. */}
           {shown.length > 0 && "Still showing your current pick. "}
+          Not on this list at all? Pick Other, below.{" "}
           <button
             type="button"
             onClick={() => {
@@ -222,18 +335,20 @@ export function VehicleConfigurator({
         </p>
       )}
 
-      {shown.length > 0 && (
-        /* The What We Build ladder, one step short at the bottom. That section
-           drops to a single column on phones because its cards carry a
-           sentence of description that broke to two-word lines in half a
-           narrow viewport; these carry a marque and a model name, which
-           survive the same width — and five vehicles stacked one-up is a very
-           long scroll to reach a form. */
-        <div
-          role="radiogroup"
-          aria-label="Vehicle"
-          className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
-        >
+      {/* The What We Build ladder, one step short at the bottom. That section
+          drops to a single column on phones because its cards carry a sentence
+          of description that broke to two-word lines in half a narrow viewport;
+          these carry a marque and a model name, which survive the same width —
+          and five vehicles stacked one-up is a very long scroll to reach a form.
+
+          Not gated on `shown.length` any more: the grid always holds at least
+          the Other card, and hiding it when a search matches nothing would hide
+          it at the one moment it answers the question being asked. */}
+      <div
+        role="radiogroup"
+        aria-label="Vehicle"
+        className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+      >
           {shown.map((vehicle) => (
             <div key={vehicle.id} className="relative">
               {/* Holds the cell open while the card is away at centre stage.
@@ -268,8 +383,46 @@ export function VehicleConfigurator({
               )}
             </div>
           ))}
+
+          {/* Last, and outside the map, because it is not a vehicle. Keeping it
+              out of `matched` and `shown` is what lets those two stay Vehicle[]
+              and lets the result count go on meaning machines.
+
+              Never filtered — not by the query, not by the marque. Someone who
+              searches for their bike and finds nothing is exactly who this is
+              for, and a control that only appears on failure is one nobody
+              knows exists.
+
+              Same cell shape as the cards above: an invisible copy sizes the
+              grid slot and the real card lies over it, so parity is by
+              construction rather than by two pieces of markup that happen to
+              measure alike. No layoutId — this card is never promoted to centre
+              stage, so there is nothing for one to pair with. */}
+          <div className="relative">
+            <div
+              aria-hidden
+              className="invisible rounded-sm border border-transparent"
+            >
+              <div className="aspect-[4/3]" />
+              <div className="p-3.5 sm:p-5">
+                <p className="text-[10px] tracking-[0.18em] uppercase mb-1">
+                  {OTHER_MACHINE_EYEBROW}
+                </p>
+                <h4 className={VEHICLE_NAME_CLASS}>{OTHER_MACHINE_NAME}</h4>
+              </div>
+            </div>
+
+            <div className="absolute inset-0">
+              <OtherMachineCard
+                selected={selectedVehicleId === OTHER_VEHICLE_ID}
+                /* Straight to the parent, deliberately not through
+                   handleSelectVehicle: that one also sets focusedId, which is
+                   what opens the colour dialog. There are no colours here. */
+                onSelect={() => onSelectVehicle(OTHER_VEHICLE_ID)}
+              />
+            </div>
+          </div>
         </div>
-      )}
 
       <AnimatePresence>
         {focusedVehicle && (

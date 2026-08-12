@@ -2,7 +2,12 @@ import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { Mascot } from "@/components/Mascot";
 import Cubes from "@/components/ui/Cubes";
 import { Magnet } from "@/components/Magnet";
-import { VehicleConfigurator } from "@/components/VehicleConfigurator";
+import {
+  VehicleConfigurator,
+  OTHER_VEHICLE_ID,
+  OTHER_MACHINE_EYEBROW,
+  OTHER_MACHINE_NAME,
+} from "@/components/VehicleConfigurator";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import { PendingRender } from "@/components/PendingRender";
 import { SparkleButton } from "@/components/SparkleButton";
@@ -35,6 +40,16 @@ const USAGE_OPTIONS: MarqueChip[] = [
   { id: "dealership", label: "Dealership", hint: "Stock we sell" },
   { id: "agency", label: "Agency", hint: "For a client" },
 ];
+
+/**
+ * What the `vehicle` column says when the machine is not one of ours.
+ *
+ * Not left empty. The studio reads a table where an empty vehicle means the
+ * form failed, and they would have to be told once per row that this one is
+ * different. It says where the machine actually is instead, and every such
+ * row sorts together. Twenty-three characters against a two-hundred limit.
+ */
+const OTHER_VEHICLE_LABEL = "Other — see description";
 
 const fieldClass =
   "bg-transparent border-b border-white/20 focus:border-white/60 outline-none py-3 text-[#F5F7FA] text-base normal-case tracking-normal transition-colors";
@@ -85,10 +100,40 @@ function Step({
 function ChosenMachine({
   vehicle,
   color,
+  other,
 }: {
   vehicle?: Vehicle;
   color?: VehicleColor;
+  other?: boolean;
 }) {
+  /* Ahead of the missing-vehicle branch, because Other is a choice that was
+     made and not one that is absent. The paragraph below would send this
+     visitor back to step 01 to redo the thing they just did. */
+  if (other) {
+    return (
+      <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
+        <div className="h-14 w-20 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-24">
+          <PendingRender swatch="#6E7378" label="No render" />
+        </div>
+        <div className="min-w-0 normal-case tracking-normal">
+          <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]">
+            {OTHER_MACHINE_EYEBROW}
+          </p>
+          <p className="font-display text-base sm:text-lg text-[#F5F7FA]">
+            {OTHER_MACHINE_NAME}
+          </p>
+          {/* Where the colour line sits on every other machine. There is no
+              colour to choose and no card to tap, so "tap the card above to
+              pick one" would point at a control this visitor does not have.
+              This says what they owe us instead. */}
+          <p className="mt-1 text-xs text-[#B8C4D6]">
+            Tell us the make, model and year in step 03 below.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!vehicle) {
     return (
       <p className="text-sm text-[#B8C4D6] normal-case tracking-normal">
@@ -175,8 +220,12 @@ export function Booking() {
     (p) => p.title === selectedProject,
   )?.price;
 
+  /* Both undefined when the choice is Other, on purpose: there is no Vehicle
+     behind that id, so nothing downstream may reach for a manufacturer, a
+     render or a colour list. */
   const chosenVehicle = vehicles.find((v) => v.id === vehicleId);
   const chosenColor = chosenVehicle?.colors.find((c) => c.id === colorId);
+  const isOther = vehicleId === OTHER_VEHICLE_ID;
 
   function handleSelectVehicle(id: string) {
     setVehicleId(id);
@@ -198,11 +247,15 @@ export function Booking() {
     const form = e.currentTarget;
     const data = new FormData(form);
 
-    const vehicleLabel = chosenVehicle
-      ? `${chosenVehicle.manufacturer} ${chosenVehicle.name}${
-          chosenColor ? ` — ${chosenColor.name}` : ""
-        }`
-      : "";
+    /* Other is tested first so it cannot fall through to the empty string.
+       chosenColor is undefined under it, so no colour can be appended. */
+    const vehicleLabel = isOther
+      ? OTHER_VEHICLE_LABEL
+      : chosenVehicle
+        ? `${chosenVehicle.manufacturer} ${chosenVehicle.name}${
+            chosenColor ? ` — ${chosenColor.name}` : ""
+          }`
+        : "";
 
     const ok = await submitBookingForm({
       fullName: String(data.get("fullName") || ""),
@@ -392,6 +445,7 @@ export function Booking() {
               <ChosenMachine
                 vehicle={chosenVehicle}
                 color={chosenColor}
+                other={isOther}
               />
 
               <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
@@ -458,7 +512,15 @@ export function Booking() {
             <Step
               number="03"
               title="Tell us about your machine."
-              hint="The card above says what it is. This is where you say what you have done to it, then pick the closest kind of build."
+              /* The stock line opens on "the card above says what it is", which
+                 is false the moment the card above is Other — that one names
+                 nothing. Under it this field is the only place the machine gets
+                 named at all, so it says so. */
+              hint={
+                isOther
+                  ? "The card above doesn't name it, so start here: make, model and year. Then what you have done to it, then the closest kind of build."
+                  : "The card above says what it is. This is where you say what you have done to it, then pick the closest kind of build."
+              }
             />
             {/* The old prompt here described a finished shot — wet streets,
                 headlight flare, no rider — and got shot briefs back. The
@@ -470,7 +532,33 @@ export function Booking() {
               <textarea
                 name="description"
                 rows={4}
-                placeholder="Aftermarket exhaust, crash guards, custom decals, a respray that isn't the stock colour — and anything you want the shot to do with it."
+                /* Required only under Other, and by the browser rather than by
+                   us. React drops the attribute entirely when this is false, so
+                   the fifty-seven-machine path is untouched, and the field stays
+                   uncontrolled — toggling the flag does not remount it or throw
+                   away what has been typed.
+
+                   Deliberately not paired with a disabled submit button. A
+                   disabled button suppresses constraint validation altogether
+                   and leaves a dead control with no message, which is the exact
+                   failure the hint under it was written to fix. The vehicle gate
+                   needs its own lock in JS because a selected card is not
+                   something a native constraint can express; a textarea is, so
+                   the browser owns this one.
+
+                   `required` rejects only the empty string, so a single space
+                   satisfies it. Not worth policing — that is a reply away. */
+                required={isOther}
+                /* The column is `char_length(description) <= 5000`; past it the
+                   insert 400s and the form can only say something went wrong.
+                   Pre-existing, and likelier now this field carries the machine
+                   itself. */
+                maxLength={5000}
+                placeholder={
+                  isOther
+                    ? "Make, model and year first — then the exhaust, the guards, the decals, a respray that isn't the stock colour, and anything you want the shot to do with it."
+                    : "Aftermarket exhaust, crash guards, custom decals, a respray that isn't the stock colour — and anything you want the shot to do with it."
+                }
                 className={`${fieldClass} resize-none placeholder:text-[#B8C4D6]/40`}
               />
             </label>
