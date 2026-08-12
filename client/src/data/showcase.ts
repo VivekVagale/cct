@@ -50,8 +50,14 @@ export const showcaseItems: ShowcaseItem[] = [
     vehicle: "Royal Enfield Interceptor 650",
     image: "/showcase/f-0153.webp",
   },
+  /* Was "Escort", for the two aircraft flanking the machine, and renamed at the
+     studio's word when the build went back to Jet Mist. It is a different
+     picture from that card's — the card is the wet-tarmac frame — so this is a
+     matter of vocabulary rather than of the two being the same shot. Still
+     titled from the frame: the haze off the cloud deck is the other thing in
+     it. */
   {
-    title: "Escort",
+    title: "Mist",
     category: "Aerial",
     image: "/showcase/f-0156.webp",
   },
