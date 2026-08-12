@@ -1129,7 +1129,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#1A2436",
         render: "/vehicles/pulsar-150/ebony-black-ink-blue.webp",
         image: "/vehicles/pulsar-150/ebony-black-ink-blue.webp",
-        pending: true,
       },
       {
         id: "ebony-dark-grey",
@@ -1155,7 +1154,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-125/cover.webp",
     image: "/vehicles/pulsar-125/cover.webp",
-    pending: true,
     colors: [
       {
         id: "solar-red",
@@ -1163,7 +1161,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/pulsar-125/solar-red.webp",
         image: "/vehicles/pulsar-125/solar-red.webp",
-        pending: true,
       },
       {
         id: "neon-silver",
@@ -1171,7 +1168,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#C3C7CC",
         render: "/vehicles/pulsar-125/neon-silver.webp",
         image: "/vehicles/pulsar-125/neon-silver.webp",
-        pending: true,
       },
       {
         id: "neon-green",
@@ -1179,15 +1175,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#25543B",
         render: "/vehicles/pulsar-125/neon-green.webp",
         image: "/vehicles/pulsar-125/neon-green.webp",
-        pending: true,
-      },
-      {
-        id: "black-cyan-blue",
-        name: "Black Cyan Blue",
-        swatch: "#1A2436",
-        render: "/vehicles/pulsar-125/black-cyan-blue.webp",
-        image: "/vehicles/pulsar-125/black-cyan-blue.webp",
-        pending: true,
       },
       {
         id: "black-dark-grey",
