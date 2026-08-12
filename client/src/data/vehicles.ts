@@ -1191,7 +1191,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-220f/cover.webp",
     image: "/vehicles/pulsar-220f/cover.webp",
-    pending: true,
     colors: [
       {
         id: "sparkle-black",
@@ -1199,7 +1198,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-220f/sparkle-black.webp",
         image: "/vehicles/pulsar-220f/sparkle-black.webp",
-        pending: true,
       },
       {
         id: "volcanic-red",
@@ -1207,7 +1205,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/pulsar-220f/volcanic-red.webp",
         image: "/vehicles/pulsar-220f/volcanic-red.webp",
-        pending: true,
       },
       {
         id: "pearl-white",
@@ -1215,7 +1212,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-220f/pearl-white.webp",
         image: "/vehicles/pulsar-220f/pearl-white.webp",
-        pending: true,
       },
       {
         id: "sapphire-blue",
@@ -1223,7 +1219,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/pulsar-220f/sapphire-blue.webp",
         image: "/vehicles/pulsar-220f/sapphire-blue.webp",
-        pending: true,
       },
       {
         id: "black-cherry-red",
@@ -1231,7 +1226,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#2A1216",
         render: "/vehicles/pulsar-220f/black-cherry-red.webp",
         image: "/vehicles/pulsar-220f/black-cherry-red.webp",
-        pending: true,
       },
       {
         id: "black-ink-blue",
@@ -1239,7 +1233,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#1A2436",
         render: "/vehicles/pulsar-220f/black-ink-blue.webp",
         image: "/vehicles/pulsar-220f/black-ink-blue.webp",
-        pending: true,
       },
       {
         id: "black-copper-beige",
@@ -1247,7 +1240,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#8A7358",
         render: "/vehicles/pulsar-220f/black-copper-beige.webp",
         image: "/vehicles/pulsar-220f/black-copper-beige.webp",
-        pending: true,
       },
     ],
   },
@@ -1257,7 +1249,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-rs200/cover.webp",
     image: "/vehicles/pulsar-rs200/cover.webp",
-    pending: true,
     colors: [
       {
         id: "glossy-racing-red",
@@ -1265,7 +1256,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/pulsar-rs200/glossy-racing-red.webp",
         image: "/vehicles/pulsar-rs200/glossy-racing-red.webp",
-        pending: true,
       },
       {
         id: "pearl-metallic-white",
@@ -1273,7 +1263,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-rs200/pearl-metallic-white.webp",
         image: "/vehicles/pulsar-rs200/pearl-metallic-white.webp",
-        pending: true,
       },
       {
         id: "active-black-satin",
@@ -1281,7 +1270,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-rs200/active-black-satin.webp",
         image: "/vehicles/pulsar-rs200/active-black-satin.webp",
-        pending: true,
       },
       {
         id: "brooklyn-black",
@@ -1289,7 +1277,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-rs200/brooklyn-black.webp",
         image: "/vehicles/pulsar-rs200/brooklyn-black.webp",
-        pending: true,
       },
       {
         id: "pearl-metallic-white-and-caribbean-blue",
@@ -1297,7 +1284,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-rs200/pearl-metallic-white-and-caribbean-blue.webp",
         image: "/vehicles/pulsar-rs200/pearl-metallic-white-and-caribbean-blue.webp",
-        pending: true,
       },
     ],
   },
@@ -1307,7 +1293,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-n125/cover.webp",
     image: "/vehicles/pulsar-n125/cover.webp",
-    pending: true,
     colors: [
       {
         id: "ebony-black-cocktail-wine-red",
@@ -1315,7 +1300,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#2A1216",
         render: "/vehicles/pulsar-n125/ebony-black-cocktail-wine-red.webp",
         image: "/vehicles/pulsar-n125/ebony-black-cocktail-wine-red.webp",
-        pending: true,
       },
       {
         id: "ebony-black-purple-fury",
@@ -1323,7 +1307,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#4A3468",
         render: "/vehicles/pulsar-n125/ebony-black-purple-fury.webp",
         image: "/vehicles/pulsar-n125/ebony-black-purple-fury.webp",
-        pending: true,
       },
       {
         id: "pewter-grey",
@@ -1331,7 +1314,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#6E7378",
         render: "/vehicles/pulsar-n125/pewter-grey.webp",
         image: "/vehicles/pulsar-n125/pewter-grey.webp",
-        pending: true,
       },
       {
         id: "pearl-metallic-white",
@@ -1339,7 +1321,30 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-n125/pearl-metallic-white.webp",
         image: "/vehicles/pulsar-n125/pearl-metallic-white.webp",
-        pending: true,
+      },
+      /* Three the brief did not list, all three rendered in the studio's own
+         PULSAR N125 folder. A render that exists is better evidence of what
+         Bajaj sells than a list typed out by hand, so they are added. */
+      {
+        id: "caribbean-blue",
+        name: "Caribbean Blue",
+        swatch: "#22406E",
+        render: "/vehicles/pulsar-n125/caribbean-blue.webp",
+        image: "/vehicles/pulsar-n125/caribbean-blue.webp",
+      },
+      {
+        id: "cocktail-wine-red",
+        name: "Cocktail Wine Red",
+        swatch: "#5E1F26",
+        render: "/vehicles/pulsar-n125/cocktail-wine-red.webp",
+        image: "/vehicles/pulsar-n125/cocktail-wine-red.webp",
+      },
+      {
+        id: "ebony-black",
+        name: "Ebony Black",
+        swatch: "#14161A",
+        render: "/vehicles/pulsar-n125/ebony-black.webp",
+        image: "/vehicles/pulsar-n125/ebony-black.webp",
       },
     ],
   },
@@ -1349,7 +1354,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-n150/cover.webp",
     image: "/vehicles/pulsar-n150/cover.webp",
-    pending: true,
     colors: [
       {
         id: "pearl-metallic-white",
@@ -1357,7 +1361,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-n150/pearl-metallic-white.webp",
         image: "/vehicles/pulsar-n150/pearl-metallic-white.webp",
-        pending: true,
       },
       {
         id: "ebony-black",
@@ -1365,7 +1368,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-n150/ebony-black.webp",
         image: "/vehicles/pulsar-n150/ebony-black.webp",
-        pending: true,
       },
     ],
   },
@@ -1375,7 +1377,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-n160/cover.webp",
     image: "/vehicles/pulsar-n160/cover.webp",
-    pending: true,
     colors: [
       {
         id: "glossy-racing-red",
@@ -1383,7 +1384,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/pulsar-n160/glossy-racing-red.webp",
         image: "/vehicles/pulsar-n160/glossy-racing-red.webp",
-        pending: true,
       },
       {
         id: "polar-sky-blue",
@@ -1391,7 +1391,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/pulsar-n160/polar-sky-blue.webp",
         image: "/vehicles/pulsar-n160/polar-sky-blue.webp",
-        pending: true,
       },
       {
         id: "pearl-metallic-white",
@@ -1399,7 +1398,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-n160/pearl-metallic-white.webp",
         image: "/vehicles/pulsar-n160/pearl-metallic-white.webp",
-        pending: true,
       },
       {
         id: "brooklyn-black",
@@ -1407,7 +1405,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-n160/brooklyn-black.webp",
         image: "/vehicles/pulsar-n160/brooklyn-black.webp",
-        pending: true,
       },
     ],
   },
@@ -1417,7 +1414,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-n250/cover.webp",
     image: "/vehicles/pulsar-n250/cover.webp",
-    pending: true,
     colors: [
       {
         id: "glossy-racing-red",
@@ -1425,7 +1421,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/pulsar-n250/glossy-racing-red.webp",
         image: "/vehicles/pulsar-n250/glossy-racing-red.webp",
-        pending: true,
       },
       {
         id: "brooklyn-black",
@@ -1433,7 +1428,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-n250/brooklyn-black.webp",
         image: "/vehicles/pulsar-n250/brooklyn-black.webp",
-        pending: true,
       },
       {
         id: "pearl-metallic-white",
@@ -1441,7 +1435,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-n250/pearl-metallic-white.webp",
         image: "/vehicles/pulsar-n250/pearl-metallic-white.webp",
-        pending: true,
       },
     ],
   },
@@ -1451,7 +1444,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-ns125/cover.webp",
     image: "/vehicles/pulsar-ns125/cover.webp",
-    pending: true,
     colors: [
       {
         id: "fiery-orange",
@@ -1459,7 +1451,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#C4622A",
         render: "/vehicles/pulsar-ns125/fiery-orange.webp",
         image: "/vehicles/pulsar-ns125/fiery-orange.webp",
-        pending: true,
       },
       {
         id: "burnt-red",
@@ -1467,7 +1458,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/pulsar-ns125/burnt-red.webp",
         image: "/vehicles/pulsar-ns125/burnt-red.webp",
-        pending: true,
       },
       {
         id: "beach-blue",
@@ -1475,7 +1465,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/pulsar-ns125/beach-blue.webp",
         image: "/vehicles/pulsar-ns125/beach-blue.webp",
-        pending: true,
       },
       {
         id: "pewter-grey",
@@ -1483,7 +1472,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#6E7378",
         render: "/vehicles/pulsar-ns125/pewter-grey.webp",
         image: "/vehicles/pulsar-ns125/pewter-grey.webp",
-        pending: true,
       },
     ],
   },
@@ -1493,7 +1481,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-ns160/cover.webp",
     image: "/vehicles/pulsar-ns160/cover.webp",
-    pending: true,
     colors: [
       {
         id: "cocktail-wine-red",
@@ -1501,7 +1488,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#5E1F26",
         render: "/vehicles/pulsar-ns160/cocktail-wine-red.webp",
         image: "/vehicles/pulsar-ns160/cocktail-wine-red.webp",
-        pending: true,
       },
       {
         id: "ebony-black",
@@ -1509,7 +1495,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-ns160/ebony-black.webp",
         image: "/vehicles/pulsar-ns160/ebony-black.webp",
-        pending: true,
       },
       {
         id: "pearl-metallic-white",
@@ -1517,7 +1502,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-ns160/pearl-metallic-white.webp",
         image: "/vehicles/pulsar-ns160/pearl-metallic-white.webp",
-        pending: true,
       },
       {
         id: "pewter-grey",
@@ -1525,7 +1509,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#6E7378",
         render: "/vehicles/pulsar-ns160/pewter-grey.webp",
         image: "/vehicles/pulsar-ns160/pewter-grey.webp",
-        pending: true,
       },
     ],
   },
@@ -1535,7 +1518,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-ns200/cover.webp",
     image: "/vehicles/pulsar-ns200/cover.webp",
-    pending: true,
     colors: [
       {
         id: "cocktail-wine-red-white",
@@ -1543,7 +1525,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#5E1F26",
         render: "/vehicles/pulsar-ns200/cocktail-wine-red-white.webp",
         image: "/vehicles/pulsar-ns200/cocktail-wine-red-white.webp",
-        pending: true,
       },
       {
         id: "glossy-ebony-black",
@@ -1551,7 +1532,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-ns200/glossy-ebony-black.webp",
         image: "/vehicles/pulsar-ns200/glossy-ebony-black.webp",
-        pending: true,
       },
       {
         id: "metallic-pearl-white",
@@ -1559,7 +1539,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-ns200/metallic-pearl-white.webp",
         image: "/vehicles/pulsar-ns200/metallic-pearl-white.webp",
-        pending: true,
       },
       {
         id: "pewter-grey-blue",
@@ -1567,7 +1546,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#6E7378",
         render: "/vehicles/pulsar-ns200/pewter-grey-blue.webp",
         image: "/vehicles/pulsar-ns200/pewter-grey-blue.webp",
-        pending: true,
       },
     ],
   },
@@ -1577,7 +1555,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/pulsar-ns400z/cover.webp",
     image: "/vehicles/pulsar-ns400z/cover.webp",
-    pending: true,
     colors: [
       {
         id: "brooklyn-black",
@@ -1585,7 +1562,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/pulsar-ns400z/brooklyn-black.webp",
         image: "/vehicles/pulsar-ns400z/brooklyn-black.webp",
-        pending: true,
       },
       {
         id: "glossy-racing-red",
@@ -1593,7 +1569,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/pulsar-ns400z/glossy-racing-red.webp",
         image: "/vehicles/pulsar-ns400z/glossy-racing-red.webp",
-        pending: true,
       },
       {
         id: "pearl-metallic-white",
@@ -1601,7 +1576,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/pulsar-ns400z/pearl-metallic-white.webp",
         image: "/vehicles/pulsar-ns400z/pearl-metallic-white.webp",
-        pending: true,
       },
       {
         id: "pewter-grey",
@@ -1609,7 +1583,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#6E7378",
         render: "/vehicles/pulsar-ns400z/pewter-grey.webp",
         image: "/vehicles/pulsar-ns400z/pewter-grey.webp",
-        pending: true,
       },
     ],
   },
@@ -1619,7 +1592,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/dominar-250/cover.webp",
     image: "/vehicles/dominar-250/cover.webp",
-    pending: true,
     colors: [
       {
         id: "canyon-red",
@@ -1627,7 +1599,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/dominar-250/canyon-red.webp",
         image: "/vehicles/dominar-250/canyon-red.webp",
-        pending: true,
       },
       {
         id: "sparkling-black",
@@ -1635,7 +1606,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/dominar-250/sparkling-black.webp",
         image: "/vehicles/dominar-250/sparkling-black.webp",
-        pending: true,
       },
       {
         id: "citrus-rush",
@@ -1643,7 +1613,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#C4622A",
         render: "/vehicles/dominar-250/citrus-rush.webp",
         image: "/vehicles/dominar-250/citrus-rush.webp",
-        pending: true,
       },
     ],
   },
@@ -1653,7 +1622,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/dominar-400/cover.webp",
     image: "/vehicles/dominar-400/cover.webp",
-    pending: true,
     colors: [
       {
         id: "aurora-green",
@@ -1661,7 +1629,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#25543B",
         render: "/vehicles/dominar-400/aurora-green.webp",
         image: "/vehicles/dominar-400/aurora-green.webp",
-        pending: true,
       },
       {
         id: "charcoal-black",
@@ -1669,7 +1636,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/dominar-400/charcoal-black.webp",
         image: "/vehicles/dominar-400/charcoal-black.webp",
-        pending: true,
       },
     ],
   },
@@ -1679,7 +1645,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/platina-100/cover.webp",
     image: "/vehicles/platina-100/cover.webp",
-    pending: true,
     colors: [
       {
         id: "black-and-red",
@@ -1687,7 +1652,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#2A1216",
         render: "/vehicles/platina-100/black-and-red.webp",
         image: "/vehicles/platina-100/black-and-red.webp",
-        pending: true,
       },
       {
         id: "black-and-silver",
@@ -1695,7 +1659,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#3A3E44",
         render: "/vehicles/platina-100/black-and-silver.webp",
         image: "/vehicles/platina-100/black-and-silver.webp",
-        pending: true,
       },
       {
         id: "black-and-blue",
@@ -1703,7 +1666,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#1A2436",
         render: "/vehicles/platina-100/black-and-blue.webp",
         image: "/vehicles/platina-100/black-and-blue.webp",
-        pending: true,
       },
       {
         id: "black-and-white",
@@ -1711,7 +1673,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#2E3238",
         render: "/vehicles/platina-100/black-and-white.webp",
         image: "/vehicles/platina-100/black-and-white.webp",
-        pending: true,
       },
       {
         id: "blue",
@@ -1719,7 +1680,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/platina-100/blue.webp",
         image: "/vehicles/platina-100/blue.webp",
-        pending: true,
       },
       {
         id: "red",
@@ -1727,7 +1687,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/platina-100/red.webp",
         image: "/vehicles/platina-100/red.webp",
-        pending: true,
       },
     ],
   },
@@ -1737,7 +1696,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/platina-110/cover.webp",
     image: "/vehicles/platina-110/cover.webp",
-    pending: true,
     colors: [
       {
         id: "satin-beach-blue",
@@ -1745,7 +1703,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/platina-110/satin-beach-blue.webp",
         image: "/vehicles/platina-110/satin-beach-blue.webp",
-        pending: true,
       },
       {
         id: "charcoal-black",
@@ -1753,7 +1710,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/platina-110/charcoal-black.webp",
         image: "/vehicles/platina-110/charcoal-black.webp",
-        pending: true,
       },
       {
         id: "volcanic-matte-red",
@@ -1761,7 +1717,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/platina-110/volcanic-matte-red.webp",
         image: "/vehicles/platina-110/volcanic-matte-red.webp",
-        pending: true,
       },
       {
         id: "black-and-white",
@@ -1769,7 +1724,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#2E3238",
         render: "/vehicles/platina-110/black-and-white.webp",
         image: "/vehicles/platina-110/black-and-white.webp",
-        pending: true,
       },
       {
         id: "black-and-red",
@@ -1777,7 +1731,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#2A1216",
         render: "/vehicles/platina-110/black-and-red.webp",
         image: "/vehicles/platina-110/black-and-red.webp",
-        pending: true,
       },
       {
         id: "blue",
@@ -1785,7 +1738,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/platina-110/blue.webp",
         image: "/vehicles/platina-110/blue.webp",
-        pending: true,
       },
       {
         id: "red",
@@ -1793,7 +1745,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/platina-110/red.webp",
         image: "/vehicles/platina-110/red.webp",
-        pending: true,
       },
     ],
   },
@@ -1803,7 +1754,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/ct-110x/cover.webp",
     image: "/vehicles/ct-110x/cover.webp",
-    pending: true,
     colors: [
       {
         id: "matte-wild-green",
@@ -1811,7 +1761,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#25543B",
         render: "/vehicles/ct-110x/matte-wild-green.webp",
         image: "/vehicles/ct-110x/matte-wild-green.webp",
-        pending: true,
       },
       {
         id: "ebony-black-red",
@@ -1819,7 +1768,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#2A1216",
         render: "/vehicles/ct-110x/ebony-black-red.webp",
         image: "/vehicles/ct-110x/ebony-black-red.webp",
-        pending: true,
       },
       {
         id: "ebony-black-blue",
@@ -1827,7 +1775,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#1A2436",
         render: "/vehicles/ct-110x/ebony-black-blue.webp",
         image: "/vehicles/ct-110x/ebony-black-blue.webp",
-        pending: true,
       },
     ],
   },
@@ -1837,7 +1784,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/avenger-street-160/cover.webp",
     image: "/vehicles/avenger-street-160/cover.webp",
-    pending: true,
     colors: [
       {
         id: "ebony-black",
@@ -1845,7 +1791,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/avenger-street-160/ebony-black.webp",
         image: "/vehicles/avenger-street-160/ebony-black.webp",
-        pending: true,
       },
       {
         id: "spicy-red",
@@ -1853,7 +1798,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/avenger-street-160/spicy-red.webp",
         image: "/vehicles/avenger-street-160/spicy-red.webp",
-        pending: true,
       },
     ],
   },
@@ -1863,7 +1807,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/avenger-street-220/cover.webp",
     image: "/vehicles/avenger-street-220/cover.webp",
-    pending: true,
     colors: [
       {
         id: "ebony-black",
@@ -1871,7 +1814,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/avenger-street-220/ebony-black.webp",
         image: "/vehicles/avenger-street-220/ebony-black.webp",
-        pending: true,
       },
       {
         id: "cocktail-wine-red",
@@ -1879,7 +1821,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#5E1F26",
         render: "/vehicles/avenger-street-220/cocktail-wine-red.webp",
         image: "/vehicles/avenger-street-220/cocktail-wine-red.webp",
-        pending: true,
       },
     ],
   },
@@ -1889,7 +1830,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Bajaj",
     render: "/vehicles/avenger-cruise-220/cover.webp",
     image: "/vehicles/avenger-cruise-220/cover.webp",
-    pending: true,
     colors: [
       {
         id: "auburn-black",
@@ -1897,7 +1837,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#14161A",
         render: "/vehicles/avenger-cruise-220/auburn-black.webp",
         image: "/vehicles/avenger-cruise-220/auburn-black.webp",
-        pending: true,
       },
       {
         id: "moon-white",
@@ -1905,7 +1844,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/avenger-cruise-220/moon-white.webp",
         image: "/vehicles/avenger-cruise-220/moon-white.webp",
-        pending: true,
       },
     ],
   },
@@ -1927,7 +1865,6 @@ export const vehicles: Vehicle[] = [
     manufacturer: "Hero",
     render: "/vehicles/hero-xpulse-210-base/cover.webp",
     image: "/vehicles/hero-xpulse-210-base/cover.webp",
-    pending: true,
     colors: [
       {
         id: "glacier-white",
@@ -1935,7 +1872,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/hero-xpulse-210-base/glacier-white.webp",
         image: "/vehicles/hero-xpulse-210-base/glacier-white.webp",
-        pending: true,
       },
     ],
   },
@@ -2154,6 +2090,47 @@ export const vehicles: Vehicle[] = [
         swatch: "#A32330",
         render: "/vehicles/honda-cb-350-rs/rebel-red-metallic.webp",
         image: "/vehicles/honda-cb-350-rs/rebel-red-metallic.webp",
+      },
+    ],
+  },
+  /*
+   * Honda's H'ness, which arrived as its own folder alongside the Bajaj drop.
+   *
+   * Both files are the Dlx Pro Chrome variant, and since both carry it the
+   * suffix distinguishes nothing and is not in the colour names.
+   *
+   * Mat Dune Brown came in the BAJAJ BIKES folder named "honda cb 350", which
+   * is not a machine on this page. It is filed here rather than on the CB 350
+   * RS because the render is the H'ness -- round lamp, chrome pipe, classic
+   * tank, twin shocks -- and the RS is a different motorcycle.
+   */
+  {
+    id: "honda-cb-hness-350",
+    name: "CB H'ness 350",
+    manufacturer: "Honda",
+    render: "/vehicles/honda-cb-hness-350/cover.webp",
+    image: "/vehicles/honda-cb-hness-350/cover.webp",
+    colors: [
+      {
+        id: "blue-metallic",
+        name: "Blue Metallic",
+        swatch: "#22406E",
+        render: "/vehicles/honda-cb-hness-350/blue-metallic.webp",
+        image: "/vehicles/honda-cb-hness-350/blue-metallic.webp",
+      },
+      {
+        id: "decent-pearl-deep-ground-grey",
+        name: "Decent Pearl Deep Ground Grey",
+        swatch: "#4A4F55",
+        render: "/vehicles/honda-cb-hness-350/decent-pearl-deep-ground-grey.webp",
+        image: "/vehicles/honda-cb-hness-350/decent-pearl-deep-ground-grey.webp",
+      },
+      {
+        id: "mat-dune-brown",
+        name: "Mat Dune Brown",
+        swatch: "#B7A283",
+        render: "/vehicles/honda-cb-hness-350/mat-dune-brown.webp",
+        image: "/vehicles/honda-cb-hness-350/mat-dune-brown.webp",
       },
     ],
   },
