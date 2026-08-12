@@ -1860,9 +1860,11 @@ export const vehicles: Vehicle[] = [
   /*
    * Hero, which is a new marque — the chip row goes to eight on its own.
    *
-   * Six machines and twenty colourways, none rendered yet, on the same terms as
-   * the Bajaj range above: the picker's job is to find out what a client rides,
-   * and PendingRender is what a card without a shot draws.
+   * Six machines and twenty colourways. They arrived on the same terms as the
+   * Bajaj range above -- listed before they were shot, so the picker could
+   * answer what a client rides -- and every one of them has a render now. The
+   * XPulse 210 Top was off the page for a while, when its two colourways were
+   * the last anywhere without one.
    *
    * XPulse 210 Base and Top are two entries because they were supplied as two,
    * with different paint on each. That is the same call the X440's S and T got,
@@ -1882,6 +1884,29 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/hero-xpulse-210-base/glacier-white.webp",
         image: "/vehicles/hero-xpulse-210-base/glacier-white.webp",
+      },
+    ],
+  },
+  {
+    id: "hero-xpulse-210-top",
+    name: "XPulse 210 Top",
+    manufacturer: "Hero",
+    render: "/vehicles/hero-xpulse-210-top/cover.webp",
+    image: "/vehicles/hero-xpulse-210-top/cover.webp",
+    colors: [
+      {
+        id: "azure-blue",
+        name: "Azure Blue",
+        swatch: "#22406E",
+        render: "/vehicles/hero-xpulse-210-top/azure-blue.webp",
+        image: "/vehicles/hero-xpulse-210-top/azure-blue.webp",
+      },
+      {
+        id: "alpine-silver",
+        name: "Alpine Silver",
+        swatch: "#C3C7CC",
+        render: "/vehicles/hero-xpulse-210-top/alpine-silver.webp",
+        image: "/vehicles/hero-xpulse-210-top/alpine-silver.webp",
       },
     ],
   },
