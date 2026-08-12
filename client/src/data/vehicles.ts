@@ -1220,6 +1220,16 @@ export const vehicles: Vehicle[] = [
         render: "/vehicles/pulsar-220f/sapphire-blue.webp",
         image: "/vehicles/pulsar-220f/sapphire-blue.webp",
       },
+      /* Removed with the rest of the range's Black Gold and reinstated here
+         alone, on request. The other three — Pulsar 125, Pulsar 150 and the
+         Platina 100's Black & Gold — stay out. */
+      {
+        id: "black-gold",
+        name: "Black Gold",
+        swatch: "#14161A",
+        render: "/vehicles/pulsar-220f/black-gold.webp",
+        image: "/vehicles/pulsar-220f/black-gold.webp",
+      },
       {
         id: "black-cherry-red",
         name: "Black Cherry Red",
@@ -1872,32 +1882,6 @@ export const vehicles: Vehicle[] = [
         swatch: "#EDEFF2",
         render: "/vehicles/hero-xpulse-210-base/glacier-white.webp",
         image: "/vehicles/hero-xpulse-210-base/glacier-white.webp",
-      },
-    ],
-  },
-  {
-    id: "hero-xpulse-210-top",
-    name: "XPulse 210 Top",
-    manufacturer: "Hero",
-    render: "/vehicles/hero-xpulse-210-top/cover.webp",
-    image: "/vehicles/hero-xpulse-210-top/cover.webp",
-    pending: true,
-    colors: [
-      {
-        id: "azure-blue",
-        name: "Azure Blue",
-        swatch: "#22406E",
-        render: "/vehicles/hero-xpulse-210-top/azure-blue.webp",
-        image: "/vehicles/hero-xpulse-210-top/azure-blue.webp",
-        pending: true,
-      },
-      {
-        id: "alpine-silver",
-        name: "Alpine Silver",
-        swatch: "#C3C7CC",
-        render: "/vehicles/hero-xpulse-210-top/alpine-silver.webp",
-        image: "/vehicles/hero-xpulse-210-top/alpine-silver.webp",
-        pending: true,
       },
     ],
   },
