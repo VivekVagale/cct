@@ -1104,13 +1104,17 @@ export const vehicles: Vehicle[] = [
         render: "/vehicles/pulsar-150/sapphire-black-blue.webp",
         image: "/vehicles/pulsar-150/sapphire-black-blue.webp",
       },
+      /* The studio's folder holds two silvers and only one of them is one.
+         `sparkle black silver.png` is a render of a red-graphic bike, and
+         `sapphire black silver.png` is the silver one — but Sparkle Black
+         Silver is the colourway that exists, confirmed by the studio, so the
+         silver render is filed here and the misnamed file is unused. */
       {
         id: "sparkle-black-silver",
         name: "Sparkle Black Silver",
         swatch: "#3A3E44",
         render: "/vehicles/pulsar-150/sparkle-black-silver.webp",
         image: "/vehicles/pulsar-150/sparkle-black-silver.webp",
-        pending: true,
       },
       {
         id: "ebony-black-cherry-red",

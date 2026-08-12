@@ -111,8 +111,8 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    id: "jet-escort",
-    title: "Project Jet Escort",
+    id: "jet-mist",
+    title: "Project Jet Mist",
     price: "₹1.7k",
     isNew: true,
     description: "Formation flight alongside your machine, to scale.",
@@ -120,14 +120,15 @@ export const projects: Project[] = [
     // lower two-thirds, so the card's 4:3 crop of a 9:16 source keeps the whole
     // arrangement and loses only mist and mountain.
     //
-    // The file is still named for the old title. Renaming it would mean
-    // renaming the sphere's frame too, and the picture has not changed — only
-    // what the build is called.
+    // The build was briefly called Jet Escort and is Jet Mist again. The still
+    // never moved — it was left under its original name through the rename
+    // rather than being renamed twice, which is the whole reason there is
+    // nothing to undo here.
     image: "/showcase/project-jet-mist.webp",
     /* The same set as the still: the jet, the two cars and the machine on wet
        tarmac. A slow drift across it, so picking this build carries on the shot
        the card was already showing rather than cutting to a different one. */
-    video: "/projects/jet-escort.mp4",
+    video: "/projects/jet-mist.mp4",
   },
   {
     id: "bike-free-fall",
