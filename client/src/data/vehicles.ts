@@ -2078,15 +2078,21 @@ export const vehicles: Vehicle[] = [
     ],
   },
   /*
-   * Honda's H'ness, which arrived as its own folder alongside the Bajaj drop.
+   * Honda's H'ness, and the plain CB350 below it.
    *
-   * Both files are the Dlx Pro Chrome variant, and since both carry it the
-   * suffix distinguishes nothing and is not in the colour names.
+   * The H'ness arrived in two files and then in six, and the four that came
+   * later changed what the first two meant. Two of the six are Pearl Igneous
+   * Black and two are a deep ground grey; what separates each pair is the trim,
+   * Dlx Pro Chrome against Dlx Pro, and the renders are visibly different
+   * motorcycles -- brown seat and chrome against black seat and none.
    *
-   * Mat Dune Brown came in the BAJAJ BIKES folder named "honda cb 350", which
-   * is not a machine on this page. It is filed here rather than on the CB 350
-   * RS because the render is the H'ness -- round lamp, chrome pipe, classic
-   * tank, twin shocks -- and the RS is a different motorcycle.
+   * So the trim rides in the colour name. It is not a colour and it does not
+   * belong there, and the honest alternative is to split this into two or three
+   * machines the way the X440's S and T are split. That was not done because
+   * the studio's own labels are inconsistent about it -- one file says Dlx
+   * where its neighbours say Dlx Pro -- and inventing the grouping is worse
+   * than carrying six plain labels. Split it the moment the trims are
+   * confirmed.
    */
   {
     id: "honda-cb-hness-350",
@@ -2096,25 +2102,99 @@ export const vehicles: Vehicle[] = [
     image: "/vehicles/honda-cb-hness-350/cover.webp",
     colors: [
       {
-        id: "blue-metallic",
-        name: "Blue Metallic",
+        id: "blue-metallic-dlx-pro-chrome",
+        name: "Blue Metallic - Dlx Pro Chrome",
         swatch: "#22406E",
-        render: "/vehicles/honda-cb-hness-350/blue-metallic.webp",
-        image: "/vehicles/honda-cb-hness-350/blue-metallic.webp",
+        render: "/vehicles/honda-cb-hness-350/blue-metallic-dlx-pro-chrome.webp",
+        image: "/vehicles/honda-cb-hness-350/blue-metallic-dlx-pro-chrome.webp",
       },
       {
-        id: "decent-pearl-deep-ground-grey",
-        name: "Decent Pearl Deep Ground Grey",
+        id: "decent-pearl-deep-ground-grey-dlx-pro-chrome",
+        name: "Decent Pearl Deep Ground Grey - Dlx Pro Chrome",
         swatch: "#4A4F55",
-        render: "/vehicles/honda-cb-hness-350/decent-pearl-deep-ground-grey.webp",
-        image: "/vehicles/honda-cb-hness-350/decent-pearl-deep-ground-grey.webp",
+        render: "/vehicles/honda-cb-hness-350/decent-pearl-deep-ground-grey-dlx-pro-chrome.webp",
+        image: "/vehicles/honda-cb-hness-350/decent-pearl-deep-ground-grey-dlx-pro-chrome.webp",
+      },
+      {
+        id: "pearl-deep-ground-grey-dlx",
+        name: "Pearl Deep Ground Grey - Dlx",
+        swatch: "#4A4F55",
+        render: "/vehicles/honda-cb-hness-350/pearl-deep-ground-grey-dlx.webp",
+        image: "/vehicles/honda-cb-hness-350/pearl-deep-ground-grey-dlx.webp",
+      },
+      {
+        id: "pearl-igneous-black-dlx-pro-chrome",
+        name: "Pearl Igneous Black - Dlx Pro Chrome",
+        swatch: "#14161A",
+        render: "/vehicles/honda-cb-hness-350/pearl-igneous-black-dlx-pro-chrome.webp",
+        image: "/vehicles/honda-cb-hness-350/pearl-igneous-black-dlx-pro-chrome.webp",
+      },
+      {
+        id: "pearl-igneous-black-dlx-pro",
+        name: "Pearl Igneous Black - Dlx Pro",
+        swatch: "#14161A",
+        render: "/vehicles/honda-cb-hness-350/pearl-igneous-black-dlx-pro.webp",
+        image: "/vehicles/honda-cb-hness-350/pearl-igneous-black-dlx-pro.webp",
+      },
+      {
+        id: "precious-red-metallic-dlx-pro",
+        name: "Precious Red Metallic - Dlx Pro",
+        swatch: "#A32330",
+        render: "/vehicles/honda-cb-hness-350/precious-red-metallic-dlx-pro.webp",
+        image: "/vehicles/honda-cb-hness-350/precious-red-metallic-dlx-pro.webp",
+      },
+    ],
+  },
+  /*
+   * The plain CB350, which is neither the RS above nor the H'ness.
+   *
+   * Mat Dune Brown was filed with the H'ness last commit, on the strength of
+   * the bodywork in a render that arrived loose in the Bajaj folder. It was
+   * wrong: the studio's own CB350 folder holds it alongside the other four,
+   * and those four are this machine and not the RS's -- same names, different
+   * motorcycle, chrome pipe and teardrop tank against the RS's flat bench.
+   */
+  {
+    id: "honda-cb350",
+    name: "CB350",
+    manufacturer: "Honda",
+    render: "/vehicles/honda-cb350/cover.webp",
+    image: "/vehicles/honda-cb350/cover.webp",
+    colors: [
+      {
+        id: "mat-axis-gray-metallic",
+        name: "Mat Axis Gray Metallic",
+        swatch: "#6E7378",
+        render: "/vehicles/honda-cb350/mat-axis-gray-metallic.webp",
+        image: "/vehicles/honda-cb350/mat-axis-gray-metallic.webp",
       },
       {
         id: "mat-dune-brown",
         name: "Mat Dune Brown",
         swatch: "#B7A283",
-        render: "/vehicles/honda-cb-hness-350/mat-dune-brown.webp",
-        image: "/vehicles/honda-cb-hness-350/mat-dune-brown.webp",
+        render: "/vehicles/honda-cb350/mat-dune-brown.webp",
+        image: "/vehicles/honda-cb350/mat-dune-brown.webp",
+      },
+      {
+        id: "pearl-deep-ground-gray",
+        name: "Pearl Deep Ground Gray",
+        swatch: "#4A4F55",
+        render: "/vehicles/honda-cb350/pearl-deep-ground-gray.webp",
+        image: "/vehicles/honda-cb350/pearl-deep-ground-gray.webp",
+      },
+      {
+        id: "pearl-igneous-black",
+        name: "Pearl Igneous Black",
+        swatch: "#14161A",
+        render: "/vehicles/honda-cb350/pearl-igneous-black.webp",
+        image: "/vehicles/honda-cb350/pearl-igneous-black.webp",
+      },
+      {
+        id: "rebel-red-metallic",
+        name: "Rebel Red Metallic",
+        swatch: "#A32330",
+        render: "/vehicles/honda-cb350/rebel-red-metallic.webp",
+        image: "/vehicles/honda-cb350/rebel-red-metallic.webp",
       },
     ],
   },
