@@ -1713,6 +1713,22 @@ export const vehicles: Vehicle[] = [
         image: "/vehicles/platina-100/black-and-white.webp",
         pending: true,
       },
+      {
+        id: "blue",
+        name: "Blue",
+        swatch: "#22406E",
+        render: "/vehicles/platina-100/blue.webp",
+        image: "/vehicles/platina-100/blue.webp",
+        pending: true,
+      },
+      {
+        id: "red",
+        name: "Red",
+        swatch: "#A32330",
+        render: "/vehicles/platina-100/red.webp",
+        image: "/vehicles/platina-100/red.webp",
+        pending: true,
+      },
     ],
   },
   {
