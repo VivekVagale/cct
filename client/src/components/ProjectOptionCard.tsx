@@ -1,7 +1,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/content";
+import { PendingRender } from "@/components/PendingRender";
 import { useTilt } from "@/hooks/useTilt";
+
+/* The ground a build with no frame is drawn on. Neutral on purpose: the
+   placeholder is saying there is no picture, and a hue here would be the
+   card guessing at one. */
+export const PLACEHOLDER_SWATCH = "#6E7378";
 
 /**
  * The booking form's project picker, as a card rather than a text chip.
@@ -98,19 +104,34 @@ export function ProjectOptionCard({
       />
 
       <div className="relative aspect-[4/3] overflow-hidden">
-        <motion.img
-          src={project.image}
-          alt=""
-          className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
-            disabled
-              ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
-              : videoReady
-                ? "opacity-0"
-                : "opacity-60 group-hover:opacity-85"
-          }`}
-          animate={{ scale: selected ? 1.06 : 1 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        />
+        {/* A build with no frame yet draws the placeholder instead of borrowing
+            a picture of something else. It takes the same opacity treatment the
+            photograph would — the grey of a coming-soon card is the signal, and
+            a placeholder at full strength would read as the one live card in
+            the row. */}
+        {project.image ? (
+          <motion.img
+            src={project.image}
+            alt=""
+            className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+              disabled
+                ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
+                : videoReady
+                  ? "opacity-0"
+                  : "opacity-60 group-hover:opacity-85"
+            }`}
+            animate={{ scale: selected ? 1.06 : 1 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          />
+        ) : (
+          <div
+            className={`h-full w-full transition-opacity duration-700 ${
+              disabled ? "opacity-70 group-hover:opacity-90" : "opacity-90"
+            }`}
+          >
+            <PendingRender swatch={PLACEHOLDER_SWATCH} label="No frame yet" />
+          </div>
+        )}
 
         {/* The still stays mounted underneath rather than being swapped out.
             It is the poster while the loop downloads, the fallback if it never

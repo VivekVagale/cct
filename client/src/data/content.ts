@@ -71,7 +71,17 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  image: string;
+  /**
+   * The card's picture, where one exists.
+   *
+   * Optional, and a build with no frame yet should leave it unset rather than
+   * borrow. The two ways of filling this in when there is nothing to show are a
+   * stock photograph of somebody else's motorcycle and a studio frame that
+   * argues with the description beside it, and this file already carries a
+   * comment calling one of those the lesser wrong. Unset, the card draws the
+   * same placeholder a machine with no render draws, which says so.
+   */
+  image?: string;
   /**
    * A short silent loop, played in the card's thumbnail while this build is the
    * selected one in the booking form.
@@ -147,63 +157,19 @@ export const projects: Project[] = [
     video: "/projects/bike-free-fall.mp4",
   },
   {
-    id: "water-impact",
-    title: "Project Water Impact",
-    description: "The instant of contact, held a beat past real time.",
-    image:
-      "https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=1200&auto=format&fit=crop",
-    comingSoon: true,
-  },
-  {
-    id: "space-ride",
-    title: "Project Space Ride",
-    description: "Zero gravity, full detail — a machine off-world.",
-    image:
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
-    comingSoon: true,
-  },
-  {
-    id: "drop-zone",
-    title: "Project Drop Zone",
-    description:
-      "Two machines, a drop zone and a lot of smoke — game-key art staging, rendered as stills.",
-    /* The studio's own render, and now one that argues the description: a gunship
-       carrying a car out over the cloud deck on four cables is two machines and a
-       delivery. It replaces a chrome Continental at sunset, which was the studio's
-       work — the point of that swap — but had nothing to do with this brief.
-       Still a stand-in until the card's own frames are shot. */
-    image: "/showcase/chopper-delivery.webp",
-    comingSoon: true,
-  },
-  {
-    id: "hellfire",
-    title: "Project Hellfire",
-    description: "A rider wreathed in fire — volumetric flame and heat haze, simulated frame by frame.",
-    /* The nearest thing the studio has to this shot, which is not very near:
-       there is no flame render in the library at all, so this is the hottest
-       frame in it — black and red under a low sun, embers along the frame rails.
-       It is the same frame the sphere shows, and reusing it is the lesser wrong
-       against a stock photograph of somebody else's motorcycle. Replace it the
-       moment a flame sim exists; the description is writing a cheque this image
-       does not cash. */
-    image: "/showcase/f-0475.webp",
-    comingSoon: true,
-  },
-  {
-    id: "drone-chase",
-    title: "Project Drone Chase",
-    description: "A pursuit shot with no crew, no rig, no limit.",
-    image:
-      "https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=1200&auto=format&fit=crop",
-    comingSoon: true,
-  },
-  {
-    id: "re-9",
-    title: "Project RE 9",
-    description: "Nine frames of a single machine, built end to end.",
-    // The studio's own frame. 9:16, cropped 4:3 by the card, which keeps the
-    // rider and the roof edge and loses the top of the sky.
-    image: "/showcase/project-re-9.webp",
+    id: "minecraft",
+    title: "Project Minecraft",
+    description: "Your machine in a world built out of blocks.",
+    /* No image, on purpose. There is no voxel frame in the library and nothing
+       in it stands in for one — a photograph of a real motorcycle under this
+       title says the opposite of what the build is. The card draws the
+       placeholder until the first frame exists, and then this gets a path like
+       every other.
+
+       On the name: Minecraft is Mojang's trademark. Naming a paid build after
+       it was the studio's call, made with the exposure pointed out. If it ever
+       needs to change, it is the title on this line and nothing else — the id
+       is already generic. */
     comingSoon: true,
   },
   {

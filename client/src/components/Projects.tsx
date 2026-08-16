@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { projects, type Project } from "@/data/content";
+import { PendingRender } from "@/components/PendingRender";
+import { PLACEHOLDER_SWATCH } from "@/components/ProjectOptionCard";
 import { useTilt } from "@/hooks/useTilt";
 import { FoldHeading } from "@/components/FoldHeading";
 import AccordionGallery from "@/components/AccordionGallery";
@@ -63,25 +65,38 @@ function ProjectCard({ project }: { project: Project }) {
           projects. The two card grids in this flow are now the same shape at
           every width, which is the point of them looking alike at all. */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={project.image}
-          alt={project.title}
-          /* A live card runs at full strength, like the vehicle cards two
-             sections down — those carry no opacity at all, and these were
-             sitting at 0.6, so the same kind of render looked washed out in
-             one place and not the other.
+        {/* A build with no frame yet draws the placeholder rather than borrowing
+            a picture of something else, and takes the same held-back treatment
+            the photograph would. */}
+        {project.image ? (
+          <img
+            src={project.image}
+            alt={project.title}
+            /* A live card runs at full strength, like the vehicle cards two
+               sections down — those carry no opacity at all, and these were
+               sitting at 0.6, so the same kind of render looked washed out in
+               one place and not the other.
 
-             A coming-soon card is grey. Fully desaturated and held back, and
-             it stays that way under the pointer — the colour is the signal,
-             and a card that finds its colour on hover is one that looks
-             available the moment anyone touches it. It lifts slightly so the
-             card still feels alive rather than disabled-and-dead. */
-          className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
-            disabled
-              ? "opacity-55 grayscale group-hover:opacity-70"
-              : "opacity-100"
-          }`}
-        />
+               A coming-soon card is grey. Fully desaturated and held back, and
+               it stays that way under the pointer — the colour is the signal,
+               and a card that finds its colour on hover is one that looks
+               available the moment anyone touches it. It lifts slightly so the
+               card still feels alive rather than disabled-and-dead. */
+            className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+              disabled
+                ? "opacity-55 grayscale group-hover:opacity-70"
+                : "opacity-100"
+            }`}
+          />
+        ) : (
+          <div
+            className={`h-full w-full transition-opacity duration-700 ${
+              disabled ? "opacity-70 group-hover:opacity-85" : "opacity-100"
+            }`}
+          >
+            <PendingRender swatch={PLACEHOLDER_SWATCH} label="No frame yet" />
+          </div>
+        )}
         {/* Fades the image into the caption. Stops at the image's own bottom
             edge so the caption below stays clear of it. */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />

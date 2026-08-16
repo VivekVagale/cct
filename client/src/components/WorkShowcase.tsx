@@ -73,9 +73,13 @@ export function preloadShowcase() {
    * until both finished. Warming them here costs nothing anyone can see and
    * removes the wait entirely.
    */
+  /* A build with no frame yet has nothing to warm — it draws a placeholder
+     rather than an image, so `image` is undefined and there is no request to
+     get ahead of. Filtered rather than defaulted: `new Image().src = undefined`
+     resolves against the page and fetches the document again. */
   const sources = [
     ...showcaseItems.map((i) => i.image),
-    ...projects.map((p) => p.image),
+    ...projects.map((p) => p.image).filter((src): src is string => Boolean(src)),
   ];
 
   for (const src of new Set(sources)) {
