@@ -27,6 +27,32 @@ and is not subject to those policies.
 
 ---
 
+## The enquiry log, separately
+
+The Instagram enquiry sheet the studio has worked from since before this form
+existed lives in its own table, not in `bookings`. Run
+[`supabase/enquiries.sql`](supabase/enquiries.sql) the same way, then:
+
+**Table Editor → `enquiries` → Import data from CSV**, using a CSV exported
+from the sheet with **File → Download → Comma-separated values**.
+
+Match the columns by position: the file's fifteen columns are `submitted_at`,
+`status`, `contact_status`, `instagram`, `vehicle`, `availability`, `column_7`,
+`free_links`, `number_plate`, `plan`, `hdri`, `note`, `f`, `payment_at`,
+`banking_name`, in that order. Leave `id` and `imported_at` alone; they fill
+themselves.
+
+Every column is text, on purpose — the sheet is months of hand-editing and a
+typed import fails on the first bad cell and rolls back the whole file. There
+is a statement at the bottom of the SQL for converting the timestamp once the
+rows are in.
+
+`enquiries` has row-level security on and **no policies at all**, so nothing
+reachable with the publishable key can read or write it. It holds customer
+phone numbers, emails, handles and registration numbers, and the publishable
+key is readable by anyone who opens the network tab. Read it in the dashboard,
+which uses your own login. Do not add a select policy for `anon`.
+
 ## Checking it works
 
 Submit the form on the live site, then look in Table Editor. A row appears, or
