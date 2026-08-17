@@ -34,10 +34,15 @@ working a job: `contact_status` (a dropdown, the sheet's five values),
 `number_plate` (free text), `payment_at` (date picker), `payment_stage` (half or
 full, blank until you pick) and `amount_paid` in rupees.
 
-Two columns read themselves and cannot be edited: `payment_at_label` and
-`created_at_label`, both rendering as **Sunday, 17 August 2026, 10:41 PM**. The
-dashboard has no display-format setting, so this is how a date is made readable
-— type into `payment_at`, read the label beside it.
+Two columns fill themselves: `payment_at_label` and `created_at_label`, both
+rendering as **Sunday, 17 August 2026, 10:41 PM**. The dashboard has no
+display-format setting, so this is how a date is made readable — type into
+`payment_at`, read the label beside it.
+
+A trigger writes them, not a generated column: `to_char` is STABLE in Postgres
+because it reads `lc_time` for day and month names, and a generated expression
+has to be IMMUTABLE. Do not type into the labels; the next save overwrites
+them.
 
 `amount_paid` is the one number on the table worth totalling:
 

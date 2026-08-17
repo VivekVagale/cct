@@ -103,37 +103,46 @@ alter table public.bookings
   add column if not exists payment_at timestamp;
 
 alter table public.bookings
-  add column if not exists payment_at_label text
-  generated always as (
-    to_char(payment_at, 'FMDay, FMDD FMMonth YYYY, HH12:MI AM')
-  ) stored;
+  add column if not exists payment_at_label text;
 
--- The same readable copy for the booking's own date, by a different mechanism.
---
--- `created_at` is timestamptz and stays that way: the server writes it on
--- insert and its instant is the point of it. That is also why this one is not
--- generated. `at time zone` applied to a timestamptz is STABLE, not IMMUTABLE,
--- and a generated expression must be immutable -- Postgres rejects it outright
--- with 42P17. Spelling IST out as `+ interval '5 hours 30 minutes'` does not
--- help; the `at time zone 'UTC'` in front of it is the stable part.
---
--- A column default has no such rule, so the label fills on insert instead. It
--- never goes stale because `created_at` never changes after insert either. If
--- one is ever edited by hand, re-run the update below.
 alter table public.bookings
-  add column if not exists created_at_label text not null
-  default to_char(now() at time zone 'Asia/Kolkata',
-                  'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
+  add column if not exists created_at_label text;
 
--- Rows that existed before the column did took the default, which is the time
--- the column was added rather than the time they were booked. This puts them
--- right, and is a no-op on a run where nothing was backfilled.
-update public.bookings
-   set created_at_label = to_char(created_at at time zone 'Asia/Kolkata',
-                                  'FMDay, FMDD FMMonth YYYY, HH12:MI AM')
- where created_at_label is distinct from
-       to_char(created_at at time zone 'Asia/Kolkata',
-               'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
+-- Both labels are filled by a trigger, and neither is a generated column.
+--
+-- Two attempts went the generated route and Postgres refused both with 42P17,
+-- generation expression is not immutable. The rule that kills it is not the
+-- timezone, which was the first guess: `to_char` is STABLE for every timestamp
+-- variant it takes, because it reads `lc_time` for its day and month names. No
+-- generated column can call it at all, zoned or not.
+--
+-- A trigger has no immutability rule. It also handles the thing a generated
+-- column would have handled and a default would not: `payment_at` is typed by
+-- hand and changed later, and its label has to follow.
+create or replace function public.bookings_set_labels()
+returns trigger
+language plpgsql
+as $$
+begin
+  -- to_char of null is null, so an unpaid booking keeps an empty label rather
+  -- than rendering the epoch.
+  new.payment_at_label := to_char(
+    new.payment_at, 'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
+  new.created_at_label := to_char(
+    new.created_at at time zone 'Asia/Kolkata',
+    'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
+  return new;
+end
+$$;
+
+drop trigger if exists bookings_labels on public.bookings;
+create trigger bookings_labels
+  before insert or update on public.bookings
+  for each row execute function public.bookings_set_labels();
+
+-- Fires the trigger on every existing row, which is how rows written before
+-- the trigger existed get their labels. A no-op write, and safe to repeat.
+update public.bookings set id = id;
 
 -- What has been paid, in two columns rather than one sentence.
 --
