@@ -11,6 +11,27 @@ import { audienceTotals, audienceWindow } from "@/data/audience";
 import { FoldHeading } from "@/components/FoldHeading";
 import { useScene } from "@/components/SceneDeck";
 
+/* Spelled out, because the sentence they sit in is prose and the page writes
+   its other small counts in words. Past ten it falls back to digits, which is
+   not a case this list has ever been near. */
+const WORDS = [
+  "Zero",
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six",
+  "Seven",
+  "Eight",
+  "Nine",
+  "Ten",
+];
+const spell = (n: number) => WORDS[n] ?? String(n);
+
+const reelCount = spell(topReels.length).toLowerCase();
+const commissionedCount = spell(topReels.filter((reel) => reel.client).length);
+
 /**
  * What the studio is, argued with what the work did rather than with adjectives.
  *
@@ -130,8 +151,13 @@ export function About() {
               {reachWindow.label}
             </p>
 
+            {/* Both figures are counted off `topReels`, not typed. They were
+                typed once and said "Three of the four" against a list that had
+                grown to five, four of them commissioned — a sentence the page
+                disproved two screens further down. Add or drop a reel and this
+                follows. */}
             <AnimatedText
-              text="You commission the build, and it goes out from here. Three of the four below were made for someone's own machine — every one a 3D render, none of it filmed."
+              text={`You commission the build, and it goes out from here. ${commissionedCount} of the ${reelCount} below were made for someone's own machine — every one a 3D render, none of it filmed.`}
               className="text-base sm:text-lg text-[#B8C4D6] leading-relaxed max-w-2xl"
             />
           </div>
