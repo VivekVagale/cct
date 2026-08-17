@@ -31,7 +31,7 @@ and is not subject to those policies.
 
 `progress`, plus three carried over from the enquiry sheet for reference while
 working a job: `contact_status` (a dropdown, the sheet's five values),
-`number_plate` and `payment_at` (a date picker).
+`number_plate` and `payment_at` — both free text, type whatever you like.
 
 None of them is in the insert grant, so nothing on the site writes them and a
 hand-written POST cannot either. Fill them in the Table Editor. Re-run

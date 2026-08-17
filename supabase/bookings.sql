@@ -88,12 +88,34 @@ alter table public.bookings
   add column if not exists number_plate text not null default ''
   check (char_length(number_plate) <= 200);
 
--- Sheet column N. A real timestamp rather than the sheet's text, because
--- nothing has been typed into it yet -- there is no legacy formatting to
--- preserve, and the Table Editor gives a date picker for this type. Nullable:
--- an unpaid booking has no payment time, and 'not yet' is not a date.
+-- Sheet column N. Text, not timestamptz, at the studio's instruction: this is a
+-- column they type into by hand and a date type refuses everything that is not
+-- a date. Half of what goes in a payment field is not one -- 'advance paid',
+-- 'half on delivery', '2nd Aug approx' -- and a column that rejects those makes
+-- the note live somewhere else, which is worse than an unsortable column.
+--
+-- It shipped as timestamptz for one commit. The conversion below carries any
+-- value already entered across as DD/MM/YYYY HH:MM rather than dropping it.
 alter table public.bookings
-  add column if not exists payment_at timestamptz;
+  add column if not exists payment_at text not null default ''
+  check (char_length(payment_at) <= 200);
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'bookings'
+      and column_name = 'payment_at' and data_type <> 'text'
+  ) then
+    alter table public.bookings
+      alter column payment_at type text
+      using coalesce(to_char(payment_at, 'DD/MM/YYYY HH24:MI'), '');
+    alter table public.bookings alter column payment_at set default '';
+    update public.bookings set payment_at = '' where payment_at is null;
+    alter table public.bookings alter column payment_at set not null;
+  end if;
+end
+$$;
 
 -- There is no collab_post column. The collab used to be a toggle and is now
 -- simply included in every job, so the field was true on every row and recorded
