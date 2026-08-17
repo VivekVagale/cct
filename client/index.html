@@ -26,10 +26,16 @@
     <meta name="theme-color" content="#0A0B0D" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Five of the seven project cards are still Unsplash. Opening that
-         connection here saves the DNS lookup, the TCP handshake and the TLS
-         negotiation from happening later, mid-transition, on the scene that
-         needs the images. -->
+    <!-- One project card is still Unsplash: Custom CGI, the only build in the
+         range without a machine of its own to show. It was five of seven when
+         this was written, then the six coming-soon builds were cut and the
+         count was never followed down.
+
+         The preconnect stays for that one card. It saves the DNS lookup, the
+         TCP handshake and the TLS negotiation from landing mid-transition on
+         the scene that needs the image - a thinner win than it was, but the
+         card is on the projects scene either way. Drop this line the moment
+         Custom CGI gets a frame of its own. -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
     <!-- Archivo Black replaces Fraunces as the display face. It ships one
          weight and one style — that is the whole design of it, a single black
