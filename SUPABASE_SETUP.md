@@ -27,6 +27,20 @@ and is not subject to those policies.
 
 ---
 
+## Studio-side columns on `bookings`
+
+`progress`, plus three carried over from the enquiry sheet for reference while
+working a job: `contact_status` (a dropdown, the sheet's five values),
+`number_plate` and `payment_at` (a date picker).
+
+None of them is in the insert grant, so nothing on the site writes them and a
+hand-written POST cannot either. Fill them in the Table Editor. Re-run
+[`supabase/bookings.sql`](supabase/bookings.sql) to add them to a table that
+already exists — it is safe to run twice.
+
+`contact_status` and `progress` are not duplicates: one is where the render has
+got to, the other is where the conversation has got to.
+
 ## The enquiry log, separately
 
 The Instagram enquiry sheet the studio has worked from since before this form

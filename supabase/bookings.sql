@@ -50,6 +50,51 @@ create table if not exists public.bookings (
   progress public.booking_progress not null default 'yet to do'
 );
 
+-- Three columns carried over from the enquiry sheet, for reference while
+-- working a booking: its columns C, I and N.
+--
+-- Studio-side, like `progress`. None of them is in the insert grant at the
+-- bottom of this file, so nothing on the site can write them and a hand-written
+-- POST cannot either. They are filled in the Table Editor.
+--
+-- `contact_status` overlaps `progress` and that is not an accident to fix
+-- blindly: `progress` is where the render has got to, this is where the
+-- conversation has got to. A job can be 'completed' and still 'Outstanding'.
+-- If they do collapse into one in practice, drop this rather than `progress` --
+-- the site has no opinion about either, but `progress` is the older column.
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'booking_contact_status') then
+    create type public.booking_contact_status as enum (
+      'awaiting',
+      'contacted',
+      'on hold',
+      'outstanding',
+      'model confirmation?'
+    );
+  end if;
+end
+$$;
+
+-- The sheet's five values, lowercased. The sheet also holds pairs in one cell
+-- -- 'Outstanding, On Hold' -- which an enum cannot take. Those rows pick the
+-- one that is actually true; a column that accepts both says neither.
+alter table public.bookings
+  add column if not exists contact_status public.booking_contact_status
+  not null default 'awaiting';
+
+-- Sheet column I. Free text: the sheet holds names, numbers, and both.
+alter table public.bookings
+  add column if not exists number_plate text not null default ''
+  check (char_length(number_plate) <= 200);
+
+-- Sheet column N. A real timestamp rather than the sheet's text, because
+-- nothing has been typed into it yet -- there is no legacy formatting to
+-- preserve, and the Table Editor gives a date picker for this type. Nullable:
+-- an unpaid booking has no payment time, and 'not yet' is not a date.
+alter table public.bookings
+  add column if not exists payment_at timestamptz;
+
 -- There is no collab_post column. The collab used to be a toggle and is now
 -- simply included in every job, so the field was true on every row and recorded
 -- nothing. If it ever becomes a choice again, add it then; rows written before
