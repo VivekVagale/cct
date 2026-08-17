@@ -8,13 +8,19 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Cold Chain Theory — Cinematic Automotive CGI</title>
     <meta name="description" content="Cold Chain Theory is a premium automotive CGI studio turning machines into cinema." />
-    <!-- A full-face helmet in profile, the brand violet on the page's own
-         near-black. The mascot's helmet is where it comes from, drawn rather
-         than cropped: the mascot wears a real SMK lid with the maker's name
-         across the brow, and another company's mark is not what this site's
-         tab should carry. The .ico holds 48, 32 and 16; the shape is one
-         silhouette at every size, since the breath-guard notch that reads at
-         512 closes into noise by 16 and turns the mark into a blob. -->
+    <!-- The mascot's helmet, cropped square out of the studio's own render.
+         Full-bleed, no rounded plate: at 16px a corner radius eats pixels the
+         mark needs, and the browser rounds it itself where it wants to.
+
+         The maker's name across the brow is blurred out. It is a real SMK lid
+         and another company's trademark has no business being this site's
+         icon. At 32px the patch is invisible; at 512 it reads as a soft band
+         on the shell, which is the cheaper of the two problems.
+
+         What survives the size drop is the visor - a bright band across a dark
+         shell - which is why this reads as a helmet at 32px where a drawn flat
+         silhouette read as a bucket. The 48/32/16 in the .ico carry a little
+         extra contrast and brightness for the same reason. -->
     <link rel="icon" href="/favicon.ico" sizes="48x48 32x32 16x16" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#0A0B0D" />
