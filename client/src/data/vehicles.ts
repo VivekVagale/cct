@@ -2602,4 +2602,58 @@ export const vehicles: Vehicle[] = [
       },
     ],
   },
+  {
+    id: "yamaha-mt-15",
+    name: "MT-15",
+    manufacturer: "Yamaha",
+    /* Cover is Metallic Black rather than the first file the studio sent.
+       Black is what most of the enquiries for this machine ask for, and the
+       cover is a copy of a colourway's file either way. */
+    render: "/vehicles/yamaha-mt-15/cover.webp",
+    image: "/vehicles/yamaha-mt-15/cover.webp",
+    colors: [
+      {
+        id: "metallic-black",
+        name: "Metallic Black",
+        swatch: "#14161A",
+        render: "/vehicles/yamaha-mt-15/metallic-black.webp",
+        image: "/vehicles/yamaha-mt-15/metallic-black.webp",
+      },
+      {
+        /* DLX is the studio's own filename and it is kept. It is not a trim
+           split of the kind the X440's S and T are: same machine, same shot,
+           red wheels instead of black. The swatch follows Metallic Black Red
+           above - a black carrying red, not a red. */
+        id: "metallic-black-dlx",
+        name: "Metallic Black DLX",
+        swatch: "#2A1216",
+        render: "/vehicles/yamaha-mt-15/metallic-black-dlx.webp",
+        image: "/vehicles/yamaha-mt-15/metallic-black-dlx.webp",
+      },
+      {
+        id: "ice-storm",
+        name: "Ice Storm",
+        swatch: "#EDEFF2",
+        render: "/vehicles/yamaha-mt-15/ice-storm.webp",
+        image: "/vehicles/yamaha-mt-15/ice-storm.webp",
+      },
+      {
+        /* No cyan among the constants this file already reuses - the nearest,
+           #1E6E6A, is a teal and reads green beside this paint. Inferred from
+           the name like the rest, not sampled. */
+        id: "metallic-silver-cyan",
+        name: "Metallic Silver Cyan",
+        swatch: "#2E93B0",
+        render: "/vehicles/yamaha-mt-15/metallic-silver-cyan.webp",
+        image: "/vehicles/yamaha-mt-15/metallic-silver-cyan.webp",
+      },
+      {
+        id: "vivid-violet-metallic",
+        name: "Vivid Violet Metallic",
+        swatch: "#4A3468",
+        render: "/vehicles/yamaha-mt-15/vivid-violet-metallic.webp",
+        image: "/vehicles/yamaha-mt-15/vivid-violet-metallic.webp",
+      },
+    ],
+  },
 ];
