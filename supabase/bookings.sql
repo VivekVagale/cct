@@ -117,6 +117,32 @@ begin
 end
 $$;
 
+-- What has been paid, in two columns rather than one sentence.
+--
+-- `payment_stage` is nullable with no default, unlike `progress` and
+-- `contact_status`. Those have a true starting state - every job begins 'yet to
+-- do' and 'awaiting'. This one does not: a booking nobody has discussed money
+-- for is not half paid, and defaulting to 'half' would fill the column with an
+-- answer nobody gave. Blank means blank.
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'booking_payment_stage') then
+    create type public.booking_payment_stage as enum ('half', 'full');
+  end if;
+end
+$$;
+
+alter table public.bookings
+  add column if not exists payment_stage public.booking_payment_stage;
+
+-- Rupees. Numeric, not text, and this is the one column here where the type is
+-- worth the constraint: it is the only field on the table that anyone will ever
+-- want a sum of. `payment_at` beside it is free text precisely so the notes
+-- that do not fit a number have somewhere to go.
+alter table public.bookings
+  add column if not exists amount_paid numeric(10,2)
+  check (amount_paid >= 0);
+
 -- There is no collab_post column. The collab used to be a toggle and is now
 -- simply included in every job, so the field was true on every row and recorded
 -- nothing. If it ever becomes a choice again, add it then; rows written before

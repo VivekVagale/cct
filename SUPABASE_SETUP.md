@@ -31,7 +31,15 @@ and is not subject to those policies.
 
 `progress`, plus three carried over from the enquiry sheet for reference while
 working a job: `contact_status` (a dropdown, the sheet's five values),
-`number_plate` and `payment_at` — both free text, type whatever you like.
+`number_plate` and `payment_at` — both free text, type whatever you like — plus
+`payment_stage` (half or full, blank until you pick) and `amount_paid` in
+rupees. `amount_paid` is the one number on the table worth totalling:
+
+```sql
+select payment_stage, count(*), sum(amount_paid)
+from public.bookings
+group by payment_stage;
+```
 
 None of them is in the insert grant, so nothing on the site writes them and a
 hand-written POST cannot either. Fill them in the Table Editor. Re-run
