@@ -31,9 +31,15 @@ and is not subject to those policies.
 
 `progress`, plus three carried over from the enquiry sheet for reference while
 working a job: `contact_status` (a dropdown, the sheet's five values),
-`number_plate` and `payment_at` — both free text, type whatever you like — plus
-`payment_stage` (half or full, blank until you pick) and `amount_paid` in
-rupees. `amount_paid` is the one number on the table worth totalling:
+`number_plate` (free text), `payment_at` (date picker), `payment_stage` (half or
+full, blank until you pick) and `amount_paid` in rupees.
+
+Two columns read themselves and cannot be edited: `payment_at_label` and
+`created_at_label`, both rendering as **Sunday, 17 August 2026, 10:41 PM**. The
+dashboard has no display-format setting, so this is how a date is made readable
+— type into `payment_at`, read the label beside it.
+
+`amount_paid` is the one number on the table worth totalling:
 
 ```sql
 select payment_stage, count(*), sum(amount_paid)

@@ -88,34 +88,40 @@ alter table public.bookings
   add column if not exists number_plate text not null default ''
   check (char_length(number_plate) <= 200);
 
--- Sheet column N. Text, not timestamptz, at the studio's instruction: this is a
--- column they type into by hand and a date type refuses everything that is not
--- a date. Half of what goes in a payment field is not one -- 'advance paid',
--- 'half on delivery', '2nd Aug approx' -- and a column that rejects those makes
--- the note live somewhere else, which is worse than an unsortable column.
+-- Sheet column N, and the readable copy of it.
 --
--- It shipped as timestamptz for one commit. The conversion below carries any
--- value already entered across as DD/MM/YYYY HH:MM rather than dropping it.
+-- The dashboard has no display-format setting: a date column renders however
+-- the Table Editor decides and nothing on the column changes that. So the date
+-- is stored once and rendered once, in two columns -- `payment_at` is what you
+-- type into and what sorts, `payment_at_label` is what you read.
+--
+-- `timestamp`, not `timestamptz`. A generated column has to be immutable and
+-- `at time zone` is not, so a zoned column cannot produce a label at all. This
+-- one holds IST directly: the studio, its clients and its bank are all in one
+-- zone, and the column is typed by hand rather than written by a machine.
 alter table public.bookings
-  add column if not exists payment_at text not null default ''
-  check (char_length(payment_at) <= 200);
+  add column if not exists payment_at timestamp;
 
-do $$
-begin
-  if exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'bookings'
-      and column_name = 'payment_at' and data_type <> 'text'
-  ) then
-    alter table public.bookings
-      alter column payment_at type text
-      using coalesce(to_char(payment_at, 'DD/MM/YYYY HH24:MI'), '');
-    alter table public.bookings alter column payment_at set default '';
-    update public.bookings set payment_at = '' where payment_at is null;
-    alter table public.bookings alter column payment_at set not null;
-  end if;
-end
-$$;
+alter table public.bookings
+  add column if not exists payment_at_label text
+  generated always as (
+    to_char(payment_at, 'FMDay, FMDD FMMonth YYYY, HH12:MI AM')
+  ) stored;
+
+-- The same treatment for the booking's own date, which is the column anyone
+-- actually reads this table by.
+--
+-- `created_at` is timestamptz and stays that way -- it is written by the server
+-- on insert and its zone is the one thing about it worth keeping exact. IST is
+-- spelled out as an interval here for the immutability rule above; that is
+-- correct only because India has no daylight saving, and it would be a bug in
+-- any zone that does.
+alter table public.bookings
+  add column if not exists created_at_label text
+  generated always as (
+    to_char(created_at at time zone 'UTC' + interval '5 hours 30 minutes',
+            'FMDay, FMDD FMMonth YYYY, HH12:MI AM')
+  ) stored;
 
 -- What has been paid, in two columns rather than one sentence.
 --
