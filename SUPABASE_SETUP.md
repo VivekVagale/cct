@@ -31,18 +31,15 @@ and is not subject to those policies.
 
 `progress`, plus three carried over from the enquiry sheet for reference while
 working a job: `contact_status` (a dropdown, the sheet's five values),
-`number_plate` (free text), `payment_at` (date picker), `payment_stage` (half or
-full, blank until you pick) and `amount_paid` in rupees.
+`number_plate` and `payment_at` are free text — type anything. `payment_stage`
+is half or full, blank until you pick, and `amount_paid` is rupees.
 
-Two columns fill themselves: `payment_at_label` and `created_at_label`, both
-rendering as **Sunday, 17 August 2026, 10:41 PM**. The dashboard has no
-display-format setting, so this is how a date is made readable — type into
-`payment_at`, read the label beside it.
-
-A trigger writes them, not a generated column: `to_char` is STABLE in Postgres
-because it reads `lc_time` for day and month names, and a generated expression
-has to be IMMUTABLE. Do not type into the labels; the next save overwrites
-them.
+`created_at_label` fills itself, rendering the booking's date as **Sunday, 17
+August 2026, 10:41 PM**, because the dashboard has no display-format setting
+and a raw timestamptz is unreadable at a glance. A trigger writes it, not a
+generated column: `to_char` is STABLE in Postgres since it reads `lc_time` for
+day and month names, and a generated expression has to be IMMUTABLE. Don't type
+into it; the next save overwrites it.
 
 `amount_paid` is the one number on the table worth totalling:
 

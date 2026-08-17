@@ -99,16 +99,41 @@ alter table public.bookings
 -- `at time zone` is not, so a zoned column cannot produce a label at all. This
 -- one holds IST directly: the studio, its clients and its bank are all in one
 -- zone, and the column is typed by hand rather than written by a machine.
+-- Free text, and this is settled: the studio types into it by hand and wants to
+-- write things that are not dates -- 'advance paid', 'half on delivery', '2nd
+-- Aug approx'. A date column rejects all of those and pushes the note into
+-- `note` or nowhere, which costs more than the sorting it buys.
+--
+-- It was a date type for two commits and carried a `payment_at_label` beside it
+-- to render it readably. Both are gone: with no date type there is nothing to
+-- render, and the conversion below keeps anything already typed.
 alter table public.bookings
-  add column if not exists payment_at timestamp;
+  add column if not exists payment_at text not null default ''
+  check (char_length(payment_at) <= 200);
 
-alter table public.bookings
-  add column if not exists payment_at_label text;
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'bookings'
+      and column_name = 'payment_at' and data_type <> 'text'
+  ) then
+    alter table public.bookings
+      alter column payment_at type text
+      using coalesce(to_char(payment_at, 'DD/MM/YYYY HH24:MI'), '');
+    alter table public.bookings alter column payment_at set default '';
+    update public.bookings set payment_at = '' where payment_at is null;
+    alter table public.bookings alter column payment_at set not null;
+  end if;
+end
+$$;
+
+alter table public.bookings drop column if exists payment_at_label;
 
 alter table public.bookings
   add column if not exists created_at_label text;
 
--- Both labels are filled by a trigger, and neither is a generated column.
+-- Filled by a trigger, not a generated column.
 --
 -- Two attempts went the generated route and Postgres refused both with 42P17,
 -- generation expression is not immutable. The rule that kills it is not the
@@ -116,18 +141,12 @@ alter table public.bookings
 -- variant it takes, because it reads `lc_time` for its day and month names. No
 -- generated column can call it at all, zoned or not.
 --
--- A trigger has no immutability rule. It also handles the thing a generated
--- column would have handled and a default would not: `payment_at` is typed by
--- hand and changed later, and its label has to follow.
+-- A trigger has no immutability rule.
 create or replace function public.bookings_set_labels()
 returns trigger
 language plpgsql
 as $$
 begin
-  -- to_char of null is null, so an unpaid booking keeps an empty label rather
-  -- than rendering the epoch.
-  new.payment_at_label := to_char(
-    new.payment_at, 'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
   new.created_at_label := to_char(
     new.created_at at time zone 'Asia/Kolkata',
     'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
