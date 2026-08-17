@@ -2100,6 +2100,19 @@ export const vehicles: Vehicle[] = [
         render: "/vehicles/honda-cb-350-rs/rebel-red-metallic.webp",
         image: "/vehicles/honda-cb-350-rs/rebel-red-metallic.webp",
       },
+      {
+        /* The studio's file is "black with pearl sports yellow", and that is
+           what the render is: a black machine with a yellow tank flash, not a
+           yellow one. Named for Honda's own colour like the four above it,
+           swatched like Metallic Black Red on the Pulsar 150 -- a black
+           carrying yellow. A #D8A62A here would be the tank stripe standing in
+           for the whole motorcycle. */
+        id: "pearl-sports-yellow",
+        name: "Pearl Sports Yellow",
+        swatch: "#2E2411",
+        render: "/vehicles/honda-cb-350-rs/pearl-sports-yellow.webp",
+        image: "/vehicles/honda-cb-350-rs/pearl-sports-yellow.webp",
+      },
     ],
   },
   /*
