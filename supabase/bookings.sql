@@ -108,20 +108,32 @@ alter table public.bookings
     to_char(payment_at, 'FMDay, FMDD FMMonth YYYY, HH12:MI AM')
   ) stored;
 
--- The same treatment for the booking's own date, which is the column anyone
--- actually reads this table by.
+-- The same readable copy for the booking's own date, by a different mechanism.
 --
--- `created_at` is timestamptz and stays that way -- it is written by the server
--- on insert and its zone is the one thing about it worth keeping exact. IST is
--- spelled out as an interval here for the immutability rule above; that is
--- correct only because India has no daylight saving, and it would be a bug in
--- any zone that does.
+-- `created_at` is timestamptz and stays that way: the server writes it on
+-- insert and its instant is the point of it. That is also why this one is not
+-- generated. `at time zone` applied to a timestamptz is STABLE, not IMMUTABLE,
+-- and a generated expression must be immutable -- Postgres rejects it outright
+-- with 42P17. Spelling IST out as `+ interval '5 hours 30 minutes'` does not
+-- help; the `at time zone 'UTC'` in front of it is the stable part.
+--
+-- A column default has no such rule, so the label fills on insert instead. It
+-- never goes stale because `created_at` never changes after insert either. If
+-- one is ever edited by hand, re-run the update below.
 alter table public.bookings
-  add column if not exists created_at_label text
-  generated always as (
-    to_char(created_at at time zone 'UTC' + interval '5 hours 30 minutes',
-            'FMDay, FMDD FMMonth YYYY, HH12:MI AM')
-  ) stored;
+  add column if not exists created_at_label text not null
+  default to_char(now() at time zone 'Asia/Kolkata',
+                  'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
+
+-- Rows that existed before the column did took the default, which is the time
+-- the column was added rather than the time they were booked. This puts them
+-- right, and is a no-op on a run where nothing was backfilled.
+update public.bookings
+   set created_at_label = to_char(created_at at time zone 'Asia/Kolkata',
+                                  'FMDay, FMDD FMMonth YYYY, HH12:MI AM')
+ where created_at_label is distinct from
+       to_char(created_at at time zone 'Asia/Kolkata',
+               'FMDay, FMDD FMMonth YYYY, HH12:MI AM');
 
 -- What has been paid, in two columns rather than one sentence.
 --
