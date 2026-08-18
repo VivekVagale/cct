@@ -29,10 +29,10 @@ and is not subject to those policies.
 
 ## Studio-side columns on `bookings`
 
-`progress`, plus three carried over from the enquiry sheet for reference while
-working a job: `contact_status` (a dropdown, the sheet's five values),
-`number_plate` and `payment_at` are free text — type anything. `payment_stage`
-is half or full, blank until you pick, and `amount_paid` is rupees.
+`progress`, plus five for working a job through: `contact_status` (a dropdown,
+the enquiry sheet's five values), `number_plate` and `payment_at` (both free
+text — type anything), `payment_stage` (half or full, blank until you pick) and
+`amount_paid` in rupees.
 
 `created_at_label` fills itself, rendering the booking's date as **Sunday, 17
 August 2026, 10:41 PM**, because the dashboard has no display-format setting
@@ -56,6 +56,24 @@ already exists — it is safe to run twice.
 
 `contact_status` and `progress` are not duplicates: one is where the render has
 got to, the other is where the conversation has got to.
+
+## Project Free Fall's brief
+
+Choosing Free Fall on the booking form opens a dialog asking five things the
+studio used to settle over DMs: what the plate should read, how many stickers
+are on the machine, bright or dark, whether OEM parts are fitted and which, and
+which jet. They arrive as `free_fall_plate`, `free_fall_stickers`,
+`free_fall_environment`, `free_fall_oem`, `free_fall_oem_details` and
+`free_fall_jet`, and are empty strings under every other build.
+
+These are the only columns added since launch that the **site** writes, so they
+are in the insert grant. A column added without being granted is a 403 on every
+submission, not a blank value — re-run
+[`supabase/bookings.sql`](supabase/bookings.sql) after pulling, or the form
+stops working for everyone.
+
+Jet and environment are stored as their names, not their ids, because a person
+reads this table.
 
 ## The enquiry log, separately
 

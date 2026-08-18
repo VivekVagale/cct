@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { AnimatePresence } from "framer-motion";
 import { Mascot } from "@/components/Mascot";
 import Cubes from "@/components/ui/Cubes";
 import { Magnet } from "@/components/Magnet";
@@ -13,6 +14,13 @@ import { PendingRender } from "@/components/PendingRender";
 import { SparkleButton } from "@/components/SparkleButton";
 import { MarqueChips, type MarqueChip } from "@/components/MarqueChips";
 import { ThankYouCard, preloadThankYou } from "@/components/ThankYouCard";
+import {
+  FreeFallDialog,
+  FREE_FALL_DEFAULTS,
+  type FreeFallAnswers,
+} from "@/components/FreeFallDialog";
+import { jets } from "@/data/jets";
+import { environments } from "@/data/environments";
 import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
@@ -20,6 +28,11 @@ import DepthText from "@/components/DepthText";
 import { useIsPhone } from "@/hooks/useIsPhone";
 
 type Status = "idle" | "submitting" | "success" | "error";
+
+/* The build that carries its own brief. A constant rather than the literal in
+   three places, and named here so the next person looking for what makes Free
+   Fall special finds it at the top of the file. */
+const FREE_FALL_ID = "bike-free-fall";
 
 /**
  * Who the work is for.
@@ -201,7 +214,20 @@ function ChosenMachine({
 export function Booking() {
   const isPhone = useIsPhone();
   const [status, setStatus] = useState<Status>("idle");
-  const [selectedProject, setSelectedProject] = useState(projects[0].title);
+  /*
+   * The chosen build, held by id.
+   *
+   * It was the title, and every comparison downstream was a string match
+   * against display copy. That works until the copy moves -- and it is moving:
+   * Project Minecraft is a trademark the studio has been told about, and its
+   * title is the one place the word appears. A rename would have quietly
+   * stopped the Free Fall dialog opening with nothing to catch it, which is
+   * the same failure the About sentence and the Unsplash comment had.
+   *
+   * The title is derived where it is needed, so `project_type` keeps receiving
+   * exactly the strings it always has.
+   */
+  const [selectedProjectId, setSelectedProjectId] = useState(projects[0].id);
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [colorId, setColorId] = useState<string | null>(null);
   /*
@@ -210,15 +236,47 @@ export function Booking() {
    * two different jobs.
    */
   const [usage, setUsage] = useState("personal");
+  /*
+   * Free Fall's answers, and whether its dialog is open.
+   *
+   * Kept here rather than in the dialog because the dialog is unmounted most
+   * of the time and these have to survive it being closed -- dismissing keeps
+   * the answers, the way dismissing the colour picker keeps the machine. It
+   * also means they survive switching to another build and back, which is why
+   * the payload is gated instead of the state being cleared.
+   */
+  const [freeFall, setFreeFall] = useState<FreeFallAnswers>(FREE_FALL_DEFAULTS);
+  const [freeFallOpen, setFreeFallOpen] = useState(false);
   /** The section the thank-you card lands in. See the layout effect below. */
   const thanksRef = useRef<HTMLElement>(null);
 
   // Resolved once here rather than in two places: the summary above the form
   // and the label sent with the request must never name different machines.
   // Priced builds carry their own figure; the rest are quoted in conversation.
-  const selectedPrice = projects.find(
-    (p) => p.title === selectedProject,
-  )?.price;
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const selectedPrice = selectedProject?.price;
+
+  /* Free Fall is the only build with a brief of its own. The id is
+     `bike-free-fall`, not `free-fall` -- see data/content.ts. */
+  const isFreeFall = selectedProjectId === FREE_FALL_ID;
+
+  /* One line of what was answered, so the row under the grid is a summary
+     rather than a control labelled "Edit" with nothing visible to edit. It
+     reads off the same state the dialog writes, so it cannot describe a build
+     the dialog is not holding. */
+  const freeFallSummary = [
+    freeFall.plate.trim() ? `Plate "${freeFall.plate.trim()}"` : "No plate text",
+    freeFall.stickers === "none"
+      ? "no stickers"
+      : `${freeFall.stickers} sticker${freeFall.stickers === "1" ? "" : "s"}`,
+    environments
+      .find((e) => e.id === freeFall.environment)
+      ?.name.toLowerCase() ?? "",
+    freeFall.oem === "yes" ? "OEM parts" : "stock",
+    jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   /* Both undefined when the choice is Other, on purpose: there is no Vehicle
      behind that id, so nothing downstream may reach for a manufacturer, a
@@ -226,6 +284,14 @@ export function Booking() {
   const chosenVehicle = vehicles.find((v) => v.id === vehicleId);
   const chosenColor = chosenVehicle?.colors.find((c) => c.id === colorId);
   const isOther = vehicleId === OTHER_VEHICLE_ID;
+
+  /* Picking Free Fall opens its brief. Picking it again reopens it, because
+     the card is the obvious thing to click when you want to change an answer
+     and a second click that did nothing would read as the card being stuck. */
+  function handleSelectProject(id: string) {
+    setSelectedProjectId(id);
+    if (id === FREE_FALL_ID) setFreeFallOpen(true);
+  }
 
   function handleSelectVehicle(id: string) {
     setVehicleId(id);
@@ -257,15 +323,35 @@ export function Booking() {
           }`
         : "";
 
+    /* The brief travels only under the build it belongs to.
+    
+       The answers are not cleared when another build is chosen -- switching
+       away and back should not silently blank what someone typed -- so the
+       gate is here rather than in the state. Without it a Jet Mist request
+       would arrive carrying a jet and a plate nobody asked it for.
+    
+       Names, not ids: the studio reads these columns, and `su-30-mki` in an
+       inbox is worse than nothing. Same reason `vehicle` is sent as a label. */
+    const jetName = jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "";
+    const environmentName =
+      environments.find((e) => e.id === freeFall.environment)?.name ?? "";
+
     const ok = await submitBookingForm({
       fullName: String(data.get("fullName") || ""),
       email: String(data.get("email") || ""),
       instagram: String(data.get("instagram") || ""),
       whatsapp: String(data.get("whatsapp") || ""),
-      projectType: selectedProject,
+      projectType: selectedProject?.title ?? "",
       vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
       usage,
+      freeFallPlate: isFreeFall ? freeFall.plate : "",
+      freeFallStickers: isFreeFall ? freeFall.stickers : "",
+      freeFallEnvironment: isFreeFall ? environmentName : "",
+      freeFallOem: isFreeFall ? freeFall.oem : "",
+      freeFallOemDetails:
+        isFreeFall && freeFall.oem === "yes" ? freeFall.oemDetails : "",
+      freeFallJet: isFreeFall ? jetName : "",
     }).catch(() => false);
 
     setStatus(ok ? "success" : "error");
@@ -599,11 +685,32 @@ export function Booking() {
                   <ProjectOptionCard
                     key={project.id}
                     project={project}
-                    selected={selectedProject === project.title}
-                    onSelect={() => setSelectedProject(project.title)}
+                    selected={selectedProjectId === project.id}
+                    onSelect={() => handleSelectProject(project.id)}
                   />
                 ))}
               </div>
+
+              {/* The way back into the brief.
+              
+                  The dialog opens once, on selection, and a client who closes
+                  it has no other route to what they answered -- the same
+                  problem step 01 has, answered the same way: echo the choice
+                  where it was made, with a control that reopens it. */}
+              {isFreeFall && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-white/[0.1] bg-white/[0.02] px-4 py-3">
+                  <p className="text-[11px] leading-relaxed text-[#B8C4D6]">
+                    {freeFallSummary}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFreeFallOpen(true)}
+                    className="shrink-0 border-b border-white/30 pb-0.5 text-[11px] uppercase tracking-[0.16em] text-[#F5F7FA] transition-colors duration-300 hover:border-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#9F6EF2]"
+                  >
+                    Edit build
+                  </button>
+                </div>
+              )}
             </fieldset>
           </div>
 
@@ -729,6 +836,23 @@ export function Booking() {
           )}
         </div>
       </form>
+
+      {/* Outside the form on purpose, and unavoidably: it portals to the body,
+          so it is not inside this element in the DOM either way. That is what
+          makes every control in it controlled state rather than something
+          FormData could collect -- see the note in FreeFallDialog.
+
+          AnimatePresence so the scrim's exit runs; without it the overlay is
+          removed on the same frame the state flips and the blur snaps off. */}
+      <AnimatePresence>
+        {freeFallOpen && (
+          <FreeFallDialog
+            value={freeFall}
+            onChange={setFreeFall}
+            onDone={() => setFreeFallOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }

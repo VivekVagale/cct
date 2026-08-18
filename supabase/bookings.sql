@@ -88,19 +88,8 @@ alter table public.bookings
   add column if not exists number_plate text not null default ''
   check (char_length(number_plate) <= 200);
 
--- Sheet column N, and the readable copy of it.
---
--- The dashboard has no display-format setting: a date column renders however
--- the Table Editor decides and nothing on the column changes that. So the date
--- is stored once and rendered once, in two columns -- `payment_at` is what you
--- type into and what sorts, `payment_at_label` is what you read.
---
--- `timestamp`, not `timestamptz`. A generated column has to be immutable and
--- `at time zone` is not, so a zoned column cannot produce a label at all. This
--- one holds IST directly: the studio, its clients and its bank are all in one
--- zone, and the column is typed by hand rather than written by a machine.
--- Free text, and this is settled: the studio types into it by hand and wants to
--- write things that are not dates -- 'advance paid', 'half on delivery', '2nd
+-- Sheet column N. Free text, and this is settled: the studio types into it by
+-- hand and wants to write things that are not dates -- 'advance paid', 'half on delivery', '2nd
 -- Aug approx'. A date column rejects all of those and pushes the note into
 -- `note` or nowhere, which costs more than the sorting it buys.
 --
@@ -189,6 +178,51 @@ alter table public.bookings
   add column if not exists amount_paid numeric(10,2)
   check (amount_paid >= 0);
 
+-- Project Free Fall's brief.
+--
+-- Six columns rather than six sentences in `description`, because these are
+-- the questions every Free Fall job used to take a round of DMs to settle and
+-- the studio wants to read them at a glance, sort by them, and count them.
+-- Prefixed so it is obvious at the Table Editor's width that they belong to
+-- one build and are empty under the other three.
+--
+-- Unlike the columns above, these ARE written by the site, so they go in the
+-- insert grant at the foot of this file. Adding a column without adding it
+-- there is a 403 on every submission, not a missing value.
+--
+-- Text with a length ceiling, matching the other insertable columns and for
+-- the same stated reason: the form decides what a valid answer is, and these
+-- checks only cap what one row can cost, since the key that writes here ships
+-- in the page.
+alter table public.bookings
+  add column if not exists free_fall_plate text not null default ''
+  check (char_length(free_fall_plate) <= 100);
+
+-- 'none', '1', '2', '2+'. Text, not an enum: an enum rejects a value the API
+-- sends and the client sees a failed submission, where a column that stores
+-- what arrived leaves the studio a row to read. The dropdown enums on this
+-- table are all studio-side, where a bad value cannot come from a stranger.
+alter table public.bookings
+  add column if not exists free_fall_stickers text not null default ''
+  check (char_length(free_fall_stickers) <= 20);
+
+alter table public.bookings
+  add column if not exists free_fall_environment text not null default ''
+  check (char_length(free_fall_environment) <= 50);
+
+alter table public.bookings
+  add column if not exists free_fall_oem text not null default ''
+  check (char_length(free_fall_oem) <= 20);
+
+alter table public.bookings
+  add column if not exists free_fall_oem_details text not null default ''
+  check (char_length(free_fall_oem_details) <= 1000);
+
+-- The jet's name, not its id. A person reads this column.
+alter table public.bookings
+  add column if not exists free_fall_jet text not null default ''
+  check (char_length(free_fall_jet) <= 100);
+
 -- There is no collab_post column. The collab used to be a toggle and is now
 -- simply included in every job, so the field was true on every row and recorded
 -- nothing. If it ever becomes a choice again, add it then; rows written before
@@ -262,7 +296,9 @@ create policy "Anyone may submit a booking"
 -- column, and a column-level revoke does not take it back: the table grant has
 -- to go before per-column grants mean anything.
 revoke insert on public.bookings from anon, authenticated;
-grant insert (full_name, email, instagram, whatsapp, project_type, vehicle, description, usage)
+grant insert (full_name, email, instagram, whatsapp, project_type, vehicle, description, usage,
+              free_fall_plate, free_fall_stickers, free_fall_environment,
+              free_fall_oem, free_fall_oem_details, free_fall_jet)
   on public.bookings to anon, authenticated;
 
 -- Newest first is how these get read.

@@ -16,6 +16,22 @@ export interface BookingFormData {
    * submission and told an inbox nothing it did not already know.
    */
   usage: string;
+
+  /*
+   * Project Free Fall's brief, and empty strings under every other build.
+   *
+   * Not optional fields: the caller sends all six every time, blank when the
+   * chosen build is not Free Fall. An absent key and a blank answer read the
+   * same in the studio's table otherwise, which is the reasoning the columns
+   * above are already written with.
+   */
+  freeFallPlate: string;
+  freeFallStickers: string;
+  freeFallEnvironment: string;
+  freeFallOem: string;
+  freeFallOemDetails: string;
+  /** The jet's name, not its id -- a person reads this column. */
+  freeFallJet: string;
 }
 
 /**
@@ -98,6 +114,12 @@ export async function submitBookingForm(data: BookingFormData): Promise<boolean>
       vehicle: data.vehicle,
       description: data.description,
       usage: data.usage,
+      free_fall_plate: data.freeFallPlate,
+      free_fall_stickers: data.freeFallStickers,
+      free_fall_environment: data.freeFallEnvironment,
+      free_fall_oem: data.freeFallOem,
+      free_fall_oem_details: data.freeFallOemDetails,
+      free_fall_jet: data.freeFallJet,
     }),
   });
 
