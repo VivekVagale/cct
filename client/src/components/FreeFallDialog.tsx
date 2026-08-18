@@ -7,6 +7,8 @@ import { OptionCard } from "@/components/OptionCard";
 import { useIsPhone } from "@/hooks/useIsPhone";
 import { jets, defaultJet } from "@/data/jets";
 import { environments } from "@/data/environments";
+import { projects } from "@/data/content";
+import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 
 /** Everything the Free Fall build needs that the rest of the form does not. */
 export interface FreeFallAnswers {
@@ -48,6 +50,10 @@ const OEM_OPTIONS: MarqueChip[] = [
   { id: "no", label: "No", hint: "Stock machine" },
   { id: "yes", label: "Yes", hint: "Parts fitted" },
 ];
+
+/* The card shown beside the brief. Resolved from the same list the form's
+   grid renders, so it cannot drift from the build actually selected. */
+const freeFallProject = projects.find((project) => project.id === "bike-free-fall");
 
 const fieldClass =
   "w-full rounded-sm border border-white/[0.14] bg-white/[0.02] px-4 py-3 text-sm text-[#F5F7FA] transition-colors duration-300 focus:border-[#9F6EF2] focus:outline-none";
@@ -190,14 +196,35 @@ export function FreeFallDialog({
         }
       />
 
-      <div
+      {/* The lift, borrowed from the colour picker so the two modals on this
+          page open the same way. Same curve and same duration as the card's
+          flight there -- a long ease-out that covers most of the distance
+          immediately and settles slowly, which is what makes it read as the
+          panel arriving rather than a box appearing.
+
+          Out is shorter than in and travels less, matching VehicleFocus's
+          colour column: a dismissal is an answer already given, and an exit
+          that takes as long as the entrance feels like the page arguing.
+
+          Under reduced motion it fades and does not travel. The setting is
+          about movement, and a panel sliding up the screen is the movement it
+          is asking not to see. */}
+      <motion.div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={onKeyDown}
-        className="relative z-10 my-auto flex max-h-[calc(100dvh-2.5rem)] w-full max-w-[min(92vw,640px)] flex-col rounded-sm border border-white/[0.1] bg-[#080A0F] focus:outline-none"
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={
+          reduceMotion
+            ? { opacity: 0, transition: { duration: 0.14 } }
+            : { opacity: 0, y: 6, transition: { duration: 0.14 } }
+        }
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 my-auto flex max-h-[calc(100dvh-2.5rem)] w-full max-w-[min(92vw,640px)] md:max-w-[min(94vw,940px)] flex-col rounded-sm border border-white/[0.1] bg-[#080A0F] focus:outline-none"
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/[0.08] px-6 py-5">
           <div>
@@ -221,6 +248,31 @@ export function FreeFallDialog({
           </button>
         </div>
 
+        {/* The build on the left, its brief on the right, from md up.
+        
+            The same arrangement the colour picker uses, and for the same
+            reason: the thing being configured stays in view while it is being
+            configured. Stacked under 768px, where two columns would leave the
+            brief a strip too narrow for a four-up grid of jets.
+        
+            The card is inert here -- `onSelect` is a no-op. It is a picture of
+            what was chosen, not a second place to choose it, and the grid it
+            came from is still behind the scrim. */}
+        <div className="flex min-h-0 flex-col md:flex-row">
+          {freeFallProject && (
+            <div className="shrink-0 px-6 pt-6 md:w-[320px] md:pr-0">
+              <ProjectOptionCard
+                project={freeFallProject}
+                selected
+                onSelect={() => {}}
+              />
+            </div>
+          )}
+
+          {/* min-w-0 so the brief can shrink rather than forcing the panel
+              wider than its cap -- a flex item's default minimum is its content
+              width, and a four-up card grid has a wide one. */}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Block flow with vertical spacing, not a flex column.
         
             It was `flex flex-col gap-8` and every section came out crushed: a
@@ -356,6 +408,9 @@ export function FreeFallDialog({
           </div>
         </div>
 
+          </div>
+        </div>
+
         <div className="border-t border-white/[0.08] px-6 py-5">
           <button
             type="button"
@@ -365,7 +420,7 @@ export function FreeFallDialog({
             Done
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>,
     document.body,
   );
