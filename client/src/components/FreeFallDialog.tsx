@@ -221,12 +221,23 @@ export function FreeFallDialog({
           </button>
         </div>
 
-        {/* data-lenis-prevent so the page's smooth scroll does not eat the
-            wheel inside the dialog; overscroll-contain so reaching the bottom
-            does not start scrolling the locked page behind it. */}
+        {/* Block flow with vertical spacing, not a flex column.
+        
+            It was `flex flex-col gap-8` and every section came out crushed: a
+            flex item defaults to `flex-shrink: 1`, so in a column with a height
+            cap the children are compressed below their own content instead of
+            the container scrolling. The plate label was rendered 32px tall
+            holding 70px of label and input, the environment block 134px tall
+            holding a 267px grid, and each section's contents spilled over the
+            heading of the next one. Every section would need `shrink-0` to
+            survive; block layout does not have the failure mode at all.
+        
+            data-lenis-prevent so the page's smooth scroll does not eat the
+            wheel in here; overscroll-contain so reaching the bottom does not
+            start scrolling the locked page behind it. */}
         <div
           data-lenis-prevent
-          className="flex min-h-0 flex-col gap-8 overflow-y-auto overscroll-contain px-6 py-6"
+          className="min-h-0 space-y-8 overflow-y-auto overscroll-contain px-6 py-6"
         >
           <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.14em] text-[#B8C4D6]">
             What should the plate read?
