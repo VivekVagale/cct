@@ -15,6 +15,9 @@ export interface Environment {
   name: string;
   hint?: string;
   image?: string;
+  /* The dot in the caption bar, the way a colourway carries one. Light and
+     dark is exactly the kind of choice a swatch says faster than a word. */
+  swatch: string;
 }
 
 export const environments: Environment[] = [
@@ -22,10 +25,12 @@ export const environments: Environment[] = [
     id: "bright",
     name: "Bright",
     hint: "Daylight, open sky",
+    swatch: "#E4E9F0",
   },
   {
     id: "dark",
     name: "Dark",
     hint: "Night, low key",
+    swatch: "#14161A",
   },
 ];

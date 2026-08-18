@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { PendingRender } from "@/components/PendingRender";
 import { PLACEHOLDER_SWATCH } from "@/components/ProjectOptionCard";
@@ -6,90 +6,115 @@ import { PLACEHOLDER_SWATCH } from "@/components/ProjectOptionCard";
 /**
  * A picture with a name, one of a row of them, one chosen.
  *
- * The Free Fall dialog picks two things by eye -- the jet and the light -- and
- * both are the same interaction: a small grid of 4:3 frames where exactly one
- * is selected. This is that card, shared by both, rather than the two grids
- * drifting apart the way the page's selection treatments did before
- * `selected-glow` was pulled into one place.
+ * This is `ColorCard` with its data swapped out, and deliberately so rather
+ * than merely similar: the Free Fall brief picks two things by eye, in a modal
+ * that opens beside the chosen build exactly as the colour picker opens beside
+ * the chosen machine, and a card that was nearly the same would read as a
+ * different part of the site. Same ring built from the same two custom
+ * properties, same caption bar, same check badge, same variants so the parent
+ * owns the timing.
  *
- * It is `ProjectOptionCard` with everything Free Fall does not need taken out:
- * no video, no tilt, no coming-soon state, no price. What is left is the part
- * that matters -- the 4:3 box, the `PendingRender` fallback for an option whose
- * frame has not been shot, and `role="radio"` so a grid of these is a real
- * radio group to a screen reader instead of a set of buttons.
+ * What it does not copy is the swatch dot, which is optional here. A colourway
+ * has a paint to show and an environment has a light, but a jet has neither,
+ * and a dot invented for it would be decoration pretending to be information.
  *
- * No per-card charge badge. The surcharge is one line under the grid: a badge
- * on every card but one turns a picker into a price list, and the studio quotes
- * the figure in conversation anyway.
+ * No per-card price badge either. The surcharge is one line under the grid: a
+ * badge on every card but one turns a picker into a price list, and the studio
+ * quotes the figure in conversation anyway.
  */
 export function OptionCard({
   name,
-  hint,
   image,
+  swatch,
   selected,
   onSelect,
 }: {
   name: string;
-  hint?: string;
   image?: string;
+  /** The caption dot. Omitted where the option has no colour to stand for. */
+  swatch?: string;
   selected: boolean;
   onSelect: () => void;
 }) {
-  const reduceMotion = useReducedMotion();
-
   return (
     <motion.button
       type="button"
+      onClick={onSelect}
+      variants={{
+        hidden: { opacity: 0, y: 10 },
+        show: { opacity: 1, y: 0 },
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       role="radio"
       aria-checked={selected}
-      onClick={onSelect}
-      whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-      className={`group relative overflow-hidden rounded-sm border text-left transition-[border-color,background-color,box-shadow] duration-300 ${
-        selected
-          ? "selected-glow bg-[#7A44E0]/[0.07]"
-          : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
-      }`}
+      className="group relative h-full text-left rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white"
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
-        {image ? (
-          <motion.img
-            src={image}
-            alt=""
-            className="h-full w-full object-cover opacity-60 transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-85"
-            animate={{ scale: selected ? 1.06 : 1 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          />
-        ) : (
-          <div className="h-full w-full opacity-90">
-            <PendingRender swatch={PLACEHOLDER_SWATCH} label="No frame yet" />
-          </div>
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
-
-        {/* The tick, for the case the glow cannot carry on its own: two frames
-            that are both placeholders look alike, and the ring around one of
-            them is the only difference between them. The colour cards already
-            answer this the same way. */}
-        {selected && (
-          <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#7A44E0] text-[#F5F7FA]">
-            <Check className="h-3 w-3" />
-          </span>
-        )}
-      </div>
-
-      <div className="px-3 py-2.5">
-        <span
-          className={`block text-[11px] uppercase tracking-[0.16em] transition-colors duration-300 ${
-            selected ? "text-[#F5F7FA]" : "text-[#B8C4D6]"
+      <div className="relative h-full">
+        {/* The ring, violet once chosen, brighter under the pointer. The same
+            two custom properties the vehicle, colour and project cards use, so
+            the four pickers in this flow cannot drift apart. */}
+        <div
+          className={`absolute -inset-px rounded-sm transition-all duration-300 ${
+            selected
+              ? ""
+              : "shadow-[0_0_0_1px_rgba(255,255,255,0.10)] group-hover:shadow-[0_0_0_1px_rgba(255,255,255,0.34)]"
           }`}
-        >
-          {name}
-        </span>
-        {hint && (
-          <span className="mt-1 block text-[10px] tracking-normal text-[#B8C4D6]/70">
-            {hint}
-          </span>
+          style={
+            selected
+              ? { boxShadow: "var(--selected-ring), var(--selected-bloom)" }
+              : undefined
+          }
+        />
+
+        {/* Full height with the caption pushed to the bottom, so a two-line
+            name makes its own card no taller than its neighbour. */}
+        <div className="relative flex h-full flex-col overflow-hidden rounded-sm">
+          <div className="aspect-[4/3] overflow-hidden">
+            {image ? (
+              <img
+                src={image}
+                alt={name}
+                className="w-full h-full object-cover transform-gpu transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+              />
+            ) : (
+              /* No scale on hover, and nothing to scale: the lift on the
+                 photograph is what says there is a picture under the pointer,
+                 and an option with no frame shot yet should not claim one. */
+              <PendingRender
+                swatch={swatch ?? PLACEHOLDER_SWATCH}
+                label="No frame yet"
+              />
+            )}
+          </div>
+
+          <div className="mt-auto flex items-center gap-2 bg-[#0D1117] px-3 py-2.5 sm:gap-2.5 sm:px-4 sm:py-3">
+            {swatch && (
+              <span
+                className="h-2.5 w-2.5 flex-shrink-0 rounded-full border border-white/20"
+                style={{ backgroundColor: swatch }}
+              />
+            )}
+            <span
+              className={`text-xs uppercase tracking-[0.08em] transition-colors duration-300 ${
+                selected
+                  ? "text-[#F5F7FA]"
+                  : "text-[#B8C4D6] group-hover:text-[#F5F7FA]"
+              }`}
+            >
+              {name}
+            </span>
+          </div>
+        </div>
+
+        {selected && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="absolute top-2 right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#9F6EF2]"
+          >
+            <Check className="h-3 w-3 text-[#05070A]" strokeWidth={3} />
+          </motion.div>
         )}
       </div>
     </motion.button>
