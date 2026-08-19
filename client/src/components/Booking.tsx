@@ -15,10 +15,12 @@ import { SparkleButton } from "@/components/SparkleButton";
 import { MarqueChips, type MarqueChip } from "@/components/MarqueChips";
 import { ThankYouCard, preloadThankYou } from "@/components/ThankYouCard";
 import {
-  FreeFallDialog,
+  BuildBriefDialog,
+  BUILD_BRIEFS,
+  hasBrief,
   FREE_FALL_DEFAULTS,
   type FreeFallAnswers,
-} from "@/components/FreeFallDialog";
+} from "@/components/BuildBriefDialog";
 import { jets } from "@/data/jets";
 import { environments } from "@/data/environments";
 import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
@@ -29,10 +31,10 @@ import { useIsPhone } from "@/hooks/useIsPhone";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-/* The build that carries its own brief. A constant rather than the literal in
-   three places, and named here so the next person looking for what makes Free
-   Fall special finds it at the top of the file. */
-const FREE_FALL_ID = "bike-free-fall";
+/* Which builds carry a brief, and which questions each asks, lives in
+   BuildBriefDialog beside the dialog that renders them. Two builds use it now:
+   Free Fall asks all five questions, Studio asks three -- it has no jets and
+   one lighting set-up, so those two have nothing to choose between. */
 
 /**
  * Who the work is for.
@@ -256,9 +258,8 @@ export function Booking() {
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
   const selectedPrice = selectedProject?.price;
 
-  /* Free Fall is the only build with a brief of its own. The id is
-     `bike-free-fall`, not `free-fall` -- see data/content.ts. */
-  const isFreeFall = selectedProjectId === FREE_FALL_ID;
+  const briefed = hasBrief(selectedProjectId);
+  const brief = BUILD_BRIEFS[selectedProjectId];
 
   /* One line of what was answered, so the row under the grid is a summary
      rather than a control labelled "Edit" with nothing visible to edit. It
@@ -269,11 +270,11 @@ export function Booking() {
     freeFall.stickers === "none"
       ? "no stickers"
       : `${freeFall.stickers} sticker${freeFall.stickers === "1" ? "" : "s"}`,
-    environments
-      .find((e) => e.id === freeFall.environment)
-      ?.name.toLowerCase() ?? "",
+    brief?.environment
+      ? environments.find((e) => e.id === freeFall.environment)?.name.toLowerCase() ?? ""
+      : "",
     freeFall.oem === "yes" ? "OEM parts" : "stock",
-    jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "",
+    brief?.jets ? jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "" : "",
   ]
     .filter(Boolean)
     .join(" · ");
@@ -290,7 +291,7 @@ export function Booking() {
      and a second click that did nothing would read as the card being stuck. */
   function handleSelectProject(id: string) {
     setSelectedProjectId(id);
-    if (id === FREE_FALL_ID) setFreeFallOpen(true);
+    if (hasBrief(id)) setFreeFallOpen(true);
   }
 
   function handleSelectVehicle(id: string) {
@@ -345,13 +346,13 @@ export function Booking() {
       vehicle: vehicleLabel,
       description: String(data.get("description") || ""),
       usage,
-      freeFallPlate: isFreeFall ? freeFall.plate : "",
-      freeFallStickers: isFreeFall ? freeFall.stickers : "",
-      freeFallEnvironment: isFreeFall ? environmentName : "",
-      freeFallOem: isFreeFall ? freeFall.oem : "",
+      freeFallPlate: briefed ? freeFall.plate : "",
+      freeFallStickers: briefed ? freeFall.stickers : "",
+      freeFallEnvironment: briefed && brief?.environment ? environmentName : "",
+      freeFallOem: briefed ? freeFall.oem : "",
       freeFallOemDetails:
-        isFreeFall && freeFall.oem === "yes" ? freeFall.oemDetails : "",
-      freeFallJet: isFreeFall ? jetName : "",
+        briefed && freeFall.oem === "yes" ? freeFall.oemDetails : "",
+      freeFallJet: briefed && brief?.jets ? jetName : "",
     }).catch(() => false);
 
     setStatus(ok ? "success" : "error");
@@ -697,7 +698,7 @@ export function Booking() {
                   it has no other route to what they answered -- the same
                   problem step 01 has, answered the same way: echo the choice
                   where it was made, with a control that reopens it. */}
-              {isFreeFall && (
+              {briefed && (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-white/[0.1] bg-white/[0.02] px-4 py-3">
                   <p className="text-[11px] leading-relaxed text-[#B8C4D6]">
                     {freeFallSummary}
@@ -840,13 +841,14 @@ export function Booking() {
       {/* Outside the form on purpose, and unavoidably: it portals to the body,
           so it is not inside this element in the DOM either way. That is what
           makes every control in it controlled state rather than something
-          FormData could collect -- see the note in FreeFallDialog.
+          FormData could collect -- see the note in BuildBriefDialog.
 
           AnimatePresence so the scrim's exit runs; without it the overlay is
           removed on the same frame the state flips and the blur snaps off. */}
       <AnimatePresence>
         {freeFallOpen && (
-          <FreeFallDialog
+          <BuildBriefDialog
+            projectId={selectedProjectId}
             value={freeFall}
             onChange={setFreeFall}
             onDone={() => setFreeFallOpen(false)}

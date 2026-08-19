@@ -57,14 +57,21 @@ already exists — it is safe to run twice.
 `contact_status` and `progress` are not duplicates: one is where the render has
 got to, the other is where the conversation has got to.
 
-## Project Free Fall's brief
+## The build brief
 
-Choosing Free Fall on the booking form opens a dialog asking five things the
-studio used to settle over DMs: what the plate should read, how many stickers
+Some builds open a dialog before the form is sent. Free Fall asks five things
+the studio used to settle over DMs: what the plate should read, how many stickers
 are on the machine, bright or dark, whether OEM parts are fitted and which, and
 which jet. They arrive as `free_fall_plate`, `free_fall_stickers`,
 `free_fall_environment`, `free_fall_oem`, `free_fall_oem_details` and
 `free_fall_jet`, and are empty strings under every other build.
+
+**Project Studio uses the same columns** and fills only three of them —
+`free_fall_environment` and `free_fall_jet` stay empty, because a seamless
+floor has one lighting set-up and no aircraft. The columns keep their
+`free_fall_` prefix rather than being renamed: renaming them means a migration
+that has to land before the site redeploys, or every booking 403s in the gap.
+Read the build from `project_type`, not from the column names.
 
 These are the only columns added since launch that the **site** writes, so they
 are in the insert grant. A column added without being granted is a 403 on every

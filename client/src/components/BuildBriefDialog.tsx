@@ -58,11 +58,28 @@ const SECTION = {
   show: { opacity: 1, y: 0 },
 };
 
-/* The card shown beside the brief, resolved from the same list the form's grid
-   renders so it cannot drift from the build actually selected. */
-const freeFallProject = projects.find(
-  (project) => project.id === "bike-free-fall",
-);
+/**
+ * Which builds ask a brief, and which questions each one asks.
+ *
+ * Free Fall puts the machine among jets, so it needs to know which jets and in
+ * what light. Studio is a seamless floor and one lighting set-up, so both of
+ * those questions have no answer to give -- asking them would be asking a
+ * client to choose something that does not vary.
+ *
+ * A build absent from this table opens no dialog at all. That is how Minecraft
+ * and Custom CGI stay untouched.
+ */
+export interface BriefConfig {
+  environment: boolean;
+  jets: boolean;
+}
+
+export const BUILD_BRIEFS: Record<string, BriefConfig> = {
+  "bike-free-fall": { environment: true, jets: true },
+  studio: { environment: false, jets: false },
+};
+
+export const hasBrief = (projectId: string) => projectId in BUILD_BRIEFS;
 
 const eyebrowClass = "text-[10px] uppercase tracking-[0.18em] text-[#B8C4D6]";
 
@@ -90,15 +107,19 @@ const fieldClass =
  * fire on them. It is the same reason VehicleConfigurator sits outside the form
  * and reports upward through props.
  */
-export function FreeFallDialog({
+export function BuildBriefDialog({
+  projectId,
   value,
   onChange,
   onDone,
 }: {
+  projectId: string;
   value: FreeFallAnswers;
   onChange: (next: FreeFallAnswers) => void;
   onDone: () => void;
 }) {
+  const brief = BUILD_BRIEFS[projectId] ?? { environment: false, jets: false };
+  const project = projects.find((p) => p.id === projectId);
   const reduceMotion = useReducedMotion();
   const isPhone = useIsPhone();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -230,7 +251,7 @@ export function FreeFallDialog({
         className="relative z-10 my-auto flex max-h-[calc(100dvh-2.5rem)] w-full max-w-[min(92vw,430px)] flex-col focus:outline-none md:max-w-[min(94vw,940px)]"
       >
         <p id={titleId} className="sr-only">
-          Project Free Fall — a few things about your build
+          {project?.title ?? "Your build"} — a few things about it
         </p>
 
         <div className="flex justify-end pb-3">
@@ -248,10 +269,10 @@ export function FreeFallDialog({
           {/* The build, at the size the machine gets in the colour picker.
               Inert — `onSelect` is a no-op — because this is a picture of what
               was chosen and not a second place to choose it. */}
-          {freeFallProject && (
+          {project && (
             <div className="shrink-0 md:w-[400px]">
               <ProjectOptionCard
-                project={freeFallProject}
+                project={project}
                 selected
                 onSelect={() => {}}
               />
@@ -279,7 +300,7 @@ export function FreeFallDialog({
               variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
               className={`mb-3 ${eyebrowClass}`}
             >
-              Build — Project Free Fall
+              Build — {project?.title ?? ""}
             </motion.p>
 
             {/* Block flow with vertical spacing, never a flex column: a flex
@@ -322,6 +343,7 @@ export function FreeFallDialog({
                 />
               </motion.div>
 
+              {brief.environment && (
               <motion.div variants={SECTION} className="flex flex-col gap-3">
                 <p className={eyebrowClass}>The light it is set in</p>
                 <div
@@ -341,6 +363,7 @@ export function FreeFallDialog({
                   ))}
                 </div>
               </motion.div>
+              )}
 
               <motion.div variants={SECTION} className="flex flex-col gap-3">
                 <p className={eyebrowClass}>OEM parts or accessories fitted</p>
@@ -382,6 +405,7 @@ export function FreeFallDialog({
                 )}
               </motion.div>
 
+              {brief.jets ? (
               <motion.div variants={SECTION} className="flex flex-col gap-3">
                 <p className={eyebrowClass}>The jets around it</p>
                 <div
@@ -405,6 +429,19 @@ export function FreeFallDialog({
                   we will quote it when we talk the build through.
                 </p>
               </motion.div>
+              ) : (
+                /* Same statement minus the jet, for a build that does not have
+                   one. Dropping the line entirely on those builds would leave
+                   stickers and OEM parts looking free. */
+                <motion.p
+                  variants={SECTION}
+                  className="text-[11px] normal-case leading-relaxed tracking-normal text-[#B8C4D6]/70"
+                >
+                  Extra charges apply per sticker and for OEM parts. Nothing is
+                  charged here — we will quote it when we talk the build
+                  through.
+                </motion.p>
+              )}
             </div>
 
             {/* Outside the scroller. The colour picker closes on a choice and
