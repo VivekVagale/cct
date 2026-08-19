@@ -121,6 +121,22 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "studio",
+    title: "Project Studio",
+    price: "₹799",
+    isNew: true,
+    description: "Your machine on a seamless floor, lit like a product.",
+    /* The studio's own render, frame 49 of the GT 650 cinematic, pulled from
+       the graded film rather than from the raw frames -- the PNG sequence is
+       deliberately flat and would have looked washed on the card.
+
+       Cropped 4:3 around the machine rather than left at the source's 9:16. The
+       bike sits in the upper third of that frame, so the card's own crop of a
+       tall image would have kept the floor and lost the motorcycle. The two
+       cards above it are 9:16 because their subjects happen to sit low enough
+       to survive it; this one does not. */
+    image: "/showcase/project-studio.webp",
+  },  {
     id: "jet-mist",
     title: "Project Jet Mist",
     price: "₹1.7k",
@@ -155,23 +171,6 @@ export const projects: Project[] = [
        page, and putting one here would make two cards argue about which is
        which. Same reel and same grade as the still, a different moment of it. */
     video: "/projects/bike-free-fall.mp4",
-  },
-  {
-    id: "studio",
-    title: "Project Studio",
-    price: "₹799",
-    isNew: true,
-    description: "Your machine on a seamless floor, lit like a product.",
-    /* The studio's own render, frame 49 of the GT 650 cinematic, pulled from
-       the graded film rather than from the raw frames -- the PNG sequence is
-       deliberately flat and would have looked washed on the card.
-
-       Cropped 4:3 around the machine rather than left at the source's 9:16. The
-       bike sits in the upper third of that frame, so the card's own crop of a
-       tall image would have kept the floor and lost the motorcycle. The two
-       cards above it are 9:16 because their subjects happen to sit low enough
-       to survive it; this one does not. */
-    image: "/showcase/project-studio.webp",
   },
   {
     id: "minecraft",
