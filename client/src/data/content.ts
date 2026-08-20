@@ -130,12 +130,33 @@ export const projects: Project[] = [
        the graded film rather than from the raw frames -- the PNG sequence is
        deliberately flat and would have looked washed on the card.
 
+       Re-cut from the studio's finished export, which is not the file this
+       frame came from first. The sequencer's own mp4 and the export are the
+       same edit in two grades, and the export is the darker of them: about
+       twenty levels lower in average luma, with the shadows the flatter file
+       lifts. The loop below is from the export, so the still had to be as well
+       -- a poster and a loop of one shot in two grades would have brightened
+       the card the moment it was picked.
+
        Cropped 4:3 around the machine rather than left at the source's 9:16. The
        bike sits in the upper third of that frame, so the card's own crop of a
-       tall image would have kept the floor and lost the motorcycle. The two
-       cards above it are 9:16 because their subjects happen to sit low enough
-       to survive it; this one does not. */
+       tall image would have kept the floor and lost the motorcycle. The other
+       two cards are 9:16 because their subjects happen to sit low enough to
+       survive it; this one does not. */
     image: "/showcase/project-studio.webp",
+    /* The film's first two shots, cut off at the frame before its third: the
+       wide the still is a frame of, and then the push in to the three-quarter
+       front. The same 4:3 window as the still, so the loop opens on the shot
+       the poster was already showing and then moves.
+
+       Shot 01 on its own would have been the tidier match for the two cards
+       below, which are each a single unbroken drift. It is also 2.2 seconds of
+       a very slow orbit around a small side-on machine, which at 320px is the
+       still over again -- the reason for putting a loop on this card at all.
+       Carrying through into shot 02 buys the movement and lands the length
+       within a second of the other two. The cut inside it is the film's own,
+       placed on the musical accent rather than at a round number. */
+    video: "/projects/studio.mp4",
   },  {
     id: "jet-mist",
     title: "Project Jet Mist",
