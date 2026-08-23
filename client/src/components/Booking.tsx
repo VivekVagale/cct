@@ -331,7 +331,7 @@ export function Booking() {
        gate is here rather than in the state. Without it a Jet Mist request
        would arrive carrying a jet and a plate nobody asked it for.
     
-       Names, not ids: the studio reads these columns, and `su-30-mki` in an
+       Names, not ids: the studio reads these columns, and `su-30-mkk` in an
        inbox is worse than nothing. Same reason `vehicle` is sent as a label. */
     const jetName = jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "";
     const environmentName =

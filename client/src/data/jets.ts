@@ -12,9 +12,19 @@
  * the same component, as `Vehicle.pending`. Dropping a file into
  * `client/public/jets/` and adding the path here is the whole job.
  *
- * NAMES ARE PROVISIONAL. They were written before the studio's frames arrived
- * and are what a client will read, so they want confirming. Renaming one is a
- * single line; removing one is a single entry.
+ * The names were provisional through four handoffs and are not any more: these
+ * are the studio's own, read off the files they sent with the frames. Two of
+ * them are worth a second look before a client does. `Su-30 MKK` is the export
+ * variant and the earlier placeholder here said MKI, which is the one the
+ * Indian air force flies -- the file says MKK and the file wins, but if that
+ * was a slip it is one line. `7370` on the Spitfire looks like an asset number
+ * rather than a mark, and it is the only name here carrying one.
+ *
+ * One frame arrived that is not in this list. It is filed as
+ * `SPITFIRE 7370 IRON` and is not a Spitfire: it is a Bf 109 in Luftwaffe
+ * markings, with a swastika on the tail fin. It is left out rather than
+ * shipped -- see the note in the commit. Adding it back is an entry and a
+ * file, once the studio has said what they want to do about the marking.
  */
 export interface Jet {
   id: string;
@@ -31,24 +41,56 @@ export interface Jet {
   isDefault?: boolean;
 }
 
+/* Default first, then alphabetical. The default leads because it is what the
+   picker opens on and what the line under the grid prices everything against;
+   the rest have no order of their own worth inventing one for. */
 export const jets: Jet[] = [
   {
     id: "default",
-    name: "Studio default",
-    hint: "Included",
+    name: "MiG-29",
+    /* The word "default" stays visible in the caption because the line under
+       the grid charges against it by that name. The aircraft is named as well
+       now that there is a picture of it -- an option showing a frame and
+       calling itself only "Studio default" makes a client wonder what they
+       are looking at. */
+    hint: "Studio default, included",
+    image: "/jets/mig-29.webp",
     isDefault: true,
   },
   {
-    id: "tejas",
-    name: "Tejas",
+    id: "b-2a-spirit-frost",
+    name: "B-2A Spirit — Frost",
+    image: "/jets/b-2a-spirit-frost.webp",
   },
   {
-    id: "su-30-mki",
-    name: "Su-30 MKI",
+    id: "b-2a-spirit-phantom",
+    name: "B-2A Spirit — Phantom",
+    image: "/jets/b-2a-spirit-phantom.webp",
   },
   {
-    id: "rafale",
-    name: "Rafale",
+    id: "dassault-rafale",
+    name: "Dassault Rafale",
+    image: "/jets/dassault-rafale.webp",
+  },
+  {
+    id: "f-16-block-70",
+    name: "F-16 Block 70",
+    image: "/jets/f-16-block-70.webp",
+  },
+  {
+    id: "mig-21-bison",
+    name: "MiG-21 Bison",
+    image: "/jets/mig-21-bison.webp",
+  },
+  {
+    id: "spitfire-7370-shark",
+    name: "Spitfire 7370 Shark",
+    image: "/jets/spitfire-7370-shark.webp",
+  },
+  {
+    id: "su-30-mkk",
+    name: "Su-30 MKK",
+    image: "/jets/su-30-mkk.webp",
   },
 ];
 

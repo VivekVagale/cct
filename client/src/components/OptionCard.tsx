@@ -24,12 +24,23 @@ import { PLACEHOLDER_SWATCH } from "@/components/ProjectOptionCard";
  */
 export function OptionCard({
   name,
+  hint,
   image,
   swatch,
   selected,
   onSelect,
 }: {
   name: string;
+  /**
+   * A quieter second line, where the name alone does not place the option.
+   *
+   * It exists for one card: the jet included in the build's price. That used
+   * to be self-evident, because the option was called "Studio default" and
+   * nothing else was -- then the frames arrived, the aircraft turned out to be
+   * a MiG-29, and naming it that took the only marker off the one card the
+   * line under the grid prices everything against.
+   */
+  hint?: string;
   image?: string;
   /** The caption dot. Omitted where the option has no colour to stand for. */
   swatch?: string;
@@ -95,14 +106,23 @@ export function OptionCard({
                 style={{ backgroundColor: swatch }}
               />
             )}
-            <span
-              className={`text-xs uppercase tracking-[0.08em] transition-colors duration-300 ${
-                selected
-                  ? "text-[#F5F7FA]"
-                  : "text-[#B8C4D6] group-hover:text-[#F5F7FA]"
-              }`}
-            >
-              {name}
+            {/* The two lines are one flex item beside the dot, so the dot
+                stays centred on the pair rather than on the name alone. */}
+            <span className="flex min-w-0 flex-col">
+              <span
+                className={`text-xs uppercase tracking-[0.08em] transition-colors duration-300 ${
+                  selected
+                    ? "text-[#F5F7FA]"
+                    : "text-[#B8C4D6] group-hover:text-[#F5F7FA]"
+                }`}
+              >
+                {name}
+              </span>
+              {hint && (
+                <span className="mt-0.5 text-[10px] normal-case leading-snug tracking-normal text-[#B8C4D6]/70">
+                  {hint}
+                </span>
+              )}
             </span>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { OptionCard } from "@/components/OptionCard";
 import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import { useIsPhone } from "@/hooks/useIsPhone";
 import { jets, defaultJet } from "@/data/jets";
-import { environments } from "@/data/environments";
+import { environments, defaultEnvironment } from "@/data/environments";
 import { projects } from "@/data/content";
 
 /** Everything the Free Fall build needs that the rest of the form does not. */
@@ -33,7 +33,7 @@ export interface FreeFallAnswers {
 export const FREE_FALL_DEFAULTS: FreeFallAnswers = {
   plate: "",
   stickers: "none",
-  environment: environments[0].id,
+  environment: defaultEnvironment.id,
   oem: "no",
   oemDetails: "",
   jetId: defaultJet.id,
@@ -355,6 +355,7 @@ export function BuildBriefDialog({
                     <OptionCard
                       key={environment.id}
                       name={environment.name}
+                      hint={environment.hint}
                       image={environment.image}
                       swatch={environment.swatch}
                       selected={value.environment === environment.id}
@@ -417,6 +418,7 @@ export function BuildBriefDialog({
                     <OptionCard
                       key={jet.id}
                       name={jet.name}
+                      hint={jet.hint}
                       image={jet.image}
                       selected={value.jetId === jet.id}
                       onSelect={() => set("jetId", jet.id)}
