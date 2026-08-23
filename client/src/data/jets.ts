@@ -13,12 +13,13 @@
  * `client/public/jets/` and adding the path here is the whole job.
  *
  * The names were provisional through four handoffs and are not any more: these
- * are the studio's own, read off the files they sent with the frames. Two of
- * them are worth a second look before a client does. `Su-30 MKK` is the export
- * variant and the earlier placeholder here said MKI, which is the one the
- * Indian air force flies -- the file says MKK and the file wins, but if that
- * was a slip it is one line. `7370` on the Spitfire looks like an asset number
- * rather than a mark, and it is the only name here carrying one.
+ * are the studio's own, read off the files they sent with the frames, with one
+ * word taken out. The Spitfire arrived as `SPITFIRE 7370 SHARK`; the 7370 is an
+ * asset number rather than a mark and the studio has said to drop it.
+ *
+ * `Su-30 MKK` is confirmed and not a slip. It is the export variant, where the
+ * placeholder this replaces said MKI -- the one the Indian air force flies --
+ * so the difference was worth asking about and has been asked.
  *
  * One frame arrived that is not in this list. It is filed as
  * `SPITFIRE 7370 IRON` and is not a Spitfire: it is a Bf 109 in Luftwaffe
@@ -83,9 +84,9 @@ export const jets: Jet[] = [
     image: "/jets/mig-21-bison.webp",
   },
   {
-    id: "spitfire-7370-shark",
-    name: "Spitfire 7370 Shark",
-    image: "/jets/spitfire-7370-shark.webp",
+    id: "spitfire-shark",
+    name: "Spitfire — Shark",
+    image: "/jets/spitfire-shark.webp",
   },
   {
     id: "su-30-mkk",
