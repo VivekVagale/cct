@@ -21,14 +21,20 @@
  * placeholder this replaces said MKI -- the one the Indian air force flies --
  * so the difference was worth asking about and has been asked.
  *
- * The Bf 109 is the reason `image` is optional and stays that way. It arrived
- * filed as `SPITFIRE 7370 IRON`, which it is not -- the studio has confirmed
- * the aircraft and it is named for it here. The frame itself is still not in
- * the repository: it carries a swastika on the tail fin, which is illegal to
- * display in several of the countries this site is read from, and the rename
- * does not touch the marking. So the option is offered and the card draws
- * `PendingRender` under it, exactly as it would for an aircraft nobody had
- * rendered yet. A re-render without the marking is one file and one line.
+ * `Spitfire — Aces High` wears Iron Maiden's artwork, mascot and all, and this
+ * is a paid option on a commercial page rather than a personal build. The
+ * studio chose the livery knowing what it is. Noted here because whoever reads
+ * this file next should not have to work out whether anyone had noticed.
+ *
+ * One frame is deliberately absent and has been through two names. It came as
+ * `SPITFIRE 7370 IRON`, and came back as `SPITFIRE ZIRKUS ROSARIUS` -- the
+ * same file to the byte, and the second name is the accurate one: Zirkus
+ * Rosarius flew captured Allied aircraft in German markings, which is what
+ * this is. It carries a swastika on the tail fin, and renaming a file does not
+ * touch what is painted on the aircraft. It is not in the repository and there
+ * is no entry for it here; there was one briefly, under a wrong identification
+ * of the airframe, and the studio has since had it removed. A re-render
+ * without the marking is one file and one line.
  */
 export interface Jet {
   id: string;
@@ -45,9 +51,11 @@ export interface Jet {
   isDefault?: boolean;
 }
 
-/* Default first, then alphabetical. The default leads because it is what the
-   picker opens on and what the line under the grid prices everything against;
-   the rest have no order of their own worth inventing one for. */
+/* Default first, then alphabetical by name, reading the dash in a livery name
+   as if it were not there -- that keeps the four Spitfires together, which is
+   what someone scanning fifteen cards is actually looking for. The default
+   leads because it is what the picker opens on and what the line under the
+   grid prices everything against. */
 export const jets: Jet[] = [
   {
     id: "default",
@@ -72,6 +80,11 @@ export const jets: Jet[] = [
     image: "/jets/b-2a-spirit-phantom.webp",
   },
   {
+    id: "c-17-globemaster",
+    name: "C-17 Globemaster",
+    image: "/jets/c-17-globemaster.webp",
+  },
+  {
     id: "dassault-rafale",
     name: "Dassault Rafale",
     image: "/jets/dassault-rafale.webp",
@@ -82,18 +95,34 @@ export const jets: Jet[] = [
     image: "/jets/f-16-block-70.webp",
   },
   {
-    id: "messerschmitt-bf-109",
-    name: "Messerschmitt Bf 109",
-    /* No `image`, and not because nobody rendered it. See the note at the top
-       of this file: the frame exists, and the marking on it is why it is not
-       in the repository. The card draws "No frame yet" under this one, which
-       is what a client should be told either way -- there is no picture to
-       choose by. No `hint` repeating it. */
+    id: "fa-18f-super-hornet",
+    name: "F/A-18F Super Hornet",
+    image: "/jets/fa-18f-super-hornet.webp",
+  },
+  {
+    id: "hal-tejas",
+    name: "HAL Tejas",
+    image: "/jets/hal-tejas.webp",
   },
   {
     id: "mig-21-bison",
     name: "MiG-21 Bison",
     image: "/jets/mig-21-bison.webp",
+  },
+  {
+    id: "spitfire-aces-high",
+    name: "Spitfire — Aces High",
+    image: "/jets/spitfire-aces-high.webp",
+  },
+  {
+    id: "spitfire-mk-iia",
+    name: "Spitfire Mk IIa",
+    image: "/jets/spitfire-mk-iia.webp",
+  },
+  {
+    id: "spitfire-mk-ixe",
+    name: "Spitfire Mk IXe",
+    image: "/jets/spitfire-mk-ixe.webp",
   },
   {
     id: "spitfire-shark",
@@ -104,6 +133,11 @@ export const jets: Jet[] = [
     id: "su-30-mkk",
     name: "Su-30 MKK",
     image: "/jets/su-30-mkk.webp",
+  },
+  {
+    id: "yakovlev-yak-3",
+    name: "Yakovlev Yak-3",
+    image: "/jets/yakovlev-yak-3.webp",
   },
 ];
 
