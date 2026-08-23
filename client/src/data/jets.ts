@@ -21,11 +21,14 @@
  * placeholder this replaces said MKI -- the one the Indian air force flies --
  * so the difference was worth asking about and has been asked.
  *
- * One frame arrived that is not in this list. It is filed as
- * `SPITFIRE 7370 IRON` and is not a Spitfire: it is a Bf 109 in Luftwaffe
- * markings, with a swastika on the tail fin. It is left out rather than
- * shipped -- see the note in the commit. Adding it back is an entry and a
- * file, once the studio has said what they want to do about the marking.
+ * The Bf 109 is the reason `image` is optional and stays that way. It arrived
+ * filed as `SPITFIRE 7370 IRON`, which it is not -- the studio has confirmed
+ * the aircraft and it is named for it here. The frame itself is still not in
+ * the repository: it carries a swastika on the tail fin, which is illegal to
+ * display in several of the countries this site is read from, and the rename
+ * does not touch the marking. So the option is offered and the card draws
+ * `PendingRender` under it, exactly as it would for an aircraft nobody had
+ * rendered yet. A re-render without the marking is one file and one line.
  */
 export interface Jet {
   id: string;
@@ -77,6 +80,15 @@ export const jets: Jet[] = [
     id: "f-16-block-70",
     name: "F-16 Block 70",
     image: "/jets/f-16-block-70.webp",
+  },
+  {
+    id: "messerschmitt-bf-109",
+    name: "Messerschmitt Bf 109",
+    /* No `image`, and not because nobody rendered it. See the note at the top
+       of this file: the frame exists, and the marking on it is why it is not
+       in the repository. The card draws "No frame yet" under this one, which
+       is what a client should be told either way -- there is no picture to
+       choose by. No `hint` repeating it. */
   },
   {
     id: "mig-21-bison",
