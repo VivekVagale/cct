@@ -14,7 +14,6 @@ import { FAQ } from "./components/FAQ";
 import { Footer } from "./components/Footer";
 import { CinematicLine } from "./components/CinematicLine";
 import { Preloader } from "./components/Preloader";
-import { PersistentLanyard } from "./components/PersistentLanyard";
 import { SceneDeck, type SceneDefinition } from "./components/SceneDeck";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
@@ -259,12 +258,6 @@ function App() {
               onSceneChange={handleSceneChange}
               paused={!ready}
             />
-
-            {/* Beside the bar rather than inside the deck, for the same
-                reason the bar is: it belongs to the whole story and must not
-                dissolve with a scene. Nothing until a booking has been sent,
-                and nothing at all under reduced motion. */}
-            <PersistentLanyard />
 
             <Preloader onDone={handleReady} />
           </div>
