@@ -586,10 +586,11 @@ export function Booking() {
           </div>
         </div>
 
-        {/* The cubes. The pose that stood here moved down to step 05, where a
-            reaction to a question is worth more than a figure standing beside a
-            text field. Step 03 keeps the cubes on their own — the column is the
-            tallest in the form and would read as empty without something in it.
+        {/* The cubes. The pose that stood here went to step 05 and then to
+            step 04, which is where it is now -- a figure beside a grid of
+            builds rather than beside a text field. Step 03 keeps the cubes on
+            their own; the column is the tallest in the form and would read as
+            empty without something in it.
 
             The pointer reaches the cubes: the grid tilts toward the cursor and
             that is all it does. The click ripple stays off, because a click
@@ -672,7 +673,29 @@ export function Booking() {
                 className={`${fieldClass} resize-none placeholder:text-[#B8C4D6]/40`}
               />
             </label>
+          </div>
+        </div>
 
+        {/* Step 04 is its own row so it can have its own left column.
+            It used to sit under the description inside step 03's column, which
+            put the cubes beside it -- and the cubes are step 03's answer to an
+            empty column, not step 04's. The build grid keeps the width it had:
+            eight columns of twelve at the same gap, which is what makes these
+            cards the same size as the ones on the projects scene.
+
+            The row break also puts the form's own gap between the description
+            and the legend, where there was none. Choosing a build is not the
+            last line of the paragraph above it. */}
+        <div className="hidden lg:flex lg:col-span-4 justify-center items-start">
+          {/* Sticky like the other two, so the pose stays level with the grid
+              rather than scrolling off at the first row of cards. */}
+          <div className="sticky top-28">
+            <Mascot pose="fistPump" size="lg" parallax />
+          </div>
+        </div>
+
+        <div className="lg:col-span-8">
+          <div>
             {/* A fieldset rather than a label: a label may caption one control,
                 and this is a group of them. */}
             <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
@@ -746,17 +769,12 @@ export function Booking() {
             Centred on the same axis as the button below it. */}
         <div className="lg:col-span-12 mt-4 sm:mt-8 flex flex-col items-center gap-6 text-center">
           <Step number="05" title="Who's it for?" />
-          {/* Down from step 03. A pose reacting to a question the visitor has
-              just been asked reads as an answer being received; the same pose
-              beside a description field was only filling a column. Desktop
-              only, like the other two — stacked on a phone it is a screen of
-              mascot between the question and the chips. */}
-          <Mascot
-            pose="fistPump"
-            size="lg"
-            parallax
-            className="hidden lg:block"
-          />
+          {/* The pose that stood here is beside step 04 now. It read as a
+              reaction to the question, which was the argument for putting it
+              here -- but this step is a heading, a sentence and four chips, and
+              a figure at the top of it pushed the chips a screen down from the
+              question they answer. Step 04 is a grid of pictures with an empty
+              column beside it, which is somewhere for a figure to stand. */}
           {/* The explanation sits between the pose and the chips rather than
               under the heading. It is the sentence that makes the four options
               mean something, so it belongs where the eye is about to reach for
