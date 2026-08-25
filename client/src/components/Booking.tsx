@@ -14,6 +14,7 @@ import { PendingRender } from "@/components/PendingRender";
 import { SparkleButton } from "@/components/SparkleButton";
 import { MarqueChips, type MarqueChip } from "@/components/MarqueChips";
 import { ThankYouCard, preloadThankYou } from "@/components/ThankYouCard";
+import { markBookingSubmitted } from "@/lib/bookingSubmitted";
 import {
   BuildBriefDialog,
   BUILD_BRIEFS,
@@ -379,6 +380,10 @@ export function Booking() {
     }).catch(() => false);
 
     setStatus(ok ? "success" : "error");
+    /* Root-level, and one way. This is what puts the pass on the nav bar and
+       keeps it there for the rest of the visit; the section below only carries
+       the words. Nothing sets it back -- see lib/bookingSubmitted. */
+    if (ok) markBookingSubmitted();
   }
 
   /*
@@ -403,13 +408,15 @@ export function Booking() {
 
   if (status === "success") {
     return (
-      /* Full bleed, and no vertical padding.
+      /* Full bleed still, and still no vertical padding.
 
-         The confirmation is a lanyard now: the band hangs from the top of the
-         screen and the card drops into the middle of it. A centred column with
-         40 units of padding above it would have started the rope a third of the
-         way down the section and hung it in a 672px box, which is neither the
-         top of the screen nor the middle of it. */
+         This was the shape the lanyard needed: a band hanging from the top of
+         the screen wants the whole screen, not a 672px column with 40 units of
+         padding over it. The lanyard hangs from the nav bar now and this
+         section is three paragraphs -- but they are centred by their own
+         stylesheet, and a section that suddenly grew the page's standard
+         padding would move the confirmation down the screen from where the
+         scroll below puts it. */
       <section
         id="booking"
         ref={thanksRef}

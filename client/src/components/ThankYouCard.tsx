@@ -1,22 +1,9 @@
-import { useReducedMotion } from "framer-motion";
-import { lazy, Suspense, useEffect, useState } from "react";
 import { MASCOT_POSES } from "@/data/mascot";
-import { Loader } from "./Loader";
 /* The same module specifier Lanyard.tsx uses, so this is the same URL and the
    same cache entry — importing it here warms the fetch without duplicating the
    asset. */
 import cardGLB from "./card.glb";
 import "./ThankYouCard.css";
-
-/*
- * The lanyard is loaded on demand, and this is not optional.
- *
- * It pulls a physics engine, a mesh-line library and a 2.4MB model, none of
- * which any visitor needs until they have actually sent a booking — which is
- * once, at the end, if at all. Imported normally it would be in the bundle every
- * visitor downloads before the hero's first frame.
- */
-const Lanyard = lazy(() => import("./Lanyard"));
 
 /** The confirmation, in one place. Drawn onto the pass and read out below it. */
 const HEAD = "Thank you for booking!";
@@ -184,7 +171,7 @@ async function paintPass(): Promise<string | null> {
  */
 let passCache: Promise<string | null> | null = null;
 
-function getPass() {
+export function getPass() {
   passCache ??= paintPass();
   return passCache;
 }
@@ -199,7 +186,7 @@ function getPass() {
  */
 let modelCache: Promise<void> | null = null;
 
-function warmModel() {
+export function warmModel() {
   modelCache ??= fetch(cardGLB)
     .then((response) => response.arrayBuffer())
     .then(() => undefined)
@@ -228,127 +215,29 @@ export function preloadThankYou() {
 }
 
 /**
- * What replaces the form once a request is in.
+ * What replaces the form once a request is in: the words.
  *
- * A pass on a lanyard: the band hangs from the top of the screen and the card
- * settles in the middle, carrying the mascot and the message. It can be picked
- * up and thrown. This is the one moment on the site with nothing else to do,
- * which is what makes it the right place for the most expensive thing on it.
+ * It used to be the words and the pass together, the scene taking the height of
+ * this section. The pass hangs from the nav bar now and stays there for the
+ * rest of the visit -- see `PersistentLanyard`, which owns the scene, the
+ * model and the painted texture. The two are drawn from the constants above,
+ * so the object and the message cannot drift apart.
  *
- * The message exists twice, and it has to. On the pass it is pixels — a texture
- * on a mesh, which cannot be selected, read aloud, translated or found. So the
- * same words are also in the document, visually hidden and carrying
- * `role="status"`, which is what actually announces the confirmation to a screen
- * reader. Both are drawn from the constants above, so they cannot drift.
+ * What is left is better than what it replaced in one respect that was not the
+ * point of the change. The scene took several megabytes to say anything at all,
+ * so the confirmation used to arrive behind a loader; these are three
+ * paragraphs and they are on screen in the frame the insert returns.
  *
- * Under reduced motion there is no lanyard and the message is plain text on the
- * page. It is a swinging object with momentum; there is no gentler version of
- * it, and a confirmation does not need one to be read.
+ * `role="status"` rather than an alert: the reader asked for this by pressing
+ * the button and the page has already moved to it, so it wants announcing, not
+ * interrupting.
  */
 export function ThankYouCard() {
-  const reduceMotion = useReducedMotion();
-  const [pass, setPass] = useState<string | null>(null);
-  const [scene, setScene] = useState<HTMLDivElement | null>(null);
-  /*
-   * Whether the lanyard is actually on screen, which is when the loader stops.
-   *
-   * Not when the pass is painted, and not when the scene's module arrives:
-   * those both happen a beat before React mounts the canvas, and measured, that
-   * beat is a blank screen with the loader already gone. The canvas element
-   * appearing is the first moment there is something to look at, so that is
-   * what is watched — a mutation observer rather than a timer, because the
-   * duration is a download and a parse on someone else's machine.
-   */
-  const [sceneUp, setSceneUp] = useState(false);
-
-  useEffect(() => {
-    if (!scene || sceneUp) return;
-    if (scene.querySelector("canvas")) {
-      setSceneUp(true);
-      return;
-    }
-    const observer = new MutationObserver(() => {
-      if (scene.querySelector("canvas")) setSceneUp(true);
-    });
-    observer.observe(scene, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, [scene, sceneUp]);
-
-  /*
-   * Everything the scene needs, waited on together.
-   *
-   * The loader has to come down when the lanyard appears, not when this
-   * component decides to render one — and those are different moments. The pass
-   * has to be painted, the scene's 3MB chunk has to arrive, and the 2.4MB model
-   * has to be fetched; render before any of them and the screen is blank again
-   * behind a loader that has already gone. Waiting on all three leaves three.js
-   * with a parse to do and nothing to download.
-   */
-  useEffect(() => {
-    if (reduceMotion) return;
-    let live = true;
-    void Promise.all([getPass(), import("./Lanyard"), warmModel()]).then(
-      ([url]) => {
-        if (live) setPass(url);
-      },
-    );
-    return () => {
-      live = false;
-    };
-  }, [reduceMotion]);
-
-  if (reduceMotion) {
-    return (
-      <div role="status" className="thankyou-plain">
-        <p className="thankyou-plain__head">{HEAD}</p>
-        <p>{BODY}</p>
-        <p className="thankyou-plain__small">{FOLLOW}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="thankyou-scene" ref={setScene}>
-      {/* Announced and searchable, while the pass is the thing on screen. */}
-      <div role="status" className="sr-only">
-        <p>{HEAD}</p>
-        <p>{BODY}</p>
-        <p>{FOLLOW}</p>
-      </div>
-
-      {/* The wait, shown.
-
-          This was deliberately empty once, on the reasoning that the
-          confirmation had already arrived and a spinner would be asking the
-          reader to wait for decoration. That was wrong about what is on screen:
-          the form is gone, the scene is a full viewport of nothing, and several
-          megabytes are in flight. An empty screen after a submit reads as a
-          failure, whatever the markup says. */}
-      {!sceneUp && (
-        <div className="thankyou-loading">
-          <Loader />
-        </div>
-      )}
-
-      <Suspense fallback={null}>
-        {pass && (
-          /* Closer than the component's own default, because this pass has to be
-             read rather than admired — at 20 the card was a thumbnail in the
-             middle of a large dark screen and the message on it was too small to
-             take in.
-
-             `cover` rather than `contain`: contain fits the image inside the
-             face and leaves the model's own texture showing around it, which is
-             the pale frame the pass had down its sides. */
-          <Lanyard
-            position={[0, 0, 13]}
-            gravity={[0, -40, 0]}
-            frontImage={pass}
-            backImage={pass}
-            imageFit="cover"
-          />
-        )}
-      </Suspense>
+    <div role="status" className="thankyou-plain">
+      <p className="thankyou-plain__head">{HEAD}</p>
+      <p>{BODY}</p>
+      <p className="thankyou-plain__small">{FOLLOW}</p>
     </div>
   );
 }

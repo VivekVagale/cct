@@ -1,0 +1,111 @@
+/*
+ * The pass, hung from the nav bar and kept there.
+ *
+ * It used to be the booking section's confirmation and nothing else: a scene
+ * the height of that section, which scrolled away with it. The studio wants it
+ * worn for the rest of the visit, so it is fixed to the viewport and lives at
+ * the root of the application rather than inside a scene.
+ */
+.lanyard-dock {
+  /*
+   * How far above the screen the canvas begins.
+   *
+   * The band is a strip with a top edge, and that edge must not be in frame or
+   * the lanyard visibly starts somewhere instead of coming down from behind the
+   * bar. Comfortably more than the bar is tall, so it holds at either of the
+   * bar's two heights and while a phone's chrome is sliding.
+   */
+  --dock-band-hide: 140px;
+  /*
+   * How wide a strip of screen the scene owns.
+   *
+   * This is the whole reason the dock is a column and not the viewport. A
+   * canvas takes every pointer event inside itself, so a full-screen one would
+   * sit over the site and swallow every click meant for a link, a card or a
+   * form for the rest of the visit. Confined to a column, the pass stays
+   * draggable and everything outside it is untouched.
+   *
+   * Right rather than left: the nav bar's links are on the right and the band
+   * appears to come down from among them, and every scene on this site puts its
+   * subject left of centre.
+   */
+  --dock-width: clamp(200px, 26vw, 380px);
+
+  position: fixed;
+  top: calc(var(--dock-band-hide) * -1);
+  right: 0;
+  width: var(--dock-width);
+  height: calc(100dvh + var(--dock-band-hide));
+  /*
+   * Under the bar, over the page.
+   *
+   * The nav sits in a `z-20` wrapper at the root and the scene deck has no
+   * layer of its own, so ten puts the band above every section and behind the
+   * bar it hangs from -- which is the whole illusion.
+   */
+  z-index: 10;
+  /* The card can be thrown, and a page that scrolls sideways because something
+     was thrown off the edge of it is worse than a card that stops. */
+  overflow: clip;
+}
+
+/* The component's own wrapper is a full viewport; here it is the dock. */
+.lanyard-dock .lanyard-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * Out of the way of a screen reader, entirely.
+ *
+ * The confirmation is announced by the booking section, which carries the same
+ * words in a `role="status"`. This is the same message a second time, as pixels
+ * on a mesh, and it would be read out as nothing at all.
+ */
+.lanyard-dock {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/*
+ * Small enough to miss, close enough to find.
+ *
+ * A thing pinned over the site for the rest of a visit has to be removable.
+ * It sits at the dock's top left -- inside the strip, so it cannot cover the
+ * bar's own controls, and on the side the band is not hanging down.
+ */
+.lanyard-dock__dismiss {
+  position: absolute;
+  top: calc(var(--dock-band-hide) + 1rem);
+  left: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(5, 7, 10, 0.55);
+  backdrop-filter: blur(6px);
+  color: rgba(184, 196, 214, 0.8);
+  opacity: 0;
+  transition: opacity 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.lanyard-dock:hover .lanyard-dock__dismiss,
+.lanyard-dock__dismiss:focus-visible {
+  opacity: 1;
+}
+
+.lanyard-dock__dismiss:hover {
+  color: #f5f7fa;
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+/* A pointer is what reveals it, and a touchscreen has none. */
+@media (hover: none) {
+  .lanyard-dock__dismiss {
+    opacity: 1;
+  }
+}
