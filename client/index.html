@@ -37,6 +37,22 @@
          card is on the projects scene either way. Drop this line the moment
          Custom CGI gets a frame of its own. -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <!-- Where a booking is written. The insert itself is milliseconds; what
+         costs is that it is the first request this origin ever makes, so a
+         submission pays for a DNS lookup, a TCP handshake, a TLS negotiation
+         and the CORS preflight before the row is written. Measured cold on the
+         studio's machine that is 433ms against 16ms once the connection is
+         warm. Opened here so it is warm by the time anyone reaches step 06.
+
+         crossorigin because the request that follows it carries an apikey
+         header, which makes it a CORS request; a preconnect opened without it
+         warms a connection the fetch will not reuse.
+
+         The host is duplicated from client/src/lib/formHandler.ts, which is
+         where it is configured. It cannot be read from there -- this file is
+         static HTML and the tag has to be in the markup to be any use. If the
+         project ever moves, both change. -->
+    <link rel="preconnect" href="https://uqhgatgzgsnooanlfurs.supabase.co" crossorigin />
     <!-- Archivo Black replaces Fraunces as the display face. It ships one
          weight and one style — that is the whole design of it, a single black
          display cut — so unlike Fraunces there is no axis list to request, and

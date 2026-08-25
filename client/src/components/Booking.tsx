@@ -297,6 +297,28 @@ export function Booking() {
   function handleSelectVehicle(id: string) {
     setVehicleId(id);
     setColorId(null); // changing the vehicle clears the color selection
+    /* Start fetching the confirmation here, five steps before it can be
+       needed.
+
+       It used to start at the click on Submit, which reads like the right
+       moment and is not: the insert is a 16ms round trip and the confirmation
+       is a megabyte and a half of physics engine and model, so the request
+       finishes and the reader is left watching a loader. Picking a machine is
+       the first thing on this form that cannot be done by accident -- it is
+       step 01, the button will not send without it, and everything after it is
+       typing. Someone who has done it is filling the form in, and the several
+       steps that follow are the download.
+
+       Idle rather than immediately: the vehicle picker is a grid of renders
+       and this must not compete with the one the reader just asked to see.
+       requestIdleCallback is absent on Safari before 17, where a timeout is
+       the same idea with a worse guess at when. */
+    const start = () => preloadThankYou();
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(start, { timeout: 3000 });
+    } else {
+      window.setTimeout(start, 1200);
+    }
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -305,10 +327,11 @@ export function Booking() {
        than the first — a form can still be submitted by pressing Enter in a
        field, and a request naming no machine is not a request. */
     if (!vehicleId) return;
-    /* Build the confirmation while the request is in flight. It is a 3MB chunk,
-       a model to parse and a texture to paint; started after the insert returns
-       it is a wait the reader spends looking at a button that appears to have
-       done nothing. See preloadThankYou. */
+    /* Second call, and a cheap one: `preloadThankYou` is idempotent -- the
+       import is cached by the module system and the model behind a promise
+       that is only created once. This is the backstop for the reader who
+       reached this button without the idle callback in `handleSelectVehicle`
+       ever running, whose wait is then what it always was rather than worse. */
     preloadThankYou();
     setStatus("submitting");
     const form = e.currentTarget;
