@@ -7,6 +7,9 @@ import "./PersistentLanyard.css";
 
 const Lanyard = lazy(() => import("./Lanyard"));
 
+/** How far down the screen counts as "at the top", for revealing the control. */
+const NEAR_TOP = 240;
+
 /**
  * The pass, worn for the rest of the visit.
  *
@@ -21,10 +24,10 @@ const Lanyard = lazy(() => import("./Lanyard"));
  * message, in the document, where it can be read, selected and announced. Both
  * are drawn from the same constants, so they cannot say different things.
  *
- * A column, not the viewport. The reasoning is in the stylesheet and it is the
- * only decision here that is not cosmetic: a canvas takes every pointer event
- * inside itself, and one covering the screen would eat every click on the site
- * from the moment a booking was sent.
+ * Centred and at the size it always was, and therefore not interactive: the
+ * layer takes no pointer events, because a canvas over the viewport takes all
+ * of them. The reasoning is in the stylesheet and it is the only decision here
+ * that is not cosmetic.
  *
  * Nothing under reduced motion. A swinging object with momentum has no gentler
  * version — it is the movement — and pinning a still picture of it over the
@@ -35,6 +38,7 @@ export function PersistentLanyard() {
   const reduceMotion = useReducedMotion();
   const [pass, setPass] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [near, setNear] = useState(false);
 
   const wanted = submitted && !dismissed && !reduceMotion;
 
@@ -60,13 +64,29 @@ export function PersistentLanyard() {
     };
   }, [wanted]);
 
+  /*
+   * Whether the pointer is at the top of the screen, which is what reveals the
+   * dismiss control.
+   *
+   * On the window rather than on the layer, because the layer takes no pointer
+   * events and so has no hover of its own to listen for. The state is a boolean
+   * that changes twice a visit rather than on every move — the listener runs a
+   * comparison and returns, and React is only told when the answer flips.
+   */
+  useEffect(() => {
+    if (!wanted) return;
+    const onMove = (e: PointerEvent) => setNear(e.clientY < NEAR_TOP);
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [wanted]);
+
   if (!wanted || !pass) return null;
 
   return (
     /* aria-hidden and not focusable: every word on the pass is already in the
        booking section's `role="status"`, and this is that message as pixels on
        a mesh. Announcing it twice is worse than not announcing it here. */
-    <div className="lanyard-dock" aria-hidden>
+    <div className={`lanyard-dock${near ? " lanyard-dock--near" : ""}`} aria-hidden>
       <button
         type="button"
         onClick={() => setDismissed(true)}
@@ -77,16 +97,11 @@ export function PersistentLanyard() {
       </button>
 
       <Suspense fallback={null}>
-        {/* Further back than the section's scene used to be.
-
-            At [0, 0, 13] the pass filled a screen, which is what it was for:
-            the message on it had to be readable as the whole confirmation. Here
-            it hangs in a column a quarter of the screen wide, and a camera that
-            close crops the card against the sides of it. This is a keepsake
-            being worn rather than a message being delivered — the words are in
-            the section. */}
+        {/* The camera the confirmation always used. At 20 the card was a
+            thumbnail; this is the distance the pass was designed to be read at
+            and the size the studio asked for it back at. */}
         <Lanyard
-          position={[0, 0, 20]}
+          position={[0, 0, 13]}
           gravity={[0, -40, 0]}
           frontImage={pass}
           backImage={pass}
