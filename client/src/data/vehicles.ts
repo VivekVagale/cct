@@ -1855,6 +1855,17 @@ export const vehicles: Vehicle[] = [
         render: "/vehicles/avenger-cruise-220/moon-white.webp",
         image: "/vehicles/avenger-cruise-220/moon-white.webp",
       },
+      {
+        /* Sampled off the render rather than inferred from the name, which is
+           how most of the swatches above were picked. "Desert Gold" could be
+           anything from a pale sand to a brass; the tank is a warm metallic
+           gold and this is it. */
+        id: "desert-gold",
+        name: "Desert Gold",
+        swatch: "#C08D35",
+        render: "/vehicles/avenger-cruise-220/desert-gold.webp",
+        image: "/vehicles/avenger-cruise-220/desert-gold.webp",
+      },
     ],
   },
   /*
@@ -2666,6 +2677,151 @@ export const vehicles: Vehicle[] = [
         swatch: "#4A3468",
         render: "/vehicles/yamaha-mt-15/vivid-violet-metallic.webp",
         image: "/vehicles/yamaha-mt-15/vivid-violet-metallic.webp",
+      },
+    ],
+  },
+  /*
+   * The Apache RTX 300, as three machines rather than one.
+   *
+   * TVS sells it as Base, Top and BTO, and the studio asked for the split with
+   * the same four colourways under each -- the same argument the XPulse 210 and
+   * the X440's S and T are already split on: a client picks the machine they
+   * own, and a trim they cannot find is a machine the site does not do.
+   *
+   * The renders are the same four frames three times over, and they are copied
+   * rather than shared. One folder pointed at by three machines was tried
+   * first and `verify_vehicles.py` rejected all thirty-two paths: it holds the
+   * invariant that a path's folder is its machine's id, which exists because a
+   * regex once handed five colourways their neighbour's render and no diff
+   * review caught it. That check is worth more than the 540kB, and a trim that
+   * ever gets a shot of its own has somewhere to put it.
+   *
+   * TVS is new to this file. The Apache was the fourth-largest cluster in the
+   * studio's enquiry sheet and had nothing to pick.
+   */
+  {
+    id: "tvs-apache-rtx-300-base",
+    name: "Apache RTX 300 Base",
+    manufacturer: "TVS",
+    render: "/vehicles/tvs-apache-rtx-300-base/cover.webp",
+    image: "/vehicles/tvs-apache-rtx-300-base/cover.webp",
+    colors: [
+      {
+        /* The four swatches here are sampled off the renders rather than
+           inferred from the names, which is how most of this file was picked.
+           Three of these four names could be almost anything -- "Tarn Bronze"
+           is a light warm taupe and not the brass a reader would guess. */
+        id: "lightning-black",
+        name: "Lightning Black",
+        swatch: "#17181A",
+        render: "/vehicles/tvs-apache-rtx-300-base/lightning-black.webp",
+        image: "/vehicles/tvs-apache-rtx-300-base/lightning-black.webp",
+      },
+      {
+        id: "metallic-blue",
+        name: "Metallic Blue",
+        swatch: "#2059AD",
+        render: "/vehicles/tvs-apache-rtx-300-base/metallic-blue.webp",
+        image: "/vehicles/tvs-apache-rtx-300-base/metallic-blue.webp",
+      },
+      {
+        id: "tarn-bronze",
+        name: "Tarn Bronze",
+        swatch: "#B0A79E",
+        render: "/vehicles/tvs-apache-rtx-300-base/tarn-bronze.webp",
+        image: "/vehicles/tvs-apache-rtx-300-base/tarn-bronze.webp",
+      },
+      {
+        id: "viper-green",
+        name: "Viper Green",
+        swatch: "#8C9A5A",
+        render: "/vehicles/tvs-apache-rtx-300-base/viper-green.webp",
+        image: "/vehicles/tvs-apache-rtx-300-base/viper-green.webp",
+      },
+    ],
+  },
+  {
+    id: "tvs-apache-rtx-300-top",
+    name: "Apache RTX 300 Top",
+    manufacturer: "TVS",
+    render: "/vehicles/tvs-apache-rtx-300-top/cover.webp",
+    image: "/vehicles/tvs-apache-rtx-300-top/cover.webp",
+    colors: [
+      {
+        /* The four swatches here are sampled off the renders rather than
+           inferred from the names, which is how most of this file was picked.
+           Three of these four names could be almost anything -- "Tarn Bronze"
+           is a light warm taupe and not the brass a reader would guess. */
+        id: "lightning-black",
+        name: "Lightning Black",
+        swatch: "#17181A",
+        render: "/vehicles/tvs-apache-rtx-300-top/lightning-black.webp",
+        image: "/vehicles/tvs-apache-rtx-300-top/lightning-black.webp",
+      },
+      {
+        id: "metallic-blue",
+        name: "Metallic Blue",
+        swatch: "#2059AD",
+        render: "/vehicles/tvs-apache-rtx-300-top/metallic-blue.webp",
+        image: "/vehicles/tvs-apache-rtx-300-top/metallic-blue.webp",
+      },
+      {
+        id: "tarn-bronze",
+        name: "Tarn Bronze",
+        swatch: "#B0A79E",
+        render: "/vehicles/tvs-apache-rtx-300-top/tarn-bronze.webp",
+        image: "/vehicles/tvs-apache-rtx-300-top/tarn-bronze.webp",
+      },
+      {
+        id: "viper-green",
+        name: "Viper Green",
+        swatch: "#8C9A5A",
+        render: "/vehicles/tvs-apache-rtx-300-top/viper-green.webp",
+        image: "/vehicles/tvs-apache-rtx-300-top/viper-green.webp",
+      },
+    ],
+  },
+  {
+    /* Build To Order, spelled out nowhere on the card because TVS does not
+       spell it out either -- it is what the configurator on their own site
+       calls it, and it is what an owner will call it. */
+    id: "tvs-apache-rtx-300-bto",
+    name: "Apache RTX 300 BTO",
+    manufacturer: "TVS",
+    render: "/vehicles/tvs-apache-rtx-300-bto/cover.webp",
+    image: "/vehicles/tvs-apache-rtx-300-bto/cover.webp",
+    colors: [
+      {
+        /* The four swatches here are sampled off the renders rather than
+           inferred from the names, which is how most of this file was picked.
+           Three of these four names could be almost anything -- "Tarn Bronze"
+           is a light warm taupe and not the brass a reader would guess. */
+        id: "lightning-black",
+        name: "Lightning Black",
+        swatch: "#17181A",
+        render: "/vehicles/tvs-apache-rtx-300-bto/lightning-black.webp",
+        image: "/vehicles/tvs-apache-rtx-300-bto/lightning-black.webp",
+      },
+      {
+        id: "metallic-blue",
+        name: "Metallic Blue",
+        swatch: "#2059AD",
+        render: "/vehicles/tvs-apache-rtx-300-bto/metallic-blue.webp",
+        image: "/vehicles/tvs-apache-rtx-300-bto/metallic-blue.webp",
+      },
+      {
+        id: "tarn-bronze",
+        name: "Tarn Bronze",
+        swatch: "#B0A79E",
+        render: "/vehicles/tvs-apache-rtx-300-bto/tarn-bronze.webp",
+        image: "/vehicles/tvs-apache-rtx-300-bto/tarn-bronze.webp",
+      },
+      {
+        id: "viper-green",
+        name: "Viper Green",
+        swatch: "#8C9A5A",
+        render: "/vehicles/tvs-apache-rtx-300-bto/viper-green.webp",
+        image: "/vehicles/tvs-apache-rtx-300-bto/viper-green.webp",
       },
     ],
   },
