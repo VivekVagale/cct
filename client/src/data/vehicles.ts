@@ -2247,6 +2247,50 @@ export const vehicles: Vehicle[] = [
       },
     ],
   },
+  /*
+   * The CB500X and the Africa Twin, one colourway each.
+   *
+   * Both are the studio's newest frames and both arrived alone, which is what
+   * a machine looks like on the day it is added -- the XPulse 210 Base has
+   * stood on one colourway since it was put back. A second frame is a file and
+   * five lines.
+   */
+  {
+    id: "honda-cb500x",
+    name: "CB500X",
+    manufacturer: "Honda",
+    render: "/vehicles/honda-cb500x/cover.webp",
+    image: "/vehicles/honda-cb500x/cover.webp",
+    colors: [
+      {
+        /* "Blue" is the studio's filename and it is what is here, but it is
+           almost certainly short for Honda's own name for this paint the way
+           Grand Prix Red below is Honda's -- worth asking before a client
+           reads a one-word colour beside fifteen named ones. */
+        id: "blue",
+        name: "Blue",
+        swatch: "#22305E",
+        render: "/vehicles/honda-cb500x/blue.webp",
+        image: "/vehicles/honda-cb500x/blue.webp",
+      },
+    ],
+  },
+  {
+    id: "honda-africa-twin",
+    name: "Africa Twin",
+    manufacturer: "Honda",
+    render: "/vehicles/honda-africa-twin/cover.webp",
+    image: "/vehicles/honda-africa-twin/cover.webp",
+    colors: [
+      {
+        id: "grand-prix-red",
+        name: "Grand Prix Red",
+        swatch: "#C8202B",
+        render: "/vehicles/honda-africa-twin/grand-prix-red.webp",
+        image: "/vehicles/honda-africa-twin/grand-prix-red.webp",
+      },
+    ],
+  },
   {
     id: "aprilia-rs-457",
     name: "RS 457",
