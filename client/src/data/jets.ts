@@ -79,11 +79,17 @@ export const jets: Jet[] = [
     name: "B-2A Spirit — Phantom",
     image: "/jets/b-2a-spirit-phantom.webp",
   },
-  {
-    id: "c-17-globemaster",
-    name: "C-17 Globemaster",
-    image: "/jets/c-17-globemaster.webp",
-  },
+  /* The C-17 Globemaster was here and is not any more.
+
+     It is the aircraft the Premium build drops the machine out of, offered
+     there as a delivery rather than as an escort. Listing it here as well
+     would put the same aeroplane in the form twice, answering two different
+     questions, and a client picking it off this grid would be asking for a
+     cargo plane to fly alongside them — which is not a thing this studio
+     sells and not what the frame shows.
+
+     `/jets/c-17-globemaster.webp` is left in place; it is the studio's own
+     render and nothing else points at it. */
   {
     id: "dassault-rafale",
     name: "Dassault Rafale",
