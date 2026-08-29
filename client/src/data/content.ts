@@ -216,15 +216,22 @@ export const projects: Project[] = [
        from, so this says only what is certainly true and leaves the selling to
        be written by someone who knows what the tier includes. */
     description: "The Free Fall treatment, taken further.",
-    /* Free Fall's own still and loop, deliberately.
+    /* The studio's own frame: the C-17 with the machine already out of the
+       ramp. Cropped 4:3 from a 1080x1920 source rather than left tall, for the
+       reason the Studio card is — the aircraft and the bike occupy rows
+       251..851 of 1920, so the card's own centre crop of the full frame would
+       have held sky and cut the tail. The window is placed with the slack
+       biased downward, which leaves 63px over the wing and 147px under the
+       machine: it is falling, and the space beneath it is what says so. */
+    image: "/showcase/project-free-fall-premium.webp",
+    /* No loop, deliberately.
 
-       The build is the same subject at a higher tier, so a different frame
-       would be arguing it is a different film. WorkShowcase dedupes its warm
-       list through a Set, so sharing a source costs no second request; the
-       Projects grid does show the two cards carrying one image, which is worth
-       a look once there is a frame that belongs to this tier. */
-    image: "/showcase/it-say-grrr.webp",
-    video: "/projects/bike-free-fall.mp4",
+       The only clip that could go here is Free Fall's, and that is the one shot
+       of the reel with no aircraft in it — the machine alone over a rock. Under
+       this still it would cut from a cargo plane at altitude to a different
+       film. `video` is optional precisely so a card can be a still, and the
+       still is the poster every unselected card already shows, so nothing is
+       lost until there is a loop cut from this tier's own footage. */
   },
   {
     id: "minecraft",
