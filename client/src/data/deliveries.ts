@@ -36,8 +36,15 @@ export const deliveries: Delivery[] = [
     id: "globemaster",
     name: "Globemaster Drop",
     hint: "Out the back of a C-17",
-    /* The frame the Premium card is cut from, so the build a client picked and
-       the option the dialog opens on are the same picture. */
+    /* The same frame the Premium card is cut from, so the build a client picked
+       and the option the dialog opens on are one picture rather than two.
+
+       A tighter square than the card takes, because this is drawn at chip size
+       and the card's wider view of the same shot loses the machine at that
+       scale. The card window is 4:3 and object-covers, so the top and bottom
+       eighth of this square are clipped before anyone sees them — the crop is
+       set with the machine inside that middle band, not merely inside the
+       square. */
     image: "/deliveries/globemaster.webp",
     isDefault: true,
   },
