@@ -204,6 +204,18 @@ export function ProjectOptionCard({
             New
           </span>
         )}
+        {/* The New badge exactly, with a different word — asked for as "the
+            same one". Gated on !disabled for the same reason: a build that
+            cannot be ordered yet should say that and nothing else.
+
+            The two are independent, so both can render on one card and would
+            then be two identical violet chips reading New and Premium. Nothing
+            carries both today; the moment one does, this wants its own tint. */}
+        {!disabled && project.isPremium && (
+          <span className="inline-block mt-3 ml-2 text-[10px] tracking-[0.18em] uppercase text-[#C9AEFF] border border-[#9F6EF2]/50 bg-[#7A44E0]/[0.12] px-2.5 py-1">
+            Premium
+          </span>
+        )}
       </div>
 
       {selected && (

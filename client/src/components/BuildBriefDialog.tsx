@@ -76,6 +76,11 @@ export interface BriefConfig {
 
 export const BUILD_BRIEFS: Record<string, BriefConfig> = {
   "bike-free-fall": { environment: true, jets: true },
+  /* Free Fall's brief minus the jets question, which is the whole difference
+     between the two entries. The riders and OEM questions are not in this
+     table at all — they are asked of every build that opens a brief — so
+     "everything except jets" is one flag, not a list. */
+  "bike-free-fall-premium": { environment: true, jets: false },
   studio: { environment: false, jets: false },
 };
 

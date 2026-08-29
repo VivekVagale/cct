@@ -108,6 +108,16 @@ export interface Project {
    */
   isNew?: boolean;
   /**
+   * The higher tier of a build that also ships in a standard form.
+   *
+   * Separate from `isNew` because they are unrelated claims — one is about how
+   * long it has been offered, the other about what you get — and a build can
+   * reasonably be both. They render as the same badge shape for that reason;
+   * if the two ever appear on one card they will need telling apart by colour
+   * rather than by reading them.
+   */
+  isPremium?: boolean;
+  /**
    * What this build costs, already formatted.
    *
    * A string rather than a number, and deliberately: "1.7k" is how the studio
@@ -191,6 +201,29 @@ export const projects: Project[] = [
        helicopter or a bomber in frame are the build next to this one on the
        page, and putting one here would make two cards argue about which is
        which. Same reel and same grade as the still, a different moment of it. */
+    video: "/projects/bike-free-fall.mp4",
+  },
+  {
+    id: "bike-free-fall-premium",
+    title: "Project Free Fall Premium",
+    price: "₹1.3k",
+    isPremium: true,
+    /* PLACEHOLDER — the studio's words, not mine.
+
+       Sitting next to Free Fall, this line is the only thing on the card that
+       says why one costs ₹799 and the other ₹1.3k. I know the brief drops the
+       jets question and nothing else, which is not enough to write a claim
+       from, so this says only what is certainly true and leaves the selling to
+       be written by someone who knows what the tier includes. */
+    description: "The Free Fall treatment, taken further.",
+    /* Free Fall's own still and loop, deliberately.
+
+       The build is the same subject at a higher tier, so a different frame
+       would be arguing it is a different film. WorkShowcase dedupes its warm
+       list through a Set, so sharing a source costs no second request; the
+       Projects grid does show the two cards carrying one image, which is worth
+       a look once there is a frame that belongs to this tier. */
+    image: "/showcase/it-say-grrr.webp",
     video: "/projects/bike-free-fall.mp4",
   },
   {
