@@ -233,14 +233,21 @@ export const projects: Project[] = [
        biased downward, which leaves 63px over the wing and 147px under the
        machine: it is falling, and the space beneath it is what says so. */
     image: "/showcase/project-free-fall-premium.webp",
-    /* No loop, deliberately.
+    /* The first five seconds of the Cherry Meteor film: the machine strapped in
+       the hold under the red load lighting, the ramp opening, and the drop.
 
-       The only clip that could go here is Free Fall's, and that is the one shot
-       of the reel with no aircraft in it — the machine alone over a rock. Under
-       this still it would cut from a cargo plane at altitude to a different
-       film. `video` is optional precisely so a card can be a still, and the
-       still is the poster every unselected card already shows, so nothing is
-       lost until there is a loop cut from this tier's own footage. */
+       It replaces no loop at all. Until this existed the only clip available
+       was standard Free Fall's, which is the one shot of that reel with no
+       aircraft in it, and under a cargo-plane still it cut to a different film.
+       This is the tier's own footage, so the card now opens on the wide and
+       plays the detail.
+
+       Cut 4:3 out of a 2160x3840 source rather than letterboxed: the band is
+       placed to hold the machine through the whole five seconds, which it moves
+       across as it goes from the deck to the sky. 640x480 and 253 kB, sitting
+       with studio.mp4's 242 kB — a card is about 320px wide and this is fetched
+       on a click, not before one. */
+    video: "/projects/free-fall-premium.mp4",
   },
   {
     id: "minecraft",
