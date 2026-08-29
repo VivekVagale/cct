@@ -224,12 +224,12 @@ export const projects: Project[] = [
   {
     id: "bike-free-fall-premium",
     title: "Project Free Fall Premium",
-    price: "₹1.3k",
+    price: "₹1.2k",
     isPremium: true,
     /* PLACEHOLDER — the studio's words, not mine.
 
        Sitting next to Free Fall, this line is the only thing on the card that
-       says why one costs ₹799 and the other ₹1.3k. I know the brief drops the
+       says why one costs ₹799 and the other ₹1.2k. I know the brief drops the
        jets question and nothing else, which is not enough to write a claim
        from, so this says only what is certainly true and leaves the selling to
        be written by someone who knows what the tier includes. */
