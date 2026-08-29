@@ -23,6 +23,7 @@ import {
 } from "@/components/BuildBriefDialog";
 import { jets } from "@/data/jets";
 import { environments } from "@/data/environments";
+import { deliveries } from "@/data/deliveries";
 import { vehicles, type Vehicle, type VehicleColor } from "@/data/vehicles";
 import { projects } from "@/data/content";
 import { submitBookingForm } from "@/lib/formHandler";
@@ -275,6 +276,9 @@ export function Booking() {
       : "",
     freeFall.oem === "yes" ? "OEM parts" : "stock",
     brief?.jets ? jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "" : "",
+    brief?.delivery
+      ? deliveries.find((d) => d.id === freeFall.deliveryId)?.name ?? ""
+      : "",
   ]
     .filter(Boolean)
     .join(" · ");
@@ -359,6 +363,8 @@ export function Booking() {
     const jetName = jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "";
     const environmentName =
       environments.find((e) => e.id === freeFall.environment)?.name ?? "";
+    const deliveryName =
+      deliveries.find((d) => d.id === freeFall.deliveryId)?.name ?? "";
 
     const ok = await submitBookingForm({
       fullName: String(data.get("fullName") || ""),
@@ -375,7 +381,23 @@ export function Booking() {
       freeFallOem: briefed ? freeFall.oem : "",
       freeFallOemDetails:
         briefed && freeFall.oem === "yes" ? freeFall.oemDetails : "",
-      freeFallJet: briefed && brief?.jets ? jetName : "",
+      /* Both the jet and the delivery ride this one column.
+
+         They are the same question — which aircraft is in the shot — asked of
+         two builds that answer it differently, and no build turns both on. The
+         alternative was a `free_fall_delivery` column, which this client cannot
+         create: the insert names its columns explicitly and PostgREST rejects
+         the whole row for one it does not know, so shipping that ahead of the
+         migration would have broken every submission on the site rather than
+         just this build's. Add the column and split these two if the studio
+         ever wants them apart in the table. */
+      freeFallJet: briefed
+        ? brief?.jets
+          ? jetName
+          : brief?.delivery
+            ? deliveryName
+            : ""
+        : "",
     }).catch(() => false);
 
     setStatus(ok ? "success" : "error");

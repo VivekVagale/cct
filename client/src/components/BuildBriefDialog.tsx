@@ -8,6 +8,7 @@ import { ProjectOptionCard } from "@/components/ProjectOptionCard";
 import { useIsPhone } from "@/hooks/useIsPhone";
 import { jets, defaultJet } from "@/data/jets";
 import { environments, defaultEnvironment } from "@/data/environments";
+import { deliveries, defaultDelivery } from "@/data/deliveries";
 import { projects } from "@/data/content";
 
 /** Everything the Free Fall build needs that the rest of the form does not. */
@@ -20,6 +21,13 @@ export interface FreeFallAnswers {
   oemDetails: string;
   /** The jet's id. The name is resolved at submit; see Booking. */
   jetId: string;
+  /**
+   * The delivery's id, on the builds that ask. Resolved to a name at submit.
+   *
+   * Never set at the same time as a jet: a build asks one question or the
+   * other, and Booking sends whichever the brief turned on.
+   */
+  deliveryId: string;
 }
 
 /**
@@ -37,6 +45,9 @@ export const FREE_FALL_DEFAULTS: FreeFallAnswers = {
   oem: "no",
   oemDetails: "",
   jetId: defaultJet.id,
+  /* Costs nothing extra like the rest of this object — and here that is not a
+     default so much as the whole rule: both deliveries are the same price. */
+  deliveryId: defaultDelivery.id,
 };
 
 const STICKER_OPTIONS: MarqueChip[] = [
@@ -72,16 +83,24 @@ const SECTION = {
 export interface BriefConfig {
   environment: boolean;
   jets: boolean;
+  /**
+   * Which aircraft brings the machine to the drop.
+   *
+   * Mutually exclusive with `jets` in practice: both are "what is the aircraft
+   * in this shot", asked of builds that answer it differently. Nothing turns
+   * both on, and Booking sends whichever one the brief enabled.
+   */
+  delivery: boolean;
 }
 
 export const BUILD_BRIEFS: Record<string, BriefConfig> = {
-  "bike-free-fall": { environment: true, jets: true },
-  /* Free Fall's brief minus the jets question, which is the whole difference
-     between the two entries. The riders and OEM questions are not in this
-     table at all — they are asked of every build that opens a brief — so
-     "everything except jets" is one flag, not a list. */
-  "bike-free-fall-premium": { environment: true, jets: false },
-  studio: { environment: false, jets: false },
+  "bike-free-fall": { environment: true, jets: true, delivery: false },
+  /* Free Fall's brief minus the jets question, plus the delivery picker. The
+     riders and OEM questions are not in this table at all — they are asked of
+     every build that opens a brief — so "everything except jets" is one flag,
+     not a list. */
+  "bike-free-fall-premium": { environment: true, jets: false, delivery: true },
+  studio: { environment: false, jets: false, delivery: false },
 };
 
 export const hasBrief = (projectId: string) => projectId in BUILD_BRIEFS;
@@ -123,7 +142,11 @@ export function BuildBriefDialog({
   onChange: (next: FreeFallAnswers) => void;
   onDone: () => void;
 }) {
-  const brief = BUILD_BRIEFS[projectId] ?? { environment: false, jets: false };
+  const brief = BUILD_BRIEFS[projectId] ?? {
+    environment: false,
+    jets: false,
+    delivery: false,
+  };
   const project = projects.find((p) => p.id === projectId);
   const reduceMotion = useReducedMotion();
   const isPhone = useIsPhone();
@@ -410,6 +433,40 @@ export function BuildBriefDialog({
                   </label>
                 )}
               </motion.div>
+
+              {/* Sits above the charges line, not inside it.
+
+                  The jets grid below carries "extra charges apply ... for any
+                  jet other than the studio default", and a second thumbnail
+                  picker underneath that sentence would be read as carrying it
+                  too. Nothing here costs more than anything else here, so it
+                  says so in its own words and leaves the line beneath to price
+                  only what it actually prices. */}
+              {brief.delivery && (
+                <motion.div variants={SECTION} className="flex flex-col gap-3">
+                  <p className={eyebrowClass}>How it arrives</p>
+                  <div
+                    role="radiogroup"
+                    aria-label="How it arrives"
+                    className="grid grid-cols-2 gap-3"
+                  >
+                    {deliveries.map((delivery) => (
+                      <OptionCard
+                        key={delivery.id}
+                        name={delivery.name}
+                        hint={delivery.hint}
+                        image={delivery.image}
+                        selected={value.deliveryId === delivery.id}
+                        onSelect={() => set("deliveryId", delivery.id)}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-[11px] normal-case leading-relaxed tracking-normal text-[#B8C4D6]/70">
+                    Either one costs the same — this is a choice of shot, not a
+                    tier inside a tier.
+                  </p>
+                </motion.div>
+              )}
 
               {brief.jets ? (
               <motion.div variants={SECTION} className="flex flex-col gap-3">
