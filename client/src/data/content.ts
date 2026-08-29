@@ -192,10 +192,19 @@ export const projects: Project[] = [
     title: "Project Free Fall",
     price: "₹799",
     description: "Suspended motion, gravity rendered with intent.",
-    // The studio's own frame, not a stock photograph — the same render the
-    // sphere carries as "It Say Grrr". The card crops it 4:3 from a 9:16
-    // source, which keeps the fork and front wheel and loses the sky.
-    image: "/showcase/it-say-grrr.webp",
+    /* The studio's own frame, cropped 4:3 from a square source rather than left
+       for the card to centre-crop a 9:16 one.
+
+       The machine fills the whole height of 0298, so the 270px this loses is a
+       composition call, not a fit: centred is the placement that keeps the
+       headlight, the tank badge, the engine and all but the last of the front
+       wheel. It costs most of the "COLD CHAIN" lettering on the fuselage at
+       bottom right, which is the one thing a lower crop would have bought — at
+       the price of the badge and the headlight, which are the subject.
+
+       The loop below is unchanged and still plays on selection. This is the
+       poster it opens from and the still every unselected card shows. */
+    image: "/showcase/project-free-fall.webp",
     /* The last shot of the Guerrilla 450 reel, and the only one in it with no
        aircraft: the machine alone, turning over the rock. The shots with a
        helicopter or a bomber in frame are the build next to this one on the
