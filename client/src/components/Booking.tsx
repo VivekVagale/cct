@@ -360,11 +360,37 @@ export function Booking() {
     
        Names, not ids: the studio reads these columns, and `su-30-mkk` in an
        inbox is worse than nothing. Same reason `vehicle` is sent as a label. */
-    const jetName = jets.find((jet) => jet.id === freeFall.jetId)?.name ?? "";
+    /* Say when an answer is the one nobody chose.
+
+       The table was recording the default jet as "MiG-29", which reads in an
+       inbox exactly like a client who went looking and picked the MiG-29 — and
+       the difference matters, because the line under the grid prices every
+       other jet against that one. Marked rather than blanked: the studio still
+       needs to know which aircraft is in the shot, and an empty cell would
+       trade one ambiguity for a worse one.
+
+       Only on the way to the table. The summary the client reads on the page
+       still says "MiG-29", because they are looking at the picker while they
+       read it and "Default jet" there would describe nothing they can see. */
+    const asDefault = (name: string, isDefault: boolean, noun: string) =>
+      name && isDefault ? `Default ${noun} (${name})` : name;
+
+    const chosenJet = jets.find((jet) => jet.id === freeFall.jetId);
+    const jetName = asDefault(
+      chosenJet?.name ?? "",
+      Boolean(chosenJet?.isDefault),
+      "jet",
+    );
     const environmentName =
       environments.find((e) => e.id === freeFall.environment)?.name ?? "";
-    const deliveryName =
-      deliveries.find((d) => d.id === freeFall.deliveryId)?.name ?? "";
+    const chosenDelivery = deliveries.find(
+      (d) => d.id === freeFall.deliveryId,
+    );
+    const deliveryName = asDefault(
+      chosenDelivery?.name ?? "",
+      Boolean(chosenDelivery?.isDefault),
+      "delivery",
+    );
 
     const ok = await submitBookingForm({
       fullName: String(data.get("fullName") || ""),
