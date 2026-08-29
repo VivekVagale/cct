@@ -197,25 +197,36 @@ export function ProjectOptionCard({
         )}
         {/* The same badge shape as Coming Soon, in the brand violet rather than
             the muted grey — the two say opposite things and should not be told
-            apart by reading them. Never both: a build cannot be new and not yet
-            available. */}
-        {!disabled && project.isNew && (
-          <span className="inline-block mt-3 text-[10px] tracking-[0.18em] uppercase text-[#C9AEFF] border border-[#9F6EF2]/50 bg-[#7A44E0]/[0.12] px-2.5 py-1">
-            New
-          </span>
-        )}
-        {/* The New badge exactly, with a different word — asked for as "the
-            same one". Gated on !disabled for the same reason: a build that
-            cannot be ordered yet should say that and nothing else.
+            apart by reading them. Never alongside it either: a build that
+            cannot be ordered yet should say that and nothing else, which is
+            what the !disabled gate is for.
 
-            The two are independent, so both can render on one card and would
-            then be two identical violet chips reading New and Premium. Nothing
-            carries both today; the moment one does, this wants its own tint. */}
-        {!disabled && project.isPremium && (
-          <span className="inline-block mt-3 ml-2 text-[10px] tracking-[0.18em] uppercase text-[#C9AEFF] border border-[#9F6EF2]/50 bg-[#7A44E0]/[0.12] px-2.5 py-1">
-            Premium
-          </span>
-        )}
+            Driven off a list rather than written out three times. They are the
+            same chip with a different word, and three copies of it is three
+            places for the styling to drift apart. Order is fixed here rather
+            than taken from the flags, so two builds that happen to carry the
+            same pair always read them in the same order.
+
+            They are independent claims, so a card can carry more than one and
+            would then show two identical violet chips. Nothing does today; the
+            moment something does, the second one wants its own tint. */}
+        {!disabled &&
+          (
+            [
+              [project.isNew, "New"],
+              [project.isPopular, "Popular"],
+              [project.isPremium, "Premium"],
+            ] as const
+          )
+            .filter(([shown]) => shown)
+            .map(([, label], index) => (
+              <span
+                key={label}
+                className={`inline-block mt-3 ${index > 0 ? "ml-2" : ""} text-[10px] tracking-[0.18em] uppercase text-[#C9AEFF] border border-[#9F6EF2]/50 bg-[#7A44E0]/[0.12] px-2.5 py-1`}
+              >
+                {label}
+              </span>
+            ))}
       </div>
 
       {selected && (

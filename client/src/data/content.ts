@@ -118,6 +118,14 @@ export interface Project {
    */
   isPremium?: boolean;
   /**
+   * The one people actually order.
+   *
+   * A claim about demand, so it has an expiry the way `isNew` does: it is only
+   * worth reading while it is both true and true of one build. Put it on three
+   * of five and it stops being information and starts being decoration.
+   */
+  isPopular?: boolean;
+  /**
    * What this build costs, already formatted.
    *
    * A string rather than a number, and deliberately: "1.7k" is how the studio
@@ -191,6 +199,7 @@ export const projects: Project[] = [
     id: "bike-free-fall",
     title: "Project Free Fall",
     price: "₹799",
+    isPopular: true,
     description: "Suspended motion, gravity rendered with intent.",
     /* The studio's own frame, cropped 4:3 from a square source rather than left
        for the card to centre-crop a 9:16 one.
