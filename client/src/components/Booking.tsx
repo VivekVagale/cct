@@ -823,7 +823,21 @@ export function Booking() {
             <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-2">
               Total project cost estimate
             </p>
-            <p className="font-display text-2xl sm:text-3xl text-[#F5F7FA]">
+            {/* Two sizes, because this one element renders two different kinds
+                of thing. A figure is five glyphs and wants to be the largest
+                thing on the step — it was getting skimmed past at the size the
+                sentence needed. "Quoted after we talk" is a sentence, and at
+                display size it wraps to three lines inside max-w-md and reads
+                as a headline the studio never wrote. leading-none because a
+                single line of 72px type does not need the 1.5 line box that
+                comes with it. */}
+            <p
+              className={
+                selectedPrice
+                  ? "font-display text-6xl sm:text-7xl leading-none tracking-tight text-[#F5F7FA]"
+                  : "font-display text-2xl sm:text-3xl text-[#F5F7FA]"
+              }
+            >
               {selectedPrice ?? "Quoted after we talk"}
             </p>
             <p className="mt-3 text-sm text-[#B8C4D6] leading-relaxed">
