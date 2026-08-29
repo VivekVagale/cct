@@ -234,13 +234,22 @@ export const projects: Project[] = [
        from, so this says only what is certainly true and leaves the selling to
        be written by someone who knows what the tier includes. */
     description: "The Free Fall treatment, taken further.",
-    /* The studio's own frame: the C-17 with the machine already out of the
-       ramp. Cropped 4:3 from a 1080x1920 source rather than left tall, for the
-       reason the Studio card is — the aircraft and the bike occupy rows
-       251..851 of 1920, so the card's own centre crop of the full frame would
-       have held sky and cut the tail. The window is placed with the slack
-       biased downward, which leaves 63px over the wing and 147px under the
-       machine: it is falling, and the space beneath it is what says so. */
+    /* The machine still on the ramp, the hold open and lit behind it, the sun
+       going down past the tail.
+
+       It replaces a frame of the same aircraft shot from outside, with the bike
+       already a speck in the air. True to the build and unreadable at the
+       ~256px this card is actually drawn at. This one survives the size: the
+       machine is large in frame, the plate reads CCT, and the shape behind it
+       is obviously the inside of an aeroplane.
+
+       It also matches the loop, which opens in that hold under the red load
+       lighting. The card rests on the moment before the drop and plays the
+       drop, rather than posting the ending and then rewinding to it.
+
+       Cropped 4:3 from a 2160x2160 source with all 540px taken off the top:
+       that band is empty fuselage, and spending it there is what keeps the
+       ramp, the machine and the horizon in one frame. */
     image: "/showcase/project-free-fall-premium.webp",
     /* The first five seconds of the Cherry Meteor film: the machine strapped in
        the hold under the red load lighting, the ramp opening, and the drop.
