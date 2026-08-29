@@ -101,6 +101,18 @@ export const BUILD_BRIEFS: Record<string, BriefConfig> = {
      not a list. */
   "bike-free-fall-premium": { environment: true, jets: false, delivery: true },
   studio: { environment: false, jets: false, delivery: false },
+  /* The same brief as Studio, and for the same reason.
+
+     Both put the machine in a set the client does not choose — a seamless
+     floor, a formation of aircraft — so the light and the aircraft questions
+     have no answer to give. What is left is the three every briefed build
+     asks: the plate, the stickers on the machine, and whether OEM parts are
+     fitted. Those are about the machine itself, and it is the same machine
+     whichever build is wrapped around it.
+
+     Being in this table at all is the change: an id absent from it opens no
+     dialog, which is why Jet Mist asked nothing until now. */
+  "jet-mist": { environment: false, jets: false, delivery: false },
 };
 
 export const hasBrief = (projectId: string) => projectId in BUILD_BRIEFS;

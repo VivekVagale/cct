@@ -355,8 +355,12 @@ export function Booking() {
     
        The answers are not cleared when another build is chosen -- switching
        away and back should not silently blank what someone typed -- so the
-       gate is here rather than in the state. Without it a Jet Mist request
+       gate is here rather than in the state. Without it a Minecraft request
        would arrive carrying a jet and a plate nobody asked it for.
+
+       The example used to be Jet Mist, which now asks a brief of its own —
+       the same three questions Studio asks. The builds this still guards are
+       the ones absent from BUILD_BRIEFS entirely.
     
        Names, not ids: the studio reads these columns, and `su-30-mkk` in an
        inbox is worse than nothing. Same reason `vehicle` is sent as a label. */
