@@ -112,6 +112,39 @@ export const vehicles: Vehicle[] = [
     ],
   },
   {
+    /* Sits next to the 450 rather than at the end of the file, because the two
+       are the pair a client is actually choosing between and a list is the only
+       thing telling them apart. */
+    id: "himalayan-440",
+    name: "Himalayan 440",
+    manufacturer: "Royal Enfield",
+    render: "/vehicles/himalayan-440/cover.webp",
+    image: "/vehicles/himalayan-440/cover.webp",
+    colors: [
+      {
+        /* Swatches here follow this file's existing convention — the paint as
+           named, not the paint as photographed. Sampling the renders gives
+           #C0C0BE for this one and #424242 for Sela Black, because both shots
+           are lit dark, and a #C0C0BE chip sitting beside Kamet White's #EDEFF2
+           reads as grey rather than as the white one. The sampled figures are
+           recorded here so the whole file can be moved to measured swatches in
+           one pass if that is ever wanted, rather than half of it drifting. */
+        id: "nelong-white",
+        name: "Nelong White",
+        swatch: "#E9EBEC",
+        render: "/vehicles/himalayan-440/nelong-white.webp",
+        image: "/vehicles/himalayan-440/nelong-white.webp",
+      },
+      {
+        id: "sela-black",
+        name: "Sela Black",
+        swatch: "#17181B",
+        render: "/vehicles/himalayan-440/sela-black.webp",
+        image: "/vehicles/himalayan-440/sela-black.webp",
+      },
+    ],
+  },
+  {
     id: "hunter-350",
     name: "Hunter 350",
     manufacturer: "Royal Enfield",
@@ -2589,6 +2622,19 @@ export const vehicles: Vehicle[] = [
         swatch: "#22406E",
         render: "/vehicles/ktm-rc-390/factory-racing-blue.webp",
         image: "/vehicles/ktm-rc-390/factory-racing-blue.webp",
+      },
+      {
+        /* Orange like Electronic Orange, and a different render — the two
+           images differ by a mean of 36.7/255 per pixel, so this is its own
+           shot rather than the same one filed twice. The swatch is sampled
+           off the bodywork (#F87828 against the other's #F86808) rather than
+           inferred from the name, which is what the note at the top of this
+           file asks for now that the renders exist. */
+        id: "moto-gp-edition",
+        name: "Moto GP Edition",
+        swatch: "#F87828",
+        render: "/vehicles/ktm-rc-390/moto-gp-edition.webp",
+        image: "/vehicles/ktm-rc-390/moto-gp-edition.webp",
       },
     ],
   },
