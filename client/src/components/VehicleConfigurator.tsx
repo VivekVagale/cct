@@ -504,10 +504,19 @@ export function VehicleConfigurator({
                * only evidence a colour had been picked was the panel vanishing,
                * which reads as a dismissal rather than a selection.
                *
-               * Long enough to register as an answer, short enough that nobody
-               * waits for it.
+               * 520ms is that hold on a desktop, where the card also has a
+               * flight home to make and the pointer is nowhere near the thing it
+               * just clicked.
+               *
+               * On a phone it was the lag. There is no flight any more, the
+               * thumb is resting on the row that just lit up, and the grid card
+               * behind carries the same selected ring — so the confirmation has
+               * already been delivered three ways before this timer starts. Half
+               * a second of a panel sitting still after a tap is not a beat, it
+               * is a page that has stopped responding. One frame at 120ms is
+               * enough for the badge to paint and not enough to read as a hang.
                */
-              window.setTimeout(() => setFocusedId(null), 520);
+              window.setTimeout(() => setFocusedId(null), compact ? 120 : 520);
             }}
             onDismiss={() => setFocusedId(null)}
           />

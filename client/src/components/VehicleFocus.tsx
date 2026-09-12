@@ -133,7 +133,13 @@ export function VehicleFocus({
         animate={{ opacity: 1 }}
         // Out faster than in. The scrim is the last thing holding the overlay
         // mounted, so its duration is how long the dismissal takes.
-        exit={{ opacity: 0, transition: { duration: 0.2, ease: "linear" } }}
+        /* The scrim is the last thing to go, so its duration is how long the
+           dismissal takes — and on a phone that is added to the hold before it,
+           on top of a tap the visitor considers already answered. */
+        exit={{
+          opacity: 0,
+          transition: { duration: isPhone ? 0.11 : 0.2, ease: "linear" },
+        }}
         /* Halved on a phone. 0.35s is a considered dissolve on a desktop, where
            it covers a card travelling across the screen. With no flight left to
            cover, it is just delay between the tap and the answer. */
@@ -198,7 +204,7 @@ export function VehicleFocus({
 
         <motion.div
           className="flex justify-end pb-3"
-          exit={{ opacity: 0, transition: { duration: 0.14 } }}
+          exit={{ opacity: 0, transition: { duration: isPhone ? 0.08 : 0.14 } }}
         >
           <button
             type="button"
@@ -275,7 +281,7 @@ export function VehicleFocus({
              at "show" is a render, not an animation, and cannot be late. */
           initial={reduceMotion || isPhone ? "show" : "hidden"}
           animate="show"
-          exit={{ opacity: 0, y: 6, transition: { duration: 0.14 } }}
+          exit={{ opacity: 0, y: 6, transition: { duration: isPhone ? 0.08 : 0.14 } }}
           variants={{
             hidden: {},
             show: {
