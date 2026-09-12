@@ -104,11 +104,13 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
   function next() {
     if (!stepValid()) return;
     setGate(null);
+    form.clearError();
     setIndex((i) => Math.min(i + 1, TOTAL - 1));
   }
 
   function back() {
     setGate(null);
+    form.clearError();
     setIndex((i) => Math.max(i - 1, 0));
   }
 
@@ -180,6 +182,10 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
       <form
         onSubmit={form.handleSubmit}
+        /* One listener for the whole form rather than one per field: change
+           events bubble, and every control here is a descendant. */
+        onChange={form.clearError}
+        onInput={form.clearError}
         className="flex min-h-0 flex-1 flex-col"
         /* The browser's own validation bubbles are asked for explicitly, per
            step, in stepValid. Left on, submit would also try to report a field
@@ -406,7 +412,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
         </div>
 
         {form.status === "error" && (
-          <p className="shrink-0 px-4 pb-3 text-xs text-[#FF4444]">
+          <p className="shrink-0 px-4 pb-3 text-center text-xs text-[#FF4444]">
             Something went wrong — please email us directly.
           </p>
         )}

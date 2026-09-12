@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { registerOverlay } from "@/lib/overlayState";
 import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { MarqueChips, type MarqueChip } from "@/components/MarqueChips";
@@ -189,8 +190,12 @@ export function BuildBriefDialog({
   }, []);
 
   /* The page must not scroll under a fixed overlay. VehicleFocus's lock,
-     including the scroll restore that phones need. */
+     including the scroll restore that phones need.
+
+     It also announces itself, so the starfield underneath can stop drawing for
+     as long as this is over it — see lib/overlayState. */
   useEffect(() => {
+    const releaseOverlay = registerOverlay();
     const root = document.documentElement;
     const gap = window.innerWidth - root.clientWidth;
     const { overflow, paddingRight } = root.style;
@@ -201,6 +206,7 @@ export function BuildBriefDialog({
       root.style.overflow = overflow;
       root.style.paddingRight = paddingRight;
       if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+      releaseOverlay();
     };
   }, []);
 

@@ -144,6 +144,23 @@ export function useBookingForm() {
     }
   }
 
+  /**
+   * Take the failure notice down once the visitor does anything about it.
+   *
+   * "Something went wrong" was set by a failed submit and then never cleared by
+   * anything — not a changed field, not a different build, not walking back
+   * through the steps and forward again. So one failure pinned a red line to the
+   * last step for the rest of the session, under a form that was by then in a
+   * completely different state and might well submit perfectly.
+   *
+   * Only touches the error. A submission in flight must not be cancelled by a
+   * keystroke, and a success has replaced the form with the confirmation, so
+   * neither is this function's business.
+   */
+  function clearError() {
+    setStatus((current) => (current === "error" ? "idle" : current));
+  }
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     /* The button is disabled without one, so this is the second lock rather than
@@ -267,5 +284,6 @@ export function useBookingForm() {
     handleSelectProject,
     handleSelectVehicle,
     handleSubmit,
+    clearError,
   };
 }

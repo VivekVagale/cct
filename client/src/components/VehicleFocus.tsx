@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { registerOverlay } from "@/lib/overlayState";
 import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import type { Vehicle } from "@/data/vehicles";
@@ -67,6 +68,10 @@ export function VehicleFocus({
    * moment the lock is applied.
    */
   useEffect(() => {
+    /* Announced so the starfield underneath can stop drawing for as long as this
+       is over it — on a phone the scrim above it is 94% black, so every frame it
+       renders while this is open reaches nobody. See lib/overlayState. */
+    const releaseOverlay = registerOverlay();
     const root = document.documentElement;
     const gap = window.innerWidth - root.clientWidth;
     const { overflow, paddingRight } = root.style;
@@ -92,6 +97,7 @@ export function VehicleFocus({
       root.style.overflow = overflow;
       root.style.paddingRight = paddingRight;
       if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+      releaseOverlay();
     };
   }, []);
 
@@ -134,7 +140,10 @@ export function VehicleFocus({
         // Out faster than in. The scrim is the last thing holding the overlay
         // mounted, so its duration is how long the dismissal takes.
         exit={{ opacity: 0, transition: { duration: 0.2, ease: "linear" } }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        /* Halved on a phone. 0.35s is a considered dissolve on a desktop, where
+           it covers a card travelling across the screen. With no flight left to
+           cover, it is just delay between the tap and the answer. */
+        transition={{ duration: isPhone ? 0.18 : 0.35, ease: [0.16, 1, 0.3, 1] }}
         /* fixed, not absolute. The overlay around it scrolls when the card and
            its colours are taller than the viewport, and an absolute scrim is
            positioned against that scroll container — so it slid up with the
@@ -262,15 +271,35 @@ export function VehicleFocus({
              list has the dialog's full height to use before it needs to
              scroll at all. */
           className="flex min-h-0 flex-1 flex-col pt-0 md:pt-0"
-          initial="hidden"
+          /* Mounted already shown where there is to be no entrance, rather than
+             mounted hidden with an instant transition to bring it back.
+
+             The two are not the same. An empty transition still leaves sixteen
+             cards sitting at opacity 0 until an animation frame arrives to move
+             them, so anything that delays the first frame — a busy main thread,
+             a backgrounded tab — is a list that is briefly not there. Starting
+             at "show" is a render, not an animation, and cannot be late. */
+          initial={reduceMotion || isPhone ? "show" : "hidden"}
           animate="show"
           exit={{ opacity: 0, y: 6, transition: { duration: 0.14 } }}
           variants={{
             hidden: {},
             show: {
-              transition: reduceMotion
-                ? {}
-                : { delayChildren: 0.3, staggerChildren: 0.06 },
+              /* No stagger on a phone.
+
+                 A machine can carry sixteen colourways, and this runs one tween
+                 per card — sixteen of them, beginning 0.3s after the panel has
+                 already started opening, on top of the panel's own entrance.
+                 On a desktop that is the list arriving after the card has
+                 landed. On a handset it is the tail of the lag: the tap is
+                 answered, and then the phone keeps working for most of a second.
+
+                 The cards still fade with their parent, so the list arrives —
+                 it arrives at once. */
+              transition:
+                reduceMotion || isPhone
+                  ? {}
+                  : { delayChildren: 0.3, staggerChildren: 0.06 },
             },
           }}
         >

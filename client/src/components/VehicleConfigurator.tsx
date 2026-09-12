@@ -308,7 +308,12 @@ export function VehicleConfigurator({
       <div
         className={
           compact
-            ? "sticky top-0 z-20 mb-4 border-b border-white/[0.06] bg-[#05070A]/90 px-4 py-3 backdrop-blur-md"
+            /* No plate behind it. The field carries its own opaque black and a
+               shadow (see .glow-button__field), so it stays readable with cards
+               passing behind the strip — and a tinted, blurred band pinned
+               across the top of a phone is the same furniture the bottom dock
+               was. Only the field floats. */
+            ? "sticky top-0 z-20 mb-4 px-4 py-3"
             : "sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 px-6 py-3 sm:px-10 lg:static lg:mx-0 lg:px-0 lg:py-0"
         }
       >

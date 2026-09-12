@@ -7,6 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Galaxy from "./components/ui/Galaxy";
 import { MobileBooking } from "./components/MobileBooking";
 import { useIsPhone, useIsPhoneRoute } from "@/hooks/useIsPhone";
+import { useOverlayOpen } from "@/lib/overlayState";
 
 /**
  * The whole story, loaded only where it can be told.
@@ -58,6 +59,12 @@ function App() {
      wider viewport should get the richer sky, and nothing is lost by giving it
      to them mid-session. */
   const isPhone = useIsPhone();
+
+  /* The sky stops while an overlay is over it, and only on a phone.
+     That is where the scrim is opaque — the desktop's is 80% with a blur behind
+     it, so the starfield genuinely shows through and stopping it would be a
+     visible change rather than a saving. */
+  const overlayOpen = useOverlayOpen();
 
   return (
     <ErrorBoundary>
@@ -117,6 +124,7 @@ function App() {
                 mouseRepulsion={!isPhone}
                 resolutionScale={isPhone ? 0.6 : 1}
                 fpsCap={isPhone ? 30 : 0}
+                paused={isPhone && overlayOpen}
               />
             </motion.div>
 

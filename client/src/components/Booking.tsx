@@ -170,6 +170,10 @@ export function Booking() {
           inside the form and stops above the button. */}
       <form
         onSubmit={form.handleSubmit}
+        /* The failure notice comes down as soon as anything is changed — see
+           clearError. Change events bubble, so one listener covers the form. */
+        onChange={form.clearError}
+        onInput={form.clearError}
         className="max-w-[1600px] mx-auto px-6 sm:px-10 mt-20 sm:mt-32 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12"
       >
         {/* ── 02 · Build ──────────────────────────────────────────────────

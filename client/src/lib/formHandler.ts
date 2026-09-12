@@ -123,5 +123,36 @@ export async function submitBookingForm(data: BookingFormData): Promise<boolean>
     }),
   });
 
+  /*
+   * Say why, when it says no.
+   *
+   * The form's only vocabulary for a failure is "something went wrong — please
+   * email us directly", which is the right thing to show a client and useless to
+   * everyone else: a refused insert left no trace anywhere, so the studio could
+   * see the red line and had no way to find out whether it was a column
+   * constraint, a row-level policy, a malformed key or the network.
+   *
+   * PostgREST answers with a JSON body naming the cause — the column, the
+   * constraint, the policy — and it is thrown away by `response.ok`. This reads
+   * it once, on failure only, and puts it in the console.
+   *
+   * Nothing the visitor typed is logged: the body here is the server's
+   * explanation, not the submission. And it cannot itself break the submit —
+   * reading the body can throw on a response that has none, so it is guarded and
+   * the return value never depends on it.
+   */
+  if (!response.ok) {
+    let detail = "";
+    try {
+      detail = await response.text();
+    } catch {
+      /* No body to read. The status alone is still worth having. */
+    }
+    console.error(
+      `[booking] Supabase refused the insert: ${response.status} ${response.statusText}`,
+      detail,
+    );
+  }
+
   return response.ok;
 }
