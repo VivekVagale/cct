@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BookingWizard } from "@/components/BookingWizard";
 
 /**
@@ -17,6 +18,38 @@ import { BookingWizard } from "@/components/BookingWizard";
  * it here is what would make them look like different sites.
  */
 export function MobileBooking({ onSeeTheWork }: { onSeeTheWork: () => void }) {
+  /*
+   * Black all the way out to the edges of the browser.
+   *
+   * The shell below paints its own black and covers the viewport, which is
+   * enough right up until the two places it is not: a rubber-band overscroll,
+   * where iOS reveals the document's background behind the page, and the
+   * browser's own chrome, which takes its colour from the theme-color meta. Both
+   * would have shown #05070A — the ground the starfield was tuned against, and
+   * now the ground of nothing — as a faintly blue seam around a black page.
+   *
+   * Restored on unmount rather than assumed, because "Load the full site here"
+   * swaps this tree for the desktop one in place, and that one wants its own
+   * ground back.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const previousRoot = root.style.backgroundColor;
+    const previousBody = document.body.style.backgroundColor;
+    const previousTheme = meta?.getAttribute("content") ?? null;
+
+    root.style.backgroundColor = "#000";
+    document.body.style.backgroundColor = "#000";
+    meta?.setAttribute("content", "#000000");
+
+    return () => {
+      root.style.backgroundColor = previousRoot;
+      document.body.style.backgroundColor = previousBody;
+      if (previousTheme !== null) meta?.setAttribute("content", previousTheme);
+    };
+  }, []);
+
   return (
     /* A fixed-height shell, not a tall page.
      *

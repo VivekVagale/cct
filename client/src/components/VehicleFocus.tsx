@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
-import { registerOverlay } from "@/lib/overlayState";
 import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import type { Vehicle } from "@/data/vehicles";
@@ -68,10 +67,6 @@ export function VehicleFocus({
    * moment the lock is applied.
    */
   useEffect(() => {
-    /* Announced so the starfield underneath can stop drawing for as long as this
-       is over it — on a phone the scrim above it is 94% black, so every frame it
-       renders while this is open reaches nobody. See lib/overlayState. */
-    const releaseOverlay = registerOverlay();
     const root = document.documentElement;
     const gap = window.innerWidth - root.clientWidth;
     const { overflow, paddingRight } = root.style;
@@ -97,7 +92,6 @@ export function VehicleFocus({
       root.style.overflow = overflow;
       root.style.paddingRight = paddingRight;
       if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
-      releaseOverlay();
     };
   }, []);
 

@@ -12,12 +12,8 @@ import { Footer } from "@/components/Footer";
 import { CinematicLine } from "@/components/CinematicLine";
 import { Preloader } from "@/components/Preloader";
 import { SceneDeck, type SceneDefinition } from "@/components/SceneDeck";
-import {
-  animate,
-  useMotionValue,
-  useReducedMotion,
-  type MotionValue,
-} from "framer-motion";
+import { animate, motion, useMotionValue, useReducedMotion } from "framer-motion";
+import Galaxy from "@/components/ui/Galaxy";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { useIsPhone } from "@/hooks/useIsPhone";
 import { useScrollReveals } from "@/hooks/useScrollReveals";
@@ -31,19 +27,12 @@ import { useScrollReveals } from "@/hooks/useScrollReveals";
  * the geojson are all reachable from this module's import graph, and a bundler
  * cannot tree-shake away something that might render.
  *
- * The starfield is not here. It belongs to the page rather than to either
- * layout, and both of them sit on it — see App.
+ * The starfield is here rather than in App because this is now the only layout
+ * that has one — and a static import of it up there would have put ogl in the
+ * entry chunk for every visitor, including the phones that will never draw a
+ * star.
  */
-export function DesktopSite({
-  galaxyOpacity,
-}: {
-  /**
-   * Written by the Hero as its assembly finishes, so the page opens on flat
-   * black and the stars arrive with the reveal. Owned by App because the canvas
-   * it drives is painted there, under both layouts.
-   */
-  galaxyOpacity: MotionValue<number>;
-}) {
+export function DesktopSite() {
   const reduceMotion = useReducedMotion();
   /*
    * A phone runs a cut-down version of the page, and it is not a matter of
@@ -89,6 +78,18 @@ export function DesktopSite({
   // drawing an edge across the helmet — which is the thing the bar has always
   // refused to do.
   const heroExit = useMotionValue(0);
+
+  /*
+   * How far up the starfield is.
+   *
+   * Written by the Hero as its assembly finishes, so the page opens on flat
+   * black and the stars arrive with the reveal. This is a deliberate look rather
+   * than a technical constraint: the frames are keyed, so the stars *can* show
+   * from the very first one — that was tried, and it read as busy behind an
+   * assembling mascot. Black holds the assembly, and the starfield arriving is
+   * what makes the reveal land.
+   */
+  const galaxyOpacity = useMotionValue(0);
 
   /*
    * The starfield belongs to the page, not to the hero.
@@ -203,6 +204,44 @@ export function DesktopSite({
 
   return (
     <>
+      {/* The starfield, which is a desktop thing now.
+
+          It lived in App so both layouts could sit on the same surface. The
+          phone does not get one any more — a four-layer shader redrawn for the
+          life of the page was the largest standing cost on the site and it was
+          competing with every tap on the route whose whole job is to be tapped —
+          so the component with the only remaining use for it owns it again.
+
+          That also takes ogl out of the entry chunk: a static import in App put
+          the library in front of every visitor, including the ones who will
+          never see a star. */}
+      <motion.div style={{ opacity: galaxyOpacity }} className="fixed inset-0 z-0">
+        {/* The phone runs the component's own defaults: density 1,
+            glowIntensity 0.3, twinkleIntensity 0.3, rotationSpeed 0.1.
+            Desktop keeps the values this site tuned — a dimmer, slower
+            sky under a page that already has a great deal moving on it.
+
+            The pointer props are the one default not taken. There is no
+            cursor on a touchscreen, and a tap arrives as a synthetic
+            mousemove with no mouseleave behind it — so the starfield
+            would lean toward wherever a thumb last landed and stay
+            leaning, which is the fault the submit button had. Off is also
+            what "not reactive, like a live wallpaper" asked for. */}
+        <Galaxy
+          opacity={galaxyOpacity}
+          saturation={0}
+          hueShift={140}
+          density={isPhone ? 1 : 0.8}
+          glowIntensity={isPhone ? 0.3 : 0.4}
+          twinkleIntensity={isPhone ? 0.3 : 0.35}
+          rotationSpeed={isPhone ? 0.1 : 0.05}
+          mouseInteraction={!isPhone}
+          mouseRepulsion={!isPhone}
+          resolutionScale={isPhone ? 0.6 : 1}
+          fpsCap={isPhone ? 30 : 0}
+        />
+      </motion.div>
+
       {/* Above the deck, not inside it: the bar is the one element that belongs
           to the whole story rather than to any one scene, so it must not
           dissolve with them. */}

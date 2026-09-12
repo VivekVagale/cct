@@ -226,20 +226,6 @@ interface GalaxyProps {
    * complaint it answers was heat rather than stutter.
    */
   fpsCap?: number;
-  /**
-   * Stop drawing entirely.
-   *
-   * For the case the visibility gate below cannot see: an overlay covering the
-   * viewport. The canvas is still on screen and the tab is still focused, so
-   * every existing check says to keep going — while on a phone the scrim over it
-   * is 94% black and nothing being drawn reaches anyone's eye.
-   *
-   * The loop keeps turning; only the shader is skipped, which is essentially all
-   * of the cost. uTime is read from the timestamp rather than accumulated, so
-   * the sky is where it would have been when it comes back rather than resuming
-   * from where it stopped.
-   */
-  paused?: boolean;
 }
 
 export default function Galaxy({
@@ -262,7 +248,6 @@ export default function Galaxy({
   opacity,
   resolutionScale = 1,
   fpsCap = 0,
-  paused = false,
   ...rest
 }: GalaxyProps) {
   const ctnDom = useRef<HTMLDivElement>(null);
@@ -273,10 +258,6 @@ export default function Galaxy({
   // Read by the render loop, written by the subscription below. Defaults to
   // visible, so leaving the prop off keeps the old always-drawing behaviour.
   const visible = useRef(true);
-  /* A ref, not a dependency: this flips on every overlay open and the effect
-     below builds a WebGL context, compiles a shader and allocates a mesh. */
-  const pausedRef = useRef(paused);
-  pausedRef.current = paused;
 
   useEffect(() => {
     if (!opacity) return;
@@ -383,7 +364,7 @@ export default function Galaxy({
       // from the timestamp rather than accumulated, so the animation is where
       // it would have been when it comes back rather than resuming from where
       // it stopped.
-      if (!visible.current || document.hidden || pausedRef.current) return;
+      if (!visible.current || document.hidden) return;
 
       /*
        * The frame cap, applied before any work rather than after it.
