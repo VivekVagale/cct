@@ -19,6 +19,35 @@ import { useTilt } from "@/hooks/useTilt";
 export const VEHICLE_NAME_CLASS =
   "font-display text-base sm:text-xl leading-[1.15] min-h-[2.3em]";
 
+/**
+ * The card at two densities, from one place.
+ *
+ * The booking wizard puts this grid three across on a 390px screen, where a
+ * cell is about 102px. That is not the two-up card narrowed — a card narrowed
+ * is one whose caption no longer fits it, and this caption is a marque and a
+ * model name with nothing in them that can break badly. It is the card scaled:
+ * the crop stays 4:3, and the padding and both type sizes come down together so
+ * the proportions hold.
+ *
+ * Returned as a set rather than exported as six constants because the grid is
+ * sized by an invisible copy of each card, and the copy has to use exactly what
+ * the real one uses or the cells stop matching their contents. One call, three
+ * classes, used at both ends.
+ */
+export function vehicleCardClasses(compact?: boolean) {
+  return compact
+    ? {
+        name: "font-display text-[11px] leading-[1.15] min-h-[2.3em]",
+        cap: "relative px-2 pt-2 pb-2.5",
+        marque: "text-[8px] tracking-[0.1em] uppercase text-[#B8C4D6] mb-0.5",
+      }
+    : {
+        name: VEHICLE_NAME_CLASS,
+        cap: "relative p-3.5 sm:p-5",
+        marque: "text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6] mb-1",
+      };
+}
+
 interface VehicleCardProps {
   vehicle: Vehicle;
   selected: boolean;
@@ -31,6 +60,8 @@ interface VehicleCardProps {
    * out beneath it, should not wobble under the cursor while they choose.
    */
   tilt?: boolean;
+  /** Three-up on a phone rather than two. See vehicleCardClasses. */
+  compact?: boolean;
 }
 
 export function VehicleCard({
@@ -38,7 +69,9 @@ export function VehicleCard({
   selected,
   onSelect,
   tilt = true,
+  compact,
 }: VehicleCardProps) {
+  const cls = vehicleCardClasses(compact);
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
     useTilt<HTMLButtonElement>();
 
@@ -87,6 +120,12 @@ export function VehicleCard({
           <motion.img
             src={vehicle.image}
             alt={vehicle.name}
+            /* Sixty-four of these render at once and every one of them used to
+               be fetched on mount — about 5MB of covers before a visitor had
+               scrolled past the first row. The browser is better placed than we
+               are to decide which are about to be seen. */
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
             animate={{ scale: selected ? 1.06 : 1 }}
             whileHover={tilt ? { scale: 1.08, y: -4 } : undefined}
@@ -102,16 +141,14 @@ export function VehicleCard({
           to do it — at text-xl in that width the longer names broke to three
           lines. */}
       <motion.div
-        className="relative p-3.5 sm:p-5"
+        className={cls.cap}
         animate={{ y: selected ? -2 : 0 }}
         transition={{ duration: 0.3 }}
       >
         {vehicle.manufacturer && (
-          <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6] mb-1">
-            {vehicle.manufacturer}
-          </p>
+          <p className={cls.marque}>{vehicle.manufacturer}</p>
         )}
-        <h4 className={`${VEHICLE_NAME_CLASS} text-[#F5F7FA]`}>{vehicle.name}</h4>
+        <h4 className={`${cls.name} text-[#F5F7FA]`}>{vehicle.name}</h4>
       </motion.div>
     </motion.button>
   );

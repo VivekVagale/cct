@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
-import { VehicleCard, VEHICLE_NAME_CLASS } from "@/components/VehicleCard";
+import { VehicleCard, vehicleCardClasses } from "@/components/VehicleCard";
 import { MarqueChips } from "@/components/MarqueChips";
 import { PendingRender } from "@/components/PendingRender";
 import { VehicleFocus } from "@/components/VehicleFocus";
@@ -46,12 +46,15 @@ export const OTHER_MACHINE_NAME = "My machine isn't here";
 function OtherMachineCard({
   selected,
   onSelect,
+  compact,
 }: {
   selected: boolean;
   onSelect: () => void;
+  compact?: boolean;
 }) {
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
     useTilt<HTMLButtonElement>();
+  const cls = vehicleCardClasses(compact);
 
   return (
     <motion.button
@@ -89,7 +92,7 @@ function OtherMachineCard({
       </div>
 
       <motion.div
-        className="relative p-3.5 sm:p-5"
+        className={cls.cap}
         animate={{ y: selected ? -2 : 0 }}
         transition={{ duration: 0.3 }}
       >
@@ -97,10 +100,8 @@ function OtherMachineCard({
             is sized by an invisible copy of a card that prints a marque line
             unconditionally; a card with no eyebrow sits a line short of its
             row and puts its name where its neighbours put their marque. */}
-        <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6] mb-1">
-          {OTHER_MACHINE_EYEBROW}
-        </p>
-        <h4 className={`${VEHICLE_NAME_CLASS} text-[#F5F7FA]`}>
+        <p className={cls.marque}>{OTHER_MACHINE_EYEBROW}</p>
+        <h4 className={`${cls.name} text-[#F5F7FA]`}>
           {OTHER_MACHINE_NAME}
           {/* Appended rather than substituted: an aria-label here would replace
               the visible text instead of extending it, and the accessible name
@@ -117,6 +118,15 @@ interface VehicleConfiguratorProps {
   selectedColorId: string | null;
   onSelectVehicle: (vehicleId: string) => void;
   onSelectColor: (colorId: string) => void;
+  /**
+   * Three across at a smaller scale, for the booking wizard.
+   *
+   * The step owns a whole screen there rather than sitting above a form, so the
+   * grid is not competing with anything below it for height — and sixty-four
+   * machines two-up is twenty-two screens of scroll to reach the end of. Three
+   * across is seven.
+   */
+  compact?: boolean;
 }
 
 export function VehicleConfigurator({
@@ -124,7 +134,9 @@ export function VehicleConfigurator({
   selectedColorId,
   onSelectVehicle,
   onSelectColor,
+  compact,
 }: VehicleConfiguratorProps) {
+  const cardClasses = vehicleCardClasses(compact);
   const [query, setQuery] = useState("");
   const [marque, setMarque] = useState(ALL_MARQUES);
 
@@ -347,7 +359,11 @@ export function VehicleConfigurator({
       <div
         role="radiogroup"
         aria-label="Vehicle"
-        className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+        className={
+          compact
+            ? "grid grid-cols-3 gap-2.5"
+            : "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+        }
       >
           {shown.map((vehicle) => (
             <div key={vehicle.id} className="relative">
@@ -358,13 +374,12 @@ export function VehicleConfigurator({
                   of the tab order, which a copy of a real card must not keep. */}
               <div aria-hidden className="invisible rounded-sm border border-transparent">
                 <div className="aspect-[4/3]" />
-                <div className="p-3.5 sm:p-5">
-                  <p className="text-[10px] tracking-[0.18em] uppercase mb-1">
-                    {vehicle.manufacturer}
-                  </p>
-                  {/* Same metric the real caption uses, from the same constant
-                      — this box is what actually sizes the grid cell. */}
-                  <h4 className={VEHICLE_NAME_CLASS}>{vehicle.name}</h4>
+                {/* Same metrics the real caption uses, from the same helper —
+                    this box is what actually sizes the grid cell, so it has to
+                    follow the density the cards are drawn at. */}
+                <div className={cardClasses.cap}>
+                  <p className={cardClasses.marque}>{vehicle.manufacturer}</p>
+                  <h4 className={cardClasses.name}>{vehicle.name}</h4>
                 </div>
               </div>
 
@@ -378,6 +393,7 @@ export function VehicleConfigurator({
                     vehicle={vehicle}
                     selected={vehicle.id === selectedVehicleId}
                     onSelect={() => handleSelectVehicle(vehicle.id)}
+                    compact={compact}
                   />
                 </motion.div>
               )}
@@ -404,16 +420,15 @@ export function VehicleConfigurator({
               className="invisible rounded-sm border border-transparent"
             >
               <div className="aspect-[4/3]" />
-              <div className="p-3.5 sm:p-5">
-                <p className="text-[10px] tracking-[0.18em] uppercase mb-1">
-                  {OTHER_MACHINE_EYEBROW}
-                </p>
-                <h4 className={VEHICLE_NAME_CLASS}>{OTHER_MACHINE_NAME}</h4>
+              <div className={cardClasses.cap}>
+                <p className={cardClasses.marque}>{OTHER_MACHINE_EYEBROW}</p>
+                <h4 className={cardClasses.name}>{OTHER_MACHINE_NAME}</h4>
               </div>
             </div>
 
             <div className="absolute inset-0">
               <OtherMachineCard
+                compact={compact}
                 selected={selectedVehicleId === OTHER_VEHICLE_ID}
                 /* Straight to the parent, deliberately not through
                    handleSelectVehicle: that one also sets focusedId, which is

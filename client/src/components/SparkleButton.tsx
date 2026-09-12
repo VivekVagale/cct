@@ -44,15 +44,28 @@ export function SparkleButton({
   type = "button",
   disabled,
   className,
+  onClick,
 }: {
   children: ReactNode;
   type?: "button" | "submit";
   disabled?: boolean;
   className?: string;
+  /**
+   * For the one place this button is not a submit: the wizard's Next, which
+   * advances a step rather than sending the form. It is the same control doing
+   * the same job — the primary action of the screen — so it is this button with
+   * a handler rather than a second button that looks like it.
+   */
+  onClick?: () => void;
 }) {
   return (
     <div className={`sp ${className ?? ""}`}>
-      <button className="sparkle-button" type={type} disabled={disabled}>
+      <button
+        className="sparkle-button"
+        type={type}
+        disabled={disabled}
+        onClick={onClick}
+      >
         <span className="spark" />
         <span className="backdrop" />
         <svg

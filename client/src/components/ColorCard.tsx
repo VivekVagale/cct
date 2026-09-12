@@ -93,6 +93,10 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
             <img
               src={color.image}
               alt={color.name}
+              /* A machine with sixteen colourways is sixteen renders, and the
+                 picker opens on one row of them. */
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover transform-gpu transition-transform duration-300 ease-out group-hover:scale-[1.03]"
             />
           )}

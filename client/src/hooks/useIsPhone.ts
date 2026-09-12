@@ -28,3 +28,35 @@ export function useIsPhone() {
 
   return isPhone;
 }
+
+/**
+ * The same question, answered once and never revisited.
+ *
+ * `useIsPhone` above is right for everything it is used for — a starfield's
+ * resolution, a heading's layer count, whether a pose renders — because those
+ * are settings, and a device that rotates into a different answer should get
+ * the new one.
+ *
+ * Which of the two sites to serve is not a setting. The phone gets a booking
+ * wizard and the desktop gets the whole story, and they are different React
+ * trees: following the query across a resize would unmount one and mount the
+ * other, which throws away every field the visitor has typed. A tablet rotated
+ * mid-form would lose the form.
+ *
+ * So this reads the query at first paint and keeps that answer for the life of
+ * the page. A visitor who genuinely wants the other one reloads, which is also
+ * what the "better on a desktop" link does.
+ *
+ * Read lazily rather than at module scope so the module stays importable
+ * somewhere without a window — there is no SSR here today, and this costs
+ * nothing to keep true.
+ */
+let routeIsPhone: boolean | null = null;
+
+export function useIsPhoneRoute() {
+  if (routeIsPhone === null) {
+    routeIsPhone =
+      typeof window !== "undefined" && window.matchMedia(PHONE_QUERY).matches;
+  }
+  return routeIsPhone;
+}
