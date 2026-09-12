@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BookingWizard } from "@/components/BookingWizard";
+import { useAppShellViewport } from "@/hooks/useAppShellViewport";
 
 /**
  * What a phone gets: the booking, and a way to the rest.
@@ -18,6 +19,11 @@ import { BookingWizard } from "@/components/BookingWizard";
  * it here is what would make them look like different sites.
  */
 export function MobileBooking({ onSeeTheWork }: { onSeeTheWork: () => void }) {
+  /* Holds the document still and reports how much of it the keyboard has left.
+     Most of this site's phone traffic comes through Instagram's in-app browser,
+     which is a WKWebView — see the hook for why that needs the older lock. */
+  const shellHeight = useAppShellViewport();
+
   /*
    * Black all the way out to the edges of the browser.
    *
@@ -37,39 +43,15 @@ export function MobileBooking({ onSeeTheWork }: { onSeeTheWork: () => void }) {
     const meta = document.querySelector('meta[name="theme-color"]');
     const previousRoot = root.style.backgroundColor;
     const previousBody = document.body.style.backgroundColor;
-    const previousOverscroll = root.style.overscrollBehavior;
-    const previousBodyOverscroll = document.body.style.overscrollBehavior;
     const previousTheme = meta?.getAttribute("content") ?? null;
 
     root.style.backgroundColor = "#000";
     document.body.style.backgroundColor = "#000";
     meta?.setAttribute("content", "#000000");
 
-    /*
-     * The document itself must not bounce.
-     *
-     * `overscroll-contain` on the step's scroller stops a gesture chaining out
-     * of it, and that is half the problem. The other half is the steps short
-     * enough not to scroll at all — the price, the description, the chips. There
-     * the scroller has no overflow to consume the drag, so it goes to the
-     * document, which is exactly one viewport tall, cannot scroll either, and
-     * rubber-bands: the page lurches and the content under the thumb does not
-     * move, which is the report.
-     *
-     * `none` rather than `contain` here because there is nothing outside this to
-     * protect and pull-to-refresh is not wanted either — reloading is how you
-     * lose a part-filled booking.
-     */
-    root.style.overscrollBehavior = "none";
-    /* Both elements, because which one owns the viewport's scroll differs by
-       engine and the property does not inherit. */
-    document.body.style.overscrollBehavior = "none";
-
     return () => {
       root.style.backgroundColor = previousRoot;
       document.body.style.backgroundColor = previousBody;
-      root.style.overscrollBehavior = previousOverscroll;
-      document.body.style.overscrollBehavior = previousBodyOverscroll;
       if (previousTheme !== null) meta?.setAttribute("content", previousTheme);
     };
   }, []);
@@ -98,7 +80,10 @@ export function MobileBooking({ onSeeTheWork }: { onSeeTheWork: () => void }) {
      */
     <div
       className="relative z-10 flex h-screen flex-col overflow-clip"
-      style={{ height: "100dvh" }}
+      /* The visual viewport where it can be measured, a CSS height where it
+         cannot. dvh answers the browser's own chrome and says nothing about the
+         keyboard, which is the one that hides the submit button. */
+      style={shellHeight !== null ? { height: shellHeight } : { height: "100dvh" }}
     >
       {/* Not the full Navigation. That bar carries four section anchors and a
           panel that opens over the viewport, and none of those sections are
