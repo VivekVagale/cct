@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { AnimatePresence } from "framer-motion";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { BuildBriefDialog } from "@/components/BuildBriefDialog";
@@ -114,6 +114,26 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
     setIndex((i) => Math.max(i - 1, 0));
   }
 
+  /**
+   * The form may only be sent from the last step.
+   *
+   * The keys on the two buttons stop the specific way this went wrong, and this
+   * stops the rest of them. A form submits for reasons that have nothing to do
+   * with its buttons — Enter in a single-line field is the common one — and
+   * every step of this wizard lives inside one form element, so any of them
+   * could reach a submit handler that assumes six steps of answers behind it.
+   *
+   * Nothing is reported when it fires. A submission the visitor did not ask for
+   * should not produce an error they have to read; it should simply not happen.
+   */
+  function submitIfLast(e: FormEvent<HTMLFormElement>) {
+    if (!isLast) {
+      e.preventDefault();
+      return;
+    }
+    void form.handleSubmit(e);
+  }
+
   /* The confirmation replaces the wizard entirely, the way it replaces the
      desktop form. No scroll correction needed here — the shell is one screen
      tall and does not shorten under the reader. */
@@ -181,7 +201,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
       </div>
 
       <form
-        onSubmit={form.handleSubmit}
+        onSubmit={submitIfLast}
         /* One listener for the whole form rather than one per field: change
            events bubble, and every control here is a descendant. */
         onChange={form.clearError}
@@ -395,17 +415,29 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
           className="flex shrink-0 justify-center px-4 pt-1"
           style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
         >
-          {/* Submit on the last step, a plain button before it. A submit-typed
-              Next would send the form five steps early. */}
+          {/* Two buttons, and the keys are what make them two.
+
+              Without them React sees the same component in the same slot and
+              keeps the DOM node, changing only its attributes — so the tap that
+              moves from step 05 to 06 runs `next`, re-renders synchronously, and
+              the browser then performs that same click's default action on an
+              element which is, by the time it gets there, `type="submit"`.
+              Arriving at the last step sent the form. With no name and no email
+              in it, which is why it came back as "something went wrong" the
+              instant the step appeared.
+
+              A key forces a fresh element, so the node that was clicked is gone
+              before there is a default action to perform on it. */}
           {isLast ? (
             <SparkleButton
+              key="submit"
               type="submit"
               disabled={form.status === "submitting" || !form.vehicleId}
             >
               {form.status === "submitting" ? "Sending..." : "Submit Request"}
             </SparkleButton>
           ) : (
-            <SparkleButton type="button" onClick={next}>
+            <SparkleButton key="next" type="button" onClick={next}>
               Next
             </SparkleButton>
           )}
