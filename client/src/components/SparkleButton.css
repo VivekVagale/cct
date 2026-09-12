@@ -47,7 +47,31 @@
   transition: color var(--transition);
 }
 
-.sparkle-button:is(:hover, :focus-visible) path {
+/* ── Lit state ───────────────────────────────────────────────────────────────
+   The button lights by setting --active: 1, and the trigger for that has to be
+   different on the two kinds of input.
+
+   :hover was doing it for both, and on a touchscreen :hover does not end. A tap
+   applies it to the element and leaves it applied until something else is
+   tapped, so the Next button lit on the first step and stayed lit through the
+   whole wizard — a permanent glow on a control whose glow is supposed to mean
+   "this is where you are going next".
+
+   So :hover is gated behind a device that actually has one. :focus-visible is
+   kept unconditionally: it fires for the keyboard and not for a pointer tap,
+   which is exactly when a button should show where focus is.
+
+   Touch gets :active instead, which lasts only while the finger is down. With
+   the 0.25s --transition on the way out, that reads as a tap pulse: lit on
+   contact, out again as the thumb lifts. */
+@media (hover: hover) {
+  .sparkle-button:hover path {
+    animation-name: bounce;
+  }
+}
+
+.sparkle-button:focus-visible path,
+.sparkle-button:active path {
   animation-name: bounce;
 }
 
@@ -150,9 +174,16 @@
      card or a project card would set --active on <body>, which inherits
      into .particle-pen (it reads var(--active, 0) and declares none of its own)
      and fire this button's particles from across the page. */
-  body:has(.sparkle-button:is(:hover, :focus-visible)) {
+  body:has(.sparkle-button:is(:focus-visible, :active)) {
     --active: 1;
     --play-state: running;
+  }
+
+  @media (hover: hover) {
+    body:has(.sparkle-button:hover) {
+      --active: 1;
+      --play-state: running;
+    }
   }
 
   .bodydrop {
@@ -160,14 +191,26 @@
   }
 }
 
-.sparkle-button:is(:hover, :focus-visible) ~ :is(.bodydrop, .particle-pen) {
-  --active: 1;
-  --play-state: runnin;
-}
-
-.sparkle-button:is(:hover, :focus-visible) {
+.sparkle-button:is(:focus-visible, :active) ~ :is(.bodydrop, .particle-pen) {
   --active: 1;
   --play-state: running;
+}
+
+.sparkle-button:is(:focus-visible, :active) {
+  --active: 1;
+  --play-state: running;
+}
+
+@media (hover: hover) {
+  .sparkle-button:hover ~ :is(.bodydrop, .particle-pen) {
+    --active: 1;
+    --play-state: running;
+  }
+
+  .sparkle-button:hover {
+    --active: 1;
+    --play-state: running;
+  }
 }
 
 .sp {

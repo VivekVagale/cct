@@ -253,7 +253,13 @@ export function BuildBriefDialog({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-5 sm:p-8">
+    /* Edge to edge on a phone, a centred dialog from sm up.
+       The brief is the most detailed thing this form asks for — a plate, a
+       sticker count, a light, an OEM answer and a grid of jets or deliveries —
+       and on a phone it was being read through a letterbox: 20px of padding
+       each side, a 430px cap it could not reach, and a scroll area pinned to
+       46dvh. Under half the screen for the step that needs the most of it. */
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-0 sm:p-8">
       <motion.div
         aria-hidden
         onClick={handleDone}
@@ -288,13 +294,21 @@ export function BuildBriefDialog({
             : { opacity: 0, y: 6, transition: { duration: 0.14 } }
         }
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 my-auto flex max-h-[calc(100dvh-2.5rem)] w-full max-w-[min(92vw,430px)] flex-col focus:outline-none md:max-w-[min(94vw,940px)]"
+        className="relative z-10 my-auto flex h-full max-h-none w-full max-w-none flex-col px-4 pb-4 focus:outline-none sm:h-auto sm:max-h-[calc(100dvh-2.5rem)] sm:max-w-[min(92vw,430px)] sm:px-0 sm:pb-0 md:max-w-[min(94vw,940px)]"
       >
         <p id={titleId} className="sr-only">
           {project?.title ?? "Your build"} — a few things about it
         </p>
 
-        <div className="flex justify-end pb-3">
+        {/* The build, named. On a desktop the card below does this and this line
+            would be saying it twice; on a phone the card is gone and without
+            this the dialog opens on "Plate text" with nothing saying what is
+            being briefed. */}
+        <div className="flex items-center justify-between gap-3 pb-3 pt-4 sm:pt-0">
+          <p className="font-display text-lg text-[#F5F7FA] sm:hidden">
+            {project?.title ?? "Your build"}
+          </p>
+          <div className="ml-auto">
           <button
             type="button"
             onClick={handleDone}
@@ -303,14 +317,20 @@ export function BuildBriefDialog({
           >
             <X className="h-4 w-4" />
           </button>
+          </div>
         </div>
 
         <div className="flex min-h-0 flex-col gap-6 md:flex-row md:items-start md:gap-8">
           {/* The build, at the size the machine gets in the colour picker.
               Inert — `onSelect` is a no-op — because this is a picture of what
               was chosen and not a second place to choose it. */}
+          {/* A picture of what was already chosen, so it is the first thing to
+              go when the screen is small. At full width it was a 4:3 card plus
+              its caption — around 340px of an 812px phone — spent restating the
+              choice that opened this dialog, directly above the questions it
+              came here to answer. The title line above carries it instead. */}
           {project && (
-            <div className="shrink-0 md:w-[400px]">
+            <div className="hidden shrink-0 md:block md:w-[400px]">
               <ProjectOptionCard
                 project={project}
                 selected
@@ -355,7 +375,12 @@ export function BuildBriefDialog({
                 the overflow would otherwise clip off the top row of cards. */}
             <div
               data-lenis-prevent
-              className="max-h-[46dvh] space-y-6 overflow-y-auto overscroll-contain p-1 md:max-h-[64dvh]"
+              /* Takes what is left rather than a fixed slice of the viewport.
+                 46dvh was under half the screen on the step that needs the most
+                 of it, and it was that low because the card above was taking
+                 the rest. The card is desktop-only now, so on a phone this can
+                 simply have the remainder. */
+              className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-1 sm:max-h-[60dvh] sm:flex-none md:max-h-[64dvh]"
             >
               <motion.label
                 variants={SECTION}

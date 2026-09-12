@@ -140,7 +140,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
       {/* Six segments, one per step. A bar that fills continuously would say
           "68% done", which is a claim about effort this form cannot make — the
           steps are not the same size. Segments say which of six, which is true. */}
-      <div className="flex shrink-0 gap-1 px-5 pt-3" aria-hidden>
+      <div className="flex shrink-0 gap-1 px-4 pt-3" aria-hidden>
         {BOOKING_STEPS.map((s, i) => (
           <span
             key={s.id}
@@ -164,7 +164,25 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
         noValidate
       >
         <div ref={scrollerRef} className="min-h-0 flex-1 overflow-y-auto">
-          <div className="px-5 pb-8 pt-4">
+          {/* 16px, not 20. The gutter is the only thing between a card and the
+              edge of the screen, and every pixel of it comes out of the cards —
+              at 44px a side (this plus the configurator's own, before that one
+              was dropped) a machine card was 89px wide where there was room for
+              107.
+
+              Centred in the leftover height, which is what the price, the
+              description and the usage chips needed. Those three are short — a
+              figure, one field, four chips — and against a footer pinned to the
+              bottom of the screen they sat at the top with a third of the
+              viewport empty underneath, which reads as a step that failed to
+              load rather than a step that is simply brief.
+
+              `min-h-full` with `justify-center` is the safe half of that
+              pattern: the box grows past the viewport when the step is taller
+              than it, so free space is never negative and nothing is ever
+              centred off the top edge where a scroller cannot reach it. The two
+              grid steps have no free space to distribute and are unaffected. */}
+          <div className="flex min-h-full flex-col justify-center px-4 pb-8 pt-4">
             {/* ── 01 · Machine ──────────────────────────────────────────── */}
             <section
               ref={(el) => { stepRefs.current[0] = el; }}
@@ -334,12 +352,12 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
             notched phone — without it the button sits under the gesture strip
             and the tap opens the app switcher. */}
         {gate && (
-          <p className="shrink-0 px-5 pb-2 text-[11.5px] leading-snug text-[#B8C4D6]">
+          <p className="shrink-0 px-4 pb-2 text-[11.5px] leading-snug text-[#B8C4D6]">
             {gate}
           </p>
         )}
         <div
-          className="flex shrink-0 items-center gap-3 border-t border-white/[0.1] bg-[#05070A]/85 px-5 pt-3 backdrop-blur-md"
+          className="flex shrink-0 items-center gap-3 border-t border-white/[0.1] bg-[#05070A]/85 px-4 pt-3 backdrop-blur-md"
           style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
         >
           <button
@@ -370,7 +388,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
         </div>
 
         {form.status === "error" && (
-          <p className="shrink-0 px-5 pb-3 text-xs text-[#FF4444]">
+          <p className="shrink-0 px-4 pb-3 text-xs text-[#FF4444]">
             Something went wrong — please email us directly.
           </p>
         )}

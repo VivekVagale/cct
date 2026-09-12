@@ -255,7 +255,22 @@ export function VehicleConfigurator({
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto px-6 sm:px-10">
+    /* Compact carries no gutter of its own.
+
+       This container's 24px each side is right when the configurator is a band
+       on a page that sets its own margins. Inside the wizard it is the second
+       gutter in a row — the step already pads to 16px — and the two stacked came
+       to 44px a side on a 375px screen, measured. That is 88px of a 375px
+       viewport spent on nothing, and it came straight out of the cards: 89px
+       each where there was room for 107.
+
+       Also no max-width. A 1600px cap cannot bind at this size, and leaving it
+       on only invites the same mistake back. */
+    <div
+      className={
+        compact ? "" : "max-w-[1600px] mx-auto px-6 sm:px-10"
+      }
+    >
       {/*
         The search stays on screen for as long as the grid it filters.
 
@@ -281,7 +296,22 @@ export function VehicleConfigurator({
         a problem a desktop does not have.
       */}
       <div ref={sentinelRef} aria-hidden className="h-px lg:hidden" />
-      <div className="sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 px-6 py-3 sm:px-10 lg:static lg:mx-0 lg:px-0 lg:py-0">
+      {/* The negative margins pull this band out to the container's own edges
+          so the blur behind it spans the full width. With no container padding
+          to escape — compact — there is nothing to pull out of, and the pair
+          would push the field off both sides of the screen.
+
+          It does not stick in the wizard either: the step is its own scroller
+          with a fixed footer under it, so there is no fixed page bar to clear
+          and `top-16` would pin the field 64px down inside a box that starts at
+          the top of the content. It scrolls with the grid it filters. */}
+      <div
+        className={
+          compact
+            ? "mb-5"
+            : "sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 px-6 py-3 sm:px-10 lg:static lg:mx-0 lg:px-0 lg:py-0"
+        }
+      >
         {/* The nav bar's glass, and only while the bar is pinned.
 
             It was a flat 90% black band that was there the whole time, which is
@@ -289,7 +319,9 @@ export function VehicleConfigurator({
             hide. This is the same tint, blur and hairline the nav uses, so the
             two surfaces that float over this page are the same surface — and it
             arrives when the bar starts floating and goes when it stops. */}
-        {pinned && (
+        {/* Never in compact: the band is not pinned there, so a glass plate
+            behind it would be a stripe across a field that is sitting still. */}
+        {pinned && !compact && (
           <div
             aria-hidden
             className="absolute inset-0 -z-10 bg-[#05070A]/55 backdrop-blur-md border-b border-white/[0.06] lg:hidden"

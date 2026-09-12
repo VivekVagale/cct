@@ -41,7 +41,7 @@ export function DesktopNudgeBar({ onSeeTheWork }: { onSeeTheWork: () => void }) 
   if (dismissed) return null;
 
   return (
-    <div className="flex items-center gap-3 border-b border-white/[0.06] bg-[#7A44E0]/[0.10] px-5 py-2.5">
+    <div className="flex items-center gap-3 border-b border-white/[0.06] bg-[#7A44E0]/[0.10] px-4 py-2.5">
       <svg
         aria-hidden
         width="14"

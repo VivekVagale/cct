@@ -49,7 +49,7 @@ export function MobileBooking({ onSeeTheWork }: { onSeeTheWork: () => void }) {
           The wordmark and the one link out are what is left of it, at the same
           height, with the same glass. */}
       <header className="shrink-0 border-b border-white/[0.06] bg-[#05070A]/55 backdrop-blur-md">
-        <nav className="flex h-16 items-center justify-between gap-3 px-5">
+        <nav className="flex h-16 items-center justify-between gap-3 px-4">
           <span
             className="group relative inline-flex items-center rounded-[14px] px-3 py-1.5"
             style={{
