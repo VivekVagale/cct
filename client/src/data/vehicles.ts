@@ -142,6 +142,18 @@ export const vehicles: Vehicle[] = [
         render: "/vehicles/himalayan-440/sela-black.webp",
         image: "/vehicles/himalayan-440/sela-black.webp",
       },
+      {
+        /* Named as paint like its siblings, but pulled toward what the render
+           actually shows: the tank samples #5C524E, a muted grey-brown rather
+           than the warm one the name suggests. Kaza Brown on the 450 is
+           #5E4230, and giving this the same warmth would make two different
+           browns look like one. */
+        id: "mustang-brown",
+        name: "Mustang Brown",
+        swatch: "#6B5648",
+        render: "/vehicles/himalayan-440/mustang-brown.webp",
+        image: "/vehicles/himalayan-440/mustang-brown.webp",
+      },
     ],
   },
   {
