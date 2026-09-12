@@ -222,7 +222,20 @@ export function VehicleFocus({
              card believed it stopped — under the colour row. The card is scaled
              by its width instead, on the wrapper above. */
           className="shrink-0 md:w-[400px]"
-          layoutId={reduceMotion ? undefined : `vehicle-focus-${vehicle.id}`}
+          /* No flight on a phone.
+
+             The shared-layout pair animates the card from its cell in the grid
+             to the middle of the screen — a FLIP on an element carrying a
+             render, run at the same moment a full-viewport scrim mounts and the
+             colour list builds. On a desktop that is a nice piece of continuity.
+             On a handset it is the frame budget of the one interaction every
+             booking has to go through, and it reads as the tap not landing.
+
+             Without a layoutId the panel simply fades up, which is both what a
+             phone sheet should do and free. */
+          layoutId={
+            reduceMotion || isPhone ? undefined : `vehicle-focus-${vehicle.id}`
+          }
           initial={reduceMotion ? { opacity: 0 } : false}
           animate={reduceMotion ? { opacity: 1 } : undefined}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}

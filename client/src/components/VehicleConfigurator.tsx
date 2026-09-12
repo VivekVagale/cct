@@ -268,7 +268,7 @@ export function VehicleConfigurator({
        on only invites the same mistake back. */
     <div
       className={
-        compact ? "" : "max-w-[1600px] mx-auto px-6 sm:px-10"
+        compact ? "-mx-4" : "max-w-[1600px] mx-auto px-6 sm:px-10"
       }
     >
       {/*
@@ -308,7 +308,7 @@ export function VehicleConfigurator({
       <div
         className={
           compact
-            ? "mb-5"
+            ? "sticky top-0 z-20 mb-4 border-b border-white/[0.06] bg-[#05070A]/90 px-4 py-3 backdrop-blur-md"
             : "sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 px-6 py-3 sm:px-10 lg:static lg:mx-0 lg:px-0 lg:py-0"
         }
       >
@@ -338,7 +338,7 @@ export function VehicleConfigurator({
           Its own name so the radios cannot be confused with the usage chips
           further down the form, which are a real answer the studio reads. */}
       {marques.length > 0 && (
-        <div className="mb-8 sm:mb-10">
+        <div className={compact ? "mb-4 px-4" : "mb-8 sm:mb-10"}>
           <MarqueChips
             name="vehicle-marque"
             label="Filter machines by manufacturer"
@@ -354,7 +354,7 @@ export function VehicleConfigurator({
           resets both — the reader wants the list back, not an audit of which
           control they last touched. */}
       {matched.length === 0 && (
-        <p className="mb-8 text-sm text-[#B8C4D6]">
+        <p className={compact ? "mb-6 px-4 text-sm text-[#B8C4D6]" : "mb-8 text-sm text-[#B8C4D6]"}>
           {query.trim() && marque !== ALL_MARQUES
             ? `No ${marque} machines match “${query.trim()}”. `
             : query.trim()
@@ -391,9 +391,14 @@ export function VehicleConfigurator({
       <div
         role="radiogroup"
         aria-label="Vehicle"
+        /* Edge to edge, all but the 4px the selected ring needs to draw in.
+           Three across on a 375px screen is arithmetic: every pixel of gutter
+           and gap is a third of a pixel off each card, so the gutter goes and
+           the gap comes down to 8. 108px becomes 117. That is the ceiling at
+           this column count — 2-up is the only way to go materially bigger. */
         className={
           compact
-            ? "grid grid-cols-3 gap-2.5"
+            ? "grid grid-cols-3 gap-2 px-1"
             : "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
         }
       >
@@ -417,7 +422,11 @@ export function VehicleConfigurator({
 
               {focusedId !== vehicle.id && (
                 <motion.div
-                  layoutId={`vehicle-focus-${vehicle.id}`}
+                  /* Paired with the panel's copy — and dropped in compact for
+                     the same reason it is dropped there: see VehicleFocus. Both
+                     halves have to go together, or framer holds a measurement
+                     open for a partner that never arrives. */
+                  layoutId={compact ? undefined : `vehicle-focus-${vehicle.id}`}
                   className="absolute inset-0"
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 >

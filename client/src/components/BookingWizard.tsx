@@ -14,7 +14,7 @@ import { PriceBlock } from "@/components/booking/PriceBlock";
 import { MachineNotes, machineNotesHint } from "@/components/booking/MachineNotes";
 import { UsageChips } from "@/components/booking/UsageChips";
 import { ContactFields } from "@/components/booking/ContactFields";
-import { DesktopNudgeBar, DesktopPitch } from "@/components/booking/DesktopNudge";
+import { DesktopNudgeBar } from "@/components/booking/DesktopNudge";
 import { useBookingForm } from "@/components/booking/useBookingForm";
 
 const TOTAL = BOOKING_STEPS.length;
@@ -137,10 +137,33 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
           starting, and carrying it through five more steps would be nagging. */}
       {index === 0 && <DesktopNudgeBar onSeeTheWork={onSeeTheWork} />}
 
+      {/* Back and the count live up here now.
+
+          They were in the footer beside the button, which is what made that
+          footer a bar: three things in a row need a plate behind them to read as
+          a group, and a plate across the bottom of a phone is a dock. Moved to
+          the top they sit with the progress they describe, and the bottom is
+          left holding one control. */}
+      <div className="flex shrink-0 items-center justify-between px-4 pt-3">
+        <button
+          type="button"
+          onClick={back}
+          disabled={index === 0}
+          /* `py-2 -my-2` is hit area rather than layout — 11px type on one line
+             is a 15px target otherwise. */
+          className="-my-2 py-2 pr-3 text-[11px] tracking-[0.14em] uppercase text-[#B8C4D6] transition-opacity disabled:opacity-30"
+        >
+          &larr; Back
+        </button>
+        <span className="text-[11px] tabular-nums text-[#B8C4D6]">
+          {step.number} / {String(TOTAL).padStart(2, "0")}
+        </span>
+      </div>
+
       {/* Six segments, one per step. A bar that fills continuously would say
           "68% done", which is a claim about effort this form cannot make — the
           steps are not the same size. Segments say which of six, which is true. */}
-      <div className="flex shrink-0 gap-1 px-4 pt-3" aria-hidden>
+      <div className="flex shrink-0 gap-1 px-4 pt-2.5" aria-hidden>
         {BOOKING_STEPS.map((s, i) => (
           <span
             key={s.id}
@@ -339,38 +362,33 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
                 </p>
               </div>
 
-              <div className="mt-6">
-                <DesktopPitch onSeeTheWork={onSeeTheWork} />
-              </div>
             </section>
           </div>
         </div>
 
-        {/* ── The footer, which is the whole argument for a wizard ────────
-            Fixed under the thumb, so the way on is never something to scroll
-            for. The safe-area inset is what keeps it clear of the home bar on a
-            notched phone — without it the button sits under the gesture strip
-            and the tap opens the app switcher. */}
+        {/* ── One control, centred, on nothing ───────────────────────────
+            No plate, no hairline, no blur. It had all three because it was a bar
+            carrying three things; carrying one, it does not need to be a bar at
+            all — and the dark strip across the bottom of the screen was reading
+            as browser furniture rather than as part of the page.
+
+            Nothing is needed behind it either. This row is `shrink-0` in a flex
+            column, so the scroller's box ends exactly where this begins and the
+            step can never scroll underneath it. The usual gradient scrim would
+            be solving a problem the layout already prevents.
+
+            The safe-area inset stays: without it the button sits under the home
+            gesture strip on a notched phone, and the tap opens the app switcher
+            instead. */}
         {gate && (
-          <p className="shrink-0 px-4 pb-2 text-[11.5px] leading-snug text-[#B8C4D6]">
+          <p className="shrink-0 px-4 pb-2 text-center text-[11.5px] leading-snug text-[#B8C4D6]">
             {gate}
           </p>
         )}
         <div
-          className="flex shrink-0 items-center gap-3 border-t border-white/[0.1] bg-[#05070A]/85 px-4 pt-3 backdrop-blur-md"
-          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
+          className="flex shrink-0 justify-center px-4 pt-1"
+          style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
         >
-          <button
-            type="button"
-            onClick={back}
-            disabled={index === 0}
-            className="px-1 py-3 text-[11px] tracking-[0.14em] uppercase text-[#B8C4D6] transition-opacity disabled:opacity-30"
-          >
-            &larr; Back
-          </button>
-          <span className="ml-auto text-[11px] tabular-nums text-[#B8C4D6]">
-            {step.number} / {String(TOTAL).padStart(2, "0")}
-          </span>
           {/* Submit on the last step, a plain button before it. A submit-typed
               Next would send the form five steps early. */}
           {isLast ? (
