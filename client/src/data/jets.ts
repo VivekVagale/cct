@@ -88,8 +88,9 @@ export const jets: Jet[] = [
      cargo plane to fly alongside them — which is not a thing this studio
      sells and not what the frame shows.
 
-     `/jets/c-17-globemaster.webp` is left in place; it is the studio's own
-     render and nothing else points at it. */
+     `/jets/c-17-globemaster.webp` went with it — nothing pointed at the file
+     once this entry was gone, and it is in the history if the aircraft is
+     ever wanted back on this grid. */
   {
     id: "dassault-rafale",
     name: "Dassault Rafale",
