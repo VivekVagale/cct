@@ -212,7 +212,17 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
            inside a hidden step and fail silently. */
         noValidate
       >
-        <div ref={scrollerRef} className="min-h-0 flex-1 overflow-y-auto">
+        {/* overscroll-contain stops the gesture chaining.
+
+            Without it, a drag that reaches the end of a step carries on into the
+            document, which has nowhere to go and rubber-bands instead — the page
+            bounces while the content under the thumb sits still. `contain` ends
+            the gesture at this box, which is the only thing on the phone route
+            that is supposed to move. */}
+        <div
+          ref={scrollerRef}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        >
           {/* 16px, not 20. The gutter is the only thing between a card and the
               edge of the screen, and every pixel of it comes out of the cards —
               at 44px a side (this plus the configurator's own, before that one
