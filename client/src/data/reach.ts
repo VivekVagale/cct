@@ -60,27 +60,64 @@ export interface ReelStat {
  * already some months behind.
  */
 export const reachWindow = {
-  label: "90 days · Jan–Apr 2026",
-  capturedAt: "2026-08-04",
+  label: "Jan 2026 – Sep 2026",
+  capturedAt: "2026-09-12",
 };
 
-/** The ratio the section leads on — 2,750 views for every follower. */
+/** The ratio the section leads on — roughly 3,900 views for every follower. */
 export const headline = {
-  followers: "3.6K",
-  /* 14.3M, which includes the GT 650's 8.1M — that one reel is more than half
-     of everything the account has done. */
-  views: "14.3M",
+  /* 3.9K on the 12 Sep exports, up from the 3.6K this said before. */
+  followers: "3.9K",
+  /* 15.4M: the 14.3M of the earlier account export plus 1.13M across the six
+     reels added below. Still includes the GT 650's 8.1M, which remains more
+     than half of everything the account has done. */
+  views: "15.4M",
 };
 
+/*
+ * Read the note above `newReels` before refreshing these.
+ *
+ * These are a sum of two different kinds of measurement: an account-level
+ * export covering Jan–Apr, plus six individually transcribed reels from
+ * Aug–Sep. They are floors, not totals — anything posted between those two
+ * periods is not counted here, because no export for it has been supplied.
+ */
 export const reachStats: ReachStat[] = [
-  { label: "Likes", value: "1.523M", amount: 1.523, suffix: "M" },
+  /* 1.523M + 93.8K across the six. */
+  { label: "Likes", value: "1.617M", amount: 1.617, suffix: "M" },
   /* Down from the 138K previously on this page. The studio's current export
-     says 100K; where they disagree the newer figure wins. */
-  { label: "Shares", value: "100K", amount: 100, suffix: "K" },
-  { label: "Saves", value: "52K", amount: 52, suffix: "K" },
-  { label: "Reposts", value: "21K", amount: 21, suffix: "K" },
-  { label: "Reels", value: "37", amount: 37 },
+     says 100K; where they disagree the newer figure wins. Plus 11.6K. */
+  { label: "Shares", value: "112K", amount: 112, suffix: "K" },
+  /* 52K + 5.3K. */
+  { label: "Saves", value: "57K", amount: 57, suffix: "K" },
+  /* 21K + 3.5K = 24.5K, which rounds down, not up. */
+  { label: "Reposts", value: "24K", amount: 24, suffix: "K" },
+  { label: "Reels", value: "43", amount: 43 },
 ];
+
+/**
+ * The six reels added on 12 Sep 2026, transcribed from their insight exports.
+ *
+ * Kept as data rather than folded silently into the totals above, so the next
+ * person to refresh this file can see exactly what was added and to what.
+ *
+ * **Not in `topReels`, deliberately.** That list is what the chart plots, and
+ * the chart is the studio's 1M+ work — the smallest column on it is 1M. The
+ * best of these six is 357K, which would sit at roughly a third of the shortest
+ * existing bar and make the argument look weaker than it is. They count toward
+ * the totals and stay off the graph.
+ *
+ * Nothing renders this array today. It exists so the arithmetic above is
+ * checkable rather than asserted.
+ */
+export const newReels = [
+  { postedAt: "2026-08-21", title: "One with kalyani", views: 204_000, likes: "20K", comments: 426, reposts: 608, shares: "2.2K", saves: "1K" },
+  { postedAt: "2026-08-22", title: "1/1 Pulsar NS 160", views: 357_000, likes: "33K", comments: 456, reposts: 1_300, shares: "3.5K", saves: "1.6K" },
+  { postedAt: "2026-08-27", title: "Rate this out of 10", views: 170_000, likes: "7.8K", comments: 307, reposts: 169, shares: "935", saves: "455" },
+  { postedAt: "2026-08-30", title: "Bajaj Pulsar N 160", views: 142_000, likes: "10K", comments: 910, reposts: 388, shares: "1.1K", saves: "675" },
+  { postedAt: "2026-09-01", title: "COOKED? · NS 400Z", views: 239_000, likes: "22K", comments: 229, reposts: 1_000, shares: "3.7K", saves: "1.5K" },
+  { postedAt: "2026-09-03", title: "Duke 390", views: 15_000, likes: "1K", comments: 37, reposts: 28, shares: "136", saves: "41" },
+] as const;
 
 /**
  * The four biggest, all inside nine days in February — together 6.2M of the
