@@ -18,9 +18,12 @@ export function BuildGrid({
   briefed,
   summary,
   onEditBrief,
+  live = true,
 }: {
   selectedId: string;
   onSelect: (id: string) => void;
+  /** Passed to the cards: whether their loops should exist yet. See ProjectOptionCard. */
+  live?: boolean;
   /** Whether the chosen build asks a brief at all. */
   briefed: boolean;
   /** One line of what was answered in it. */
@@ -43,6 +46,7 @@ export function BuildGrid({
             project={project}
             selected={selectedId === project.id}
             onSelect={() => onSelect(project.id)}
+            live={live}
           />
         ))}
       </div>

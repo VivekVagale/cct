@@ -278,6 +278,9 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
                 />
               </div>
               <BuildGrid
+                /* The four loops are not rendered — and so not downloaded —
+                   until this is the step on screen. See ProjectOptionCard. */
+                live={index === 1}
                 selectedId={form.selectedProjectId}
                 onSelect={form.handleSelectProject}
                 briefed={form.briefed}

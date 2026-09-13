@@ -28,10 +28,30 @@ export function ProjectOptionCard({
   project,
   selected,
   onSelect,
+  live = true,
 }: {
   project: Project;
   selected: boolean;
   onSelect: () => void;
+  /**
+   * Whether this card is somewhere a visitor could be looking.
+   *
+   * True on the desktop, where the grid is simply on the page. False on the
+   * wizard's build step until it is the step being shown — and that is not the
+   * same question as whether the element is visible, which is why it is a prop
+   * rather than something measured here.
+   *
+   * The wizard keeps all six steps mounted so FormData can collect them, so
+   * these four cards exist from first paint. `preload="none"` and a
+   * `display: none` ancestor were both expected to stop the loops downloading
+   * until then, and neither did: measured, all four mp4s were fetched while the
+   * visitor was still on step 01 — 875KB spent on a screen that might never be
+   * reached. autoPlay asks for the media whatever the element's display.
+   *
+   * So the element itself is not rendered until the step is. Nothing to autoplay
+   * means nothing to fetch.
+   */
+  live?: boolean;
 }) {
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
     useTilt<HTMLButtonElement>();
@@ -41,8 +61,8 @@ export function ProjectOptionCard({
   const videoRef = useRef<HTMLVideoElement>(null);
   /* The loop is only shown once it is actually playing. A <video> with nothing
      decoded yet paints its first frame — or a black box — over the still, and a
-     card that flashes black on selection is worse than one that simply does not
-     move. Set from `playing`, cleared by `pause`, `ended` and any error. */
+     card that flashes black is worse than one that simply does not move. Set
+     from `playing`, and cleared only by an error: see the note on the element. */
   const [videoReady, setVideoReady] = useState(false);
   /* Reduced motion is read once rather than watched. A visitor changing the
      system setting mid-form is not worth a listener, and the query cannot be
@@ -53,28 +73,62 @@ export function ProjectOptionCard({
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
 
-  const video = wantsMotion ? project.video : undefined;
+  const video = wantsMotion && live ? project.video : undefined;
 
-  /* Play on selection, and on deselection rewind rather than merely pause: the
-     next visit to this card should open on the shot the still promised, not on
-     whatever frame the loop happened to stop at.
-
-     `play()` rejects rather than throws — a browser that refuses it (a data
-     saver, a policy the muted attribute does not satisfy) leaves the still in
-     place, which is the same thing that happens when there is no loop at all. */
+  /*
+   * The loop runs whenever the card can be seen, and stops when it cannot.
+   *
+   * It used to start on selection, on the reasoning that a click is a gesture
+   * every browser accepts as permission to play where a hover is not. That is
+   * true of video with sound. These are muted and `playsInline`, which every
+   * engine autoplays without a gesture at all — so the permission this was
+   * working around was never needed, and the cost of it was a grid of stills
+   * where the studio has four loops of its actual work.
+   *
+   * Visibility rather than mount, and the wizard is why. All six of its steps
+   * stay mounted so FormData can collect them, so a card on step 02 exists from
+   * the moment the page opens — four videos decoding behind a visitor who is
+   * still choosing a machine. `hidden` resolves to `display: none`, which an
+   * IntersectionObserver reports as not intersecting, so the same check answers
+   * that and an off-screen card on the desktop grid at once.
+   *
+   * With `preload="none"` below, nothing is fetched until the card is rendered
+   * and playback begins: a phone that never reaches step 02 never downloads a
+   * frame of the four loops, which are 875KB between them.
+   *
+   * Paused rather than rewound on the way out. Rewinding was right when playing
+   * meant "you chose this" and the next visit should open on the shot the still
+   * promised; for an ambient loop, carrying on from where it was is what looks
+   * uninterrupted.
+   *
+   * `play()` rejects rather than throws — Low Power Mode on iOS refuses muted
+   * autoplay outright — and the catch leaves the still in place, which is the
+   * same thing that happens on a build with no loop at all.
+   */
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !video) return;
 
-    if (selected) {
-      void el.play().catch(() => setVideoReady(false));
-      return;
-    }
+    /* Nothing to fall back to when there is no observer: the autoPlay attribute
+       on the element is already the mechanism, and this only trims what plays
+       off-screen. */
+    if (typeof IntersectionObserver === "undefined") return;
 
-    el.pause();
-    el.currentTime = 0;
-    setVideoReady(false);
-  }, [selected, video]);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void el.play().catch(() => setVideoReady(false));
+        } else {
+          el.pause();
+        }
+      },
+      /* A quarter visible is enough to be worth playing, and is reached well
+         before a card scrolling up into a phone's viewport is being looked at. */
+      { threshold: 0.25 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [video]);
 
   return (
     <motion.button
@@ -159,13 +213,31 @@ export function ProjectOptionCard({
             aria-hidden
             src={video}
             poster={project.image}
+            /* autoPlay is the mechanism; the observer above is the economy.
+
+               Muted and `playsInline`, this is the case every engine starts on
+               its own with no gesture — and, importantly, one the browser only
+               starts for a video it is actually rendering. A `display: none`
+               card does not autoplay, which is what keeps the wizard's five
+               unseen steps from decoding anything.
+
+               It is an attribute rather than a play() call because that call is
+               the one thing here that could fail quietly in an unusual engine,
+               and most of this site's traffic arrives in one. The observer then
+               pauses what scrolls away and resumes it, which is worth having and
+               is not worth depending on. */
+            autoPlay
             muted
             loop
             playsInline
             preload="none"
             tabIndex={-1}
             onPlaying={() => setVideoReady(true)}
-            onPause={() => setVideoReady(false)}
+            /* Nothing on pause. A paused <video> goes on painting the frame it
+               stopped at, so the still underneath has nothing to add — and
+               fading it back in every time a card crosses the observer's
+               threshold would make a scroll past this grid flicker. Cleared only
+               where there is genuinely no frame to show. */
             onError={() => setVideoReady(false)}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
               videoReady ? "opacity-60 group-hover:opacity-85" : "opacity-0"
