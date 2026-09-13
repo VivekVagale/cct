@@ -259,7 +259,19 @@ export function BuildBriefDialog({
        and on a phone it was being read through a letterbox: 20px of padding
        each side, a 430px cap it could not reach, and a scroll area pinned to
        46dvh. Under half the screen for the step that needs the most of it. */
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-0 sm:p-8">
+    /* On a phone this must not be a scroll container.
+     *
+     * It was `overflow-y-auto` at every width, which is right on a desktop where
+     * the panel is a box in the middle of a taller overlay. On a phone the panel
+     * is the whole screen, so anything it could not fit — the answers below the
+     * fold, the Done button — pushed this container into scrolling instead, and
+     * a drag near the bottom lifted the entire panel off the top of the screen
+     * and left blank space behind it. Two scroll containers stacked, and the
+     * outer one wins the gesture the inner one has finished with.
+     *
+     * Below sm there is exactly one thing that scrolls, and it is the list of
+     * answers. Above it, nothing changes. */
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-0 sm:overflow-y-auto sm:p-8">
       <motion.div
         aria-hidden
         onClick={handleDone}
@@ -294,7 +306,18 @@ export function BuildBriefDialog({
             : { opacity: 0, y: 6, transition: { duration: 0.14 } }
         }
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 my-auto flex h-full max-h-none w-full max-w-none flex-col px-4 pb-4 focus:outline-none sm:h-auto sm:max-h-[calc(100dvh-2.5rem)] sm:max-w-[min(92vw,430px)] sm:px-0 sm:pb-0 md:max-w-[min(94vw,940px)]"
+        /* min-h-0 so the column can actually give its scrollable child a bound.
+           Without it a flex item refuses to shrink below its content and the
+           list never becomes the thing that scrolls. */
+        /* Pinned to the overlay on a phone, a centred box from sm up.
+
+           `h-full` inside a centred flex container kept resolving to a panel
+           that was the right height and 24px too low — measured at y=24 in an
+           812 box, which put the Done button at 830 and out of reach behind the
+           overlay's clip. Centring arithmetic is not worth debugging for a panel
+           that is meant to be exactly the screen: inset-0 says that directly and
+           cannot be off by anything. */
+          className="absolute inset-0 z-10 flex min-h-0 flex-col px-4 pb-4 focus:outline-none sm:relative sm:inset-auto sm:my-auto sm:h-auto sm:max-h-[calc(100dvh-2.5rem)] sm:w-full sm:max-w-[min(92vw,430px)] sm:px-0 sm:pb-0 md:max-w-[min(94vw,940px)]"
       >
         <p id={titleId} className="sr-only">
           {project?.title ?? "Your build"} — a few things about it
@@ -320,7 +343,7 @@ export function BuildBriefDialog({
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-col gap-6 md:flex-row md:items-start md:gap-8">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 md:flex-none md:flex-row md:items-start md:gap-8">
           {/* The build, at the size the machine gets in the colour picker.
               Inert — `onSelect` is a no-op — because this is a picture of what
               was chosen and not a second place to choose it. */}
@@ -554,7 +577,11 @@ export function BuildBriefDialog({
               variants={SECTION}
               type="button"
               onClick={handleDone}
-              className="mt-5 w-full rounded-sm border border-white/[0.14] bg-white/[0.03] px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-[#F5F7FA] transition-colors duration-300 hover:border-white/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#9F6EF2]"
+              /* shrink-0 so the button keeps its height when the list above is
+                 long: a flex item with content will otherwise give up its own
+                 box before the scroller gives up any of its overflow, and the
+                 Done button was the first thing squeezed. */
+              className="mt-5 w-full shrink-0 rounded-sm border border-white/[0.14] bg-white/[0.03] px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-[#F5F7FA] transition-colors duration-300 hover:border-white/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#9F6EF2]"
             >
               Done
             </motion.button>
