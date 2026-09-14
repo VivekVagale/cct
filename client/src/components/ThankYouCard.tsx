@@ -1,6 +1,7 @@
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { MASCOT_POSES } from "@/data/mascot";
+import { useIsPhone } from "@/hooks/useIsPhone";
 import { Loader } from "./Loader";
 /* The same module specifier Lanyard.tsx uses, so this is the same URL and the
    same cache entry — importing it here warms the fetch without duplicating the
@@ -247,6 +248,8 @@ export function preloadThankYou() {
  */
 export function ThankYouCard() {
   const reduceMotion = useReducedMotion();
+  const isPhone = useIsPhone();
+  const [showScene, setShowScene] = useState(() => !isPhone);
   const [pass, setPass] = useState<string | null>(null);
   const [scene, setScene] = useState<HTMLDivElement | null>(null);
   /*
@@ -297,6 +300,26 @@ export function ThankYouCard() {
     };
   }, [reduceMotion]);
 
+  /*
+   * Hold the scene back by one frame on a phone, so the receipt is what paints
+   * first.
+   *
+   * Usually redundant and kept for the case where it is not. The scene waits on
+   * a 3MB chunk and a 2.4MB model, so `pass` normally resolves long after this
+   * frame has passed and the card was always going to win. On a revisit, with
+   * both already in the browser cache, they can resolve inside the same tick the
+   * card mounts in — and then the phone would go straight to a canvas, which is
+   * the stall this card exists to replace.
+   *
+   * It defers mounting, not downloading. The fetches start in the effect above
+   * regardless; nothing here makes the confirmation cheaper, only less blank.
+   */
+  useEffect(() => {
+    if (!isPhone || reduceMotion) return;
+    const frame = window.requestAnimationFrame(() => setShowScene(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, [isPhone, reduceMotion]);
+
   if (reduceMotion) {
     return (
       <div role="status" className="thankyou-plain">
@@ -309,12 +332,42 @@ export function ThankYouCard() {
 
   return (
     <div className="thankyou-scene" ref={setScene}>
-      {/* Announced and searchable, while the pass is the thing on screen. */}
-      <div role="status" className="sr-only">
-        <p>{HEAD}</p>
-        <p>{BODY}</p>
-        <p>{FOLLOW}</p>
-      </div>
+      {isPhone && (
+        <motion.div
+          role="status"
+          className="thankyou-mobile-card"
+          animate={
+            sceneUp ? { opacity: 0, scale: 0.98 } : { opacity: 1, scale: 1 }
+          }
+          transition={{ duration: 0.22, ease: "easeOut" }}
+          style={sceneUp ? { pointerEvents: "none" } : undefined}
+        >
+          <img
+            src={MASCOT_POSES.thankYou}
+            alt=""
+            className="thankyou-mobile-card__mascot"
+          />
+          <p className="thankyou-mobile-card__eyebrow">Booking received</p>
+          <h1>{HEAD}</h1>
+          <p>{BODY}</p>
+          <p className="thankyou-mobile-card__small">{FOLLOW}</p>
+        </motion.div>
+      )}
+
+      {/* Announced and searchable, while the pass is the thing on screen.
+
+          Desktop only, now that a phone has the same words visibly on a card
+          that already carries `role="status"`. Both at once is one confirmation
+          read out twice, and the hidden copy is the one worth dropping: what a
+          screen reader announces should be the text on the screen rather than a
+          duplicate of it kept alongside. */}
+      {!isPhone && (
+        <div role="status" className="sr-only">
+          <p>{HEAD}</p>
+          <p>{BODY}</p>
+          <p>{FOLLOW}</p>
+        </div>
+      )}
 
       {/* The wait, shown.
 
@@ -324,14 +377,14 @@ export function ThankYouCard() {
           the form is gone, the scene is a full viewport of nothing, and several
           megabytes are in flight. An empty screen after a submit reads as a
           failure, whatever the markup says. */}
-      {!sceneUp && (
+      {!isPhone && !sceneUp && (
         <div className="thankyou-loading">
           <Loader />
         </div>
       )}
 
       <Suspense fallback={null}>
-        {pass && (
+        {showScene && pass && (
           /* Closer than the component's own default, because this pass has to be
              read rather than admired — at 20 the card was a thumbnail in the
              middle of a large dark screen and the message on it was too small to
