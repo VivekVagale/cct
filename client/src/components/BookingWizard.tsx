@@ -1,11 +1,4 @@
-import {
-  useLayoutEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type MouseEvent,
-  type TouchEvent,
-} from "react";
+import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { AnimatePresence } from "framer-motion";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { BuildBriefDialog } from "@/components/BuildBriefDialog";
@@ -68,58 +61,6 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  /*
-   * A drag on the footer scrolls the step behind it.
-   *
-   * The document is fixed — see useAppShellViewport — so nothing scrolls except
-   * the step's own box, and that box stops above the footer. The bottom strip of
-   * the screen is where a thumb naturally rests, so a swipe starting there moved
-   * nothing and the whole wizard read as scrolling only sometimes.
-   *
-   * Forwarded rather than restyled: the footer is pinned on purpose, and the
-   * button inside it has to keep working.
-   *
-   * `dragging` is what protects the tap. It only arms past a few pixels of
-   * vertical travel, so a press that stays put is still a press and the button
-   * fires normally — and once it is armed the move is consumed, so a drag that
-   * happens to start on the button scrolls instead of pressing it.
-   */
-  const dragFrom = useRef<number | null>(null);
-  const dragging = useRef(false);
-
-  function onFooterTouchStart(e: TouchEvent<HTMLDivElement>) {
-    dragFrom.current = e.touches[0].clientY;
-    dragging.current = false;
-  }
-
-  function onFooterTouchMove(e: TouchEvent<HTMLDivElement>) {
-    const start = dragFrom.current;
-    const scroller = scrollerRef.current;
-    if (start === null || !scroller) return;
-    const y = e.touches[0].clientY;
-    const travelled = start - y;
-    if (!dragging.current && Math.abs(travelled) < 6) return;
-    dragging.current = true;
-    /* One to one with the finger, and no momentum. A flick would have to be
-       simulated, and a scroll that keeps moving after the thumb has left the
-       glass is worse than one that stops where it was put. */
-    scroller.scrollTop += travelled;
-    dragFrom.current = y;
-  }
-
-  function onFooterTouchEnd() {
-    dragFrom.current = null;
-  }
-
-  function onFooterClickCapture(e: MouseEvent<HTMLDivElement>) {
-    /* The tail of a drag is not a tap. Without this the finger lifting after a
-       scroll lands as a click on whatever is underneath, which here is Next. */
-    if (dragging.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      dragging.current = false;
-    }
-  }
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
   const step = BOOKING_STEPS[index];
@@ -297,6 +238,12 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
         <div
           ref={scrollerRef}
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+          /* Room at the end for the floating footer, which no longer reserves
+             any of its own — without it the last row of a step sits under the
+             button. */
+          style={{
+            paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))",
+          }}
         >
           {/* 16px, not 20. The gutter is the only thing between a card and the
               edge of the screen, and every pixel of it comes out of the cards —
@@ -509,18 +456,31 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
             The safe-area inset stays: without it the button sits under the home
             gesture strip on a notched phone, and the tap opens the app switcher
             instead. */}
+        {/*
+         * Over the step rather than beside it.
+         *
+         * It used to be a row of the column, which took sixty-eight pixels of
+         * screen out of the scroller — and because the document is fixed, that
+         * strip scrolled nothing. It is where a thumb rests, so swiping there
+         * did nothing and the wizard read as scrolling only sometimes.
+         *
+         * Forwarding those touches to the scroller by hand was the first
+         * attempt and it was worse: a drag applied frame by frame cannot match
+         * the native scroll running directly above it, so it felt heavy.
+         *
+         * So the footer stops being in the way. It is taken out of the flow,
+         * it has no background, and `pointer-events-none` lets a finger
+         * through to the scroller underneath, which now runs the full height
+         * of the shell. Only the button takes its events back. Native
+         * scrolling, everywhere on the screen except the one control.
+         */}
         {gate && (
-          <p className="shrink-0 px-4 pb-2 text-center text-[11.5px] leading-snug text-[#B8C4D6]">
+          <p className="pointer-events-none absolute inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-20 px-4 text-center text-[11.5px] leading-snug text-[#B8C4D6]">
             {gate}
           </p>
         )}
         <div
-          className="flex shrink-0 justify-center px-4 pt-1"
-          onTouchStart={onFooterTouchStart}
-          onTouchMove={onFooterTouchMove}
-          onTouchEnd={onFooterTouchEnd}
-          onTouchCancel={onFooterTouchEnd}
-          onClickCapture={onFooterClickCapture}
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-4 pt-1 [&>*]:pointer-events-auto"
           style={{
             paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
           }}
