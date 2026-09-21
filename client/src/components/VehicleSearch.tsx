@@ -23,6 +23,16 @@ interface VehicleSearchProps {
 const BEAM = true;
 
 /**
+ * The shell both dressings wear, so neither can drift from the other.
+ *
+ * `mx-auto` is what centres the bar: the call site passes no className, so the
+ * wrapper is an unstyled block and the bar would otherwise sit against the left
+ * edge of a full-width column. Capped at `max-w-md` first — centring something
+ * that is already full width does nothing, which is why the two belong together.
+ */
+const SHELL = "block w-full max-w-md mx-auto";
+
+/**
  * The vehicle filter, wearing the travelling beam.
  *
  * Two dressings, one field. The beam is `size="line"` — a glow that travels the
@@ -116,7 +126,7 @@ export function VehicleSearch({
           size="line"
           colorVariant="colorful"
           strength={0.7}
-          className="block w-full max-w-md"
+          className={SHELL}
         >
           {field}
         </BorderBeam>
@@ -126,7 +136,7 @@ export function VehicleSearch({
            ring instead of behind it. No transform, no opacity, no filter on
            the wrapper. */
         <span
-          className="glow-button block w-full max-w-md"
+          className={`glow-button ${SHELL}`}
           style={{ "--glow-radius": "999px" } as CSSProperties}
         >
           {field}
