@@ -105,7 +105,7 @@ export function VehicleFocus({
     if (e.key !== "Tab") return;
 
     const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-      'button, [href], input, [tabindex]:not([tabindex="-1"])',
+      'button, [href], input, [tabindex]:not([tabindex="-1"])'
     );
     if (!focusable?.length) return;
     const first = focusable[0];
@@ -143,7 +143,10 @@ export function VehicleFocus({
         /* Halved on a phone. 0.35s is a considered dissolve on a desktop, where
            it covers a card travelling across the screen. With no flight left to
            cover, it is just delay between the tap and the answer. */
-        transition={{ duration: isPhone ? 0.18 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+        transition={{
+          duration: isPhone ? 0.18 : 0.35,
+          ease: [0.16, 1, 0.3, 1],
+        }}
         /* fixed, not absolute. The overlay around it scrolls when the card and
            its colours are taller than the viewport, and an absolute scrim is
            positioned against that scroll container — so it slid up with the
@@ -196,7 +199,7 @@ export function VehicleFocus({
            
               From md the dialog goes wide instead, because the colours move
               beside the machine rather than under it. */
-          className="relative z-10 my-auto flex w-full max-w-[min(92vw,430px)] md:max-w-[min(94vw,940px)] max-h-[calc(100dvh-2.5rem)] flex-col focus:outline-none"
+        className="relative z-10 my-auto flex w-full max-w-[min(92vw,430px)] md:max-w-[min(94vw,940px)] max-h-[calc(100dvh-2.5rem)] flex-col focus:outline-none"
       >
         <p id={titleId} className="sr-only">
           {vehicle.manufacturer} {vehicle.name} — choose a colour
@@ -222,16 +225,16 @@ export function VehicleFocus({
             projection measures a rendered box, and a rotated one measures
             wrong. */}
         <div className="flex min-h-0 flex-col gap-6 md:flex-row md:items-start md:gap-8">
-        <motion.div
-          /* Nothing overriding the card's own geometry.
+          <motion.div
+            /* Nothing overriding the card's own geometry.
           
              This used to cap the image's height, which cannot work: the photo
              sits in a fixed 4:3 box, so the box kept its height while the
              picture shrank inside it and the caption ended up below where the
              card believed it stopped — under the colour row. The card is scaled
              by its width instead, on the wrapper above. */
-          className="shrink-0 md:w-[400px]"
-          /* No flight on a phone.
+            className="shrink-0 md:w-[400px]"
+            /* No flight on a phone.
 
              The shared-layout pair animates the card from its cell in the grid
              to the middle of the screen — a FLIP on an element carrying a
@@ -242,27 +245,34 @@ export function VehicleFocus({
 
              Without a layoutId the panel simply fades up, which is both what a
              phone sheet should do and free. */
-          layoutId={
-            reduceMotion || isPhone ? undefined : `vehicle-focus-${vehicle.id}`
-          }
-          initial={reduceMotion ? { opacity: 0 } : false}
-          animate={reduceMotion ? { opacity: 1 } : undefined}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <VehicleCard vehicle={vehicle} selected onSelect={() => {}} tilt={false} beam />
-        </motion.div>
+            layoutId={
+              reduceMotion || isPhone
+                ? undefined
+                : `vehicle-focus-${vehicle.id}`
+            }
+            initial={reduceMotion ? { opacity: 0 } : false}
+            animate={reduceMotion ? { opacity: 1 } : undefined}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <VehicleCard
+              vehicle={vehicle}
+              selected
+              onSelect={() => {}}
+              tilt={false}
+            />
+          </motion.div>
 
-        {/* The colours stagger in behind the card and leave all at once.
+          {/* The colours stagger in behind the card and leave all at once.
             Without the exit they had no exit animation at all, so they stayed
             at full opacity for the whole of the scrim's fade — the blur lifted,
             the card flew home, and the colour row hung over an unblurred page
             until AnimatePresence finally unmounted it. Shorter than the scrim
             so they are gone before the background is sharp again. */}
-        <motion.div
-          /* min-h-0 so the list inside can shrink and scroll rather than
+          <motion.div
+            /* min-h-0 so the list inside can shrink and scroll rather than
              pushing the card past the viewport — the card is a flex column
              with a height cap, and a child that refuses to shrink defeats it. */
-          /* Beside the machine from md up, and the part that scrolls.
+            /* Beside the machine from md up, and the part that scrolls.
           
              Under the card, a long range pushed the colours off the bottom of
              a laptop screen and left the visitor scrolling a modal to find
@@ -270,8 +280,8 @@ export function VehicleFocus({
              chosen — which is the whole point of looking at a colour — and the
              list has the dialog's full height to use before it needs to
              scroll at all. */
-          className="flex min-h-0 flex-1 flex-col pt-0 md:pt-0"
-          /* Mounted already shown where there is to be no entrance, rather than
+            className="flex min-h-0 flex-1 flex-col pt-0 md:pt-0"
+            /* Mounted already shown where there is to be no entrance, rather than
              mounted hidden with an instant transition to bring it back.
 
              The two are not the same. An empty transition still leaves sixteen
@@ -279,13 +289,17 @@ export function VehicleFocus({
              them, so anything that delays the first frame — a busy main thread,
              a backgrounded tab — is a list that is briefly not there. Starting
              at "show" is a render, not an animation, and cannot be late. */
-          initial={reduceMotion || isPhone ? "show" : "hidden"}
-          animate="show"
-          exit={{ opacity: 0, y: 6, transition: { duration: isPhone ? 0.08 : 0.14 } }}
-          variants={{
-            hidden: {},
-            show: {
-              /* No stagger on a phone.
+            initial={reduceMotion || isPhone ? "show" : "hidden"}
+            animate="show"
+            exit={{
+              opacity: 0,
+              y: 6,
+              transition: { duration: isPhone ? 0.08 : 0.14 },
+            }}
+            variants={{
+              hidden: {},
+              show: {
+                /* No stagger on a phone.
 
                  A machine can carry sixteen colourways, and this runs one tween
                  per card — sixteen of them, beginning 0.3s after the panel has
@@ -296,24 +310,24 @@ export function VehicleFocus({
 
                  The cards still fade with their parent, so the list arrives —
                  it arrives at once. */
-              transition:
-                reduceMotion || isPhone
-                  ? {}
-                  : { delayChildren: 0.3, staggerChildren: 0.06 },
-            },
-          }}
-        >
-          <motion.p
-            variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
-            className="mb-3 text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]"
+                transition:
+                  reduceMotion || isPhone
+                    ? {}
+                    : { delayChildren: 0.3, staggerChildren: 0.06 },
+              },
+            }}
           >
-            Colour — {vehicle.manufacturer} {vehicle.name}
-          </motion.p>
+            <motion.p
+              variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+              className="mb-3 text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]"
+            >
+              Colour — {vehicle.manufacturer} {vehicle.name}
+            </motion.p>
 
-          {/* Columns from the data, not a breakpoint: vehicles carry two or
+            {/* Columns from the data, not a breakpoint: vehicles carry two or
               three colours and a fixed three-up leaves a hole under the ones
               that carry two. */}
-          {/*
+            {/*
             Three across, wrapping, and scrolling inside its own box.
 
             The column count used to be the number of colours, which was fine
@@ -327,11 +341,11 @@ export function VehicleFocus({
             end of this list chains straight through to the page behind, which
             is what made scrolling here move the site instead of the colours.
           */}
-          <div
-            ref={colorListRef}
-            role="radiogroup"
-            aria-label={`Colour for ${vehicle.manufacturer} ${vehicle.name}`}
-            /* Two across, not three.
+            <div
+              ref={colorListRef}
+              role="radiogroup"
+              aria-label={`Colour for ${vehicle.manufacturer} ${vehicle.name}`}
+              /* Two across, not three.
             
                Each of these carries a photograph of that exact colourway and a
                name that must not be clipped — "Signals Commando Sand" and
@@ -343,7 +357,7 @@ export function VehicleFocus({
             
                More of them simply means more rows and more scrolling, which is
                the correct trade — a colour picker exists to be looked at. */
-            /* Lenis has to be told to keep its hands off this one.
+              /* Lenis has to be told to keep its hands off this one.
             
                Smooth scrolling works by capturing the wheel globally and
                calling preventDefault on it, then moving the page itself — which
@@ -351,34 +365,34 @@ export function VehicleFocus({
                The list was scrollable and the wheel simply never reached it.
                `data-lenis-prevent` is the library's own opt-out for exactly
                this case. */
-            data-lenis-prevent
-            /* Padded on every side, not just the right.
+              data-lenis-prevent
+              /* Padded on every side, not just the right.
 
                The selected ring is drawn one pixel outside its card, and the
                top row of cards sits flush against this container's edge — so
                `overflow-y-auto` clipped the ring's top line and left the violet
                open above the card it belongs to. The padding is the ring's own
                overhang plus room for the bloom to start before it is cut. */
-            className="colour-list max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain p-1"
-          >
-            {/* The scroller and the grid are two elements now. useBouncyScroll
+              className="colour-list max-h-[46dvh] md:max-h-[64dvh] overflow-y-auto overscroll-contain p-1"
+            >
+              {/* The scroller and the grid are two elements now. useBouncyScroll
                 stretches the wrapper's single child past the ends, so the thing
                 being stretched has to be the whole grid rather than each card. */}
-            <div className="grid grid-cols-2 gap-3">
-              {vehicle.colors.map((color) => (
-                <ColorCard
-                  key={color.id}
-                  color={color}
-                  selected={color.id === selectedColorId}
-                  onSelect={() => onSelectColor(color.id)}
-                />
-              ))}
+              <div className="grid grid-cols-2 gap-3">
+                {vehicle.colors.map(color => (
+                  <ColorCard
+                    key={color.id}
+                    color={color}
+                    selected={color.id === selectedColorId}
+                    onSelect={() => onSelectColor(color.id)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

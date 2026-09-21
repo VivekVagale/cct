@@ -1,4 +1,3 @@
-import { SelectionBeam } from "./SelectionBeam";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/content";
@@ -155,67 +154,61 @@ export function ProjectOptionCard({
         whileTap={disabled ? undefined : { scale: 0.97 }}
         style={{ rotateX, rotateY, transformPerspective: 900 }}
       >
-        {/* The chosen build lights like the chosen machine, colour and marque —
-            SelectionBeam holds the one definition. `block h-full` keeps these
-            equal height in their grid. */}
-        <SelectionBeam selected={selected} className="block h-full">
-          <motion.button
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            aria-disabled={disabled}
-            disabled={disabled}
-            onClick={disabled ? undefined : onSelect}
-            className={`group relative text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 ${
-              disabled ? "cursor-default" : "cursor-pointer"
-            } ${
-              selected
-                ? "selected-glow bg-[#7A44E0]/[0.07]"
-                : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
-            }`}
-          >
-            <motion.div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ background: glowBackground }}
-            />
+        <motion.button
+          type="button"
+          role="radio"
+          aria-checked={selected}
+          aria-disabled={disabled}
+          disabled={disabled}
+          onClick={disabled ? undefined : onSelect}
+          className={`group relative text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 ${
+            disabled ? "cursor-default" : "cursor-pointer"
+          } ${
+            selected
+              ? "selected-glow bg-[#7A44E0]/[0.07]"
+              : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
+          }`}
+        >
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ background: glowBackground }}
+          />
 
-            <div className="relative aspect-[4/3] overflow-hidden">
-              {/* A build with no frame yet draws the placeholder instead of borrowing
+          <div className="relative aspect-[4/3] overflow-hidden">
+            {/* A build with no frame yet draws the placeholder instead of borrowing
             a picture of something else. It takes the same opacity treatment the
             photograph would — the grey of a coming-soon card is the signal, and
             a placeholder at full strength would read as the one live card in
             the row. */}
-              {project.image ? (
-                <motion.img
-                  src={project.image}
-                  alt=""
-                  className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
-                    disabled
-                      ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
-                      : videoReady
-                        ? "opacity-0"
-                        : "opacity-60 group-hover:opacity-85"
-                  }`}
-                  animate={{ scale: selected ? 1.06 : 1 }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            {project.image ? (
+              <motion.img
+                src={project.image}
+                alt=""
+                className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+                  disabled
+                    ? "opacity-40 grayscale group-hover:opacity-65 group-hover:grayscale-[0.55]"
+                    : videoReady
+                      ? "opacity-0"
+                      : "opacity-60 group-hover:opacity-85"
+                }`}
+                animate={{ scale: selected ? 1.06 : 1 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              />
+            ) : (
+              <div
+                className={`h-full w-full transition-opacity duration-700 ${
+                  disabled ? "opacity-70 group-hover:opacity-90" : "opacity-90"
+                }`}
+              >
+                <PendingRender
+                  swatch={PLACEHOLDER_SWATCH}
+                  label="No frame yet"
                 />
-              ) : (
-                <div
-                  className={`h-full w-full transition-opacity duration-700 ${
-                    disabled
-                      ? "opacity-70 group-hover:opacity-90"
-                      : "opacity-90"
-                  }`}
-                >
-                  <PendingRender
-                    swatch={PLACEHOLDER_SWATCH}
-                    label="No frame yet"
-                  />
-                </div>
-              )}
+              </div>
+            )}
 
-              {/* The still stays mounted underneath rather than being swapped out.
+            {/* The still stays mounted underneath rather than being swapped out.
             It is the poster while the loop downloads, the fallback if it never
             does, and what shows again the moment the build is deselected — one
             element doing all three, instead of three states to keep in sync.
@@ -235,13 +228,13 @@ export function ProjectOptionCard({
             The loop is decoration — the card is already labelled by its title
             and description — so it is hidden from assistive technology and the
             element carries no controls to tab into. */}
-              {video && (
-                <motion.video
-                  ref={videoRef}
-                  aria-hidden
-                  src={video}
-                  poster={project.image}
-                  /* autoPlay is the mechanism; the observer above is the economy.
+            {video && (
+              <motion.video
+                ref={videoRef}
+                aria-hidden
+                src={video}
+                poster={project.image}
+                /* autoPlay is the mechanism; the observer above is the economy.
 
                Muted and `playsInline`, this is the case every engine starts on
                its own with no gesture — and, importantly, one the browser only
@@ -254,50 +247,48 @@ export function ProjectOptionCard({
                and most of this site's traffic arrives in one. The observer then
                pauses what scrolls away and resumes it, which is worth having and
                is not worth depending on. */
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="none"
-                  tabIndex={-1}
-                  onPlaying={() => setVideoReady(true)}
-                  /* Nothing on pause. A paused <video> goes on painting the frame it
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="none"
+                tabIndex={-1}
+                onPlaying={() => setVideoReady(true)}
+                /* Nothing on pause. A paused <video> goes on painting the frame it
                stopped at, so the still underneath has nothing to add — and
                fading it back in every time a card crosses the observer's
                threshold would make a scroll past this grid flicker. Cleared only
                where there is genuinely no frame to show. */
-                  onError={() => setVideoReady(false)}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                    videoReady
-                      ? "opacity-60 group-hover:opacity-85"
-                      : "opacity-0"
-                  }`}
-                  animate={{ scale: selected ? 1.06 : 1 }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                />
-              )}
-
-              <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
-            </div>
-
-            {/* Transparent caption, so the starfield reads through the card. */}
-            <div className="relative z-10 p-3 sm:p-4">
-              <h4
-                className={`font-display text-sm sm:text-lg normal-case tracking-normal mb-1 ${
-                  disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
+                onError={() => setVideoReady(false)}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                  videoReady ? "opacity-60 group-hover:opacity-85" : "opacity-0"
                 }`}
-              >
-                {project.title}
-              </h4>
-              <p className="text-xs text-[#B8C4D6] leading-relaxed normal-case tracking-normal">
-                {project.description}
-              </p>
-              {disabled && (
-                <span className="inline-block mt-3 text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]/70 border border-white/15 px-2.5 py-1 transition-colors duration-300 group-hover:border-white/30 group-hover:text-[#B8C4D6]">
-                  Coming Soon
-                </span>
-              )}
-              {/* The same badge shape as Coming Soon, in the brand violet rather than
+                animate={{ scale: selected ? 1.06 : 1 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              />
+            )}
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
+          </div>
+
+          {/* Transparent caption, so the starfield reads through the card. */}
+          <div className="relative z-10 p-3 sm:p-4">
+            <h4
+              className={`font-display text-sm sm:text-lg normal-case tracking-normal mb-1 ${
+                disabled ? "text-[#B8C4D6]" : "text-[#F5F7FA]"
+              }`}
+            >
+              {project.title}
+            </h4>
+            <p className="text-xs text-[#B8C4D6] leading-relaxed normal-case tracking-normal">
+              {project.description}
+            </p>
+            {disabled && (
+              <span className="inline-block mt-3 text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]/70 border border-white/15 px-2.5 py-1 transition-colors duration-300 group-hover:border-white/30 group-hover:text-[#B8C4D6]">
+                Coming Soon
+              </span>
+            )}
+            {/* The same badge shape as Coming Soon, in the brand violet rather than
             the muted grey — the two say opposite things and should not be told
             apart by reading them. Never alongside it either: a build that
             cannot be ordered yet should say that and nothing else, which is
@@ -312,33 +303,32 @@ export function ProjectOptionCard({
             They are independent claims, so a card can carry more than one and
             would then show two identical violet chips. Nothing does today; the
             moment something does, the second one wants its own tint. */}
-              {!disabled &&
-                (
-                  [
-                    [project.isNew, "New"],
-                    [project.isPopular, "Popular"],
-                    [project.isPremium, "Premium"],
-                  ] as const
-                )
-                  .filter(([shown]) => shown)
-                  .map(([, label], index) => (
-                    <span
-                      key={label}
-                      className={`inline-block mt-3 ${index > 0 ? "ml-2" : ""} text-[10px] tracking-[0.18em] uppercase text-[#C9AEFF] border border-[#9F6EF2]/50 bg-[#7A44E0]/[0.12] px-2.5 py-1`}
-                    >
-                      {label}
-                    </span>
-                  ))}
-            </div>
+            {!disabled &&
+              (
+                [
+                  [project.isNew, "New"],
+                  [project.isPopular, "Popular"],
+                  [project.isPremium, "Premium"],
+                ] as const
+              )
+                .filter(([shown]) => shown)
+                .map(([, label], index) => (
+                  <span
+                    key={label}
+                    className={`inline-block mt-3 ${index > 0 ? "ml-2" : ""} text-[10px] tracking-[0.18em] uppercase text-[#C9AEFF] border border-[#9F6EF2]/50 bg-[#7A44E0]/[0.12] px-2.5 py-1`}
+                  >
+                    {label}
+                  </span>
+                ))}
+          </div>
 
-            {selected && (
-              <motion.div
-                layoutId="project-selected-indicator"
-                className="absolute top-3 right-3 z-20 w-2 h-2 rounded-full bg-[#9F6EF2] shadow-[0_0_10px_rgba(159,110,242,0.9)]"
-              />
-            )}
-          </motion.button>
-        </SelectionBeam>
+          {selected && (
+            <motion.div
+              layoutId="project-selected-indicator"
+              className="absolute top-3 right-3 z-20 w-2 h-2 rounded-full bg-[#9F6EF2] shadow-[0_0_10px_rgba(159,110,242,0.9)]"
+            />
+          )}
+        </motion.button>
       </motion.div>
     </motion.div>
   );

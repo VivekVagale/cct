@@ -1,4 +1,3 @@
-import { SelectionBeam } from "./SelectionBeam";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";

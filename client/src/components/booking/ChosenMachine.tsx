@@ -1,4 +1,3 @@
-import { SelectionBeam } from "@/components/SelectionBeam";
 import { PendingRender } from "@/components/PendingRender";
 import {
   OTHER_MACHINE_EYEBROW,
@@ -46,30 +45,26 @@ export function ChosenMachine({
      visitor back to step 01 to redo the thing they just did. */
   if (other) {
     return (
-      /* Beamed like everything else marked chosen. Nothing lifts under the
-         pointer anywhere any more, so this needs no special case. */
-      <SelectionBeam selected className="block">
-        <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
-          <div className="h-14 w-20 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-24">
-            <PendingRender swatch="#6E7378" label="No render" />
-          </div>
-          <div className="min-w-0 normal-case tracking-normal">
-            <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]">
-              {OTHER_MACHINE_EYEBROW}
-            </p>
-            <p className="font-display text-base sm:text-lg text-[#F5F7FA]">
-              {OTHER_MACHINE_NAME}
-            </p>
-            {/* Where the colour line sits on every other machine. There is no
+      <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
+        <div className="h-14 w-20 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-24">
+          <PendingRender swatch="#6E7378" label="No render" />
+        </div>
+        <div className="min-w-0 normal-case tracking-normal">
+          <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]">
+            {OTHER_MACHINE_EYEBROW}
+          </p>
+          <p className="font-display text-base sm:text-lg text-[#F5F7FA]">
+            {OTHER_MACHINE_NAME}
+          </p>
+          {/* Where the colour line sits on every other machine. There is no
               colour to choose and no card to tap, so "tap the card above to
               pick one" would point at a control this visitor does not have.
               This says what they owe us instead. */}
-            <p className="mt-1 text-xs text-[#B8C4D6]">
-              Tell us the make, model and year in step 04 below.
-            </p>
-          </div>
+          <p className="mt-1 text-xs text-[#B8C4D6]">
+            Tell us the make, model and year in step 04 below.
+          </p>
         </div>
-      </SelectionBeam>
+      </div>
     );
   }
 
@@ -100,51 +95,49 @@ export function ChosenMachine({
 
   return (
     /* Same, and for the same reason — see the note in the branch above. */
-    <SelectionBeam selected className="block">
-      <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
-        {/* 80px wide, so the full "Render in progress" cannot sit on one line and
+    <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
+      {/* 80px wide, so the full "Render in progress" cannot sit on one line and
           wraps to three. The echo is captioned by the marque, the model and the
           colour name immediately beside it — this only has to say which of the
           two kinds of thing the picture is. */}
-        {(color?.pending ?? vehicle.pending) ? (
-          <div className="h-14 w-20 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-24">
-            <PendingRender
-              swatch={color?.swatch ?? vehicle.colors[0]?.swatch ?? "#6E7378"}
-              label="No render"
-            />
-          </div>
-        ) : (
-          <img
-            src={color?.image ?? vehicle.image}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-14 w-20 shrink-0 rounded-sm object-cover sm:h-16 sm:w-24"
+      {(color?.pending ?? vehicle.pending) ? (
+        <div className="h-14 w-20 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-24">
+          <PendingRender
+            swatch={color?.swatch ?? vehicle.colors[0]?.swatch ?? "#6E7378"}
+            label="No render"
           />
-        )}
-        <div className="min-w-0 normal-case tracking-normal">
-          <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]">
-            {vehicle.manufacturer}
-          </p>
-          <p className="font-display text-base sm:text-lg text-[#F5F7FA]">
-            {vehicle.name}
-          </p>
-          {color ? (
-            <p className="mt-1 flex items-center gap-2 text-xs text-[#B8C4D6]">
-              <span
-                aria-hidden
-                className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/20"
-                style={{ backgroundColor: color.swatch }}
-              />
-              {color.name}
-            </p>
-          ) : (
-            <p className="mt-1 text-xs text-[#B8C4D6]">
-              No colour chosen — tap the card above to pick one.
-            </p>
-          )}
         </div>
+      ) : (
+        <img
+          src={color?.image ?? vehicle.image}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-14 w-20 shrink-0 rounded-sm object-cover sm:h-16 sm:w-24"
+        />
+      )}
+      <div className="min-w-0 normal-case tracking-normal">
+        <p className="text-[10px] tracking-[0.18em] uppercase text-[#B8C4D6]">
+          {vehicle.manufacturer}
+        </p>
+        <p className="font-display text-base sm:text-lg text-[#F5F7FA]">
+          {vehicle.name}
+        </p>
+        {color ? (
+          <p className="mt-1 flex items-center gap-2 text-xs text-[#B8C4D6]">
+            <span
+              aria-hidden
+              className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/20"
+              style={{ backgroundColor: color.swatch }}
+            />
+            {color.name}
+          </p>
+        ) : (
+          <p className="mt-1 text-xs text-[#B8C4D6]">
+            No colour chosen — tap the card above to pick one.
+          </p>
+        )}
       </div>
-    </SelectionBeam>
+    </div>
   );
 }

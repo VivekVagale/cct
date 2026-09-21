@@ -1,4 +1,3 @@
-import { SelectionBeam } from "./SelectionBeam";
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { PendingRender } from "@/components/PendingRender";
@@ -64,43 +63,6 @@ interface VehicleCardProps {
   tilt?: boolean;
   /** Three-up on a phone rather than two. See vehicleCardClasses. */
   compact?: boolean;
-  /**
-   * Wear the chosen-card beam.
-   *
-   * Off in the grid, and that is a performance decision rather than a taste one.
-   * Every beam is a BorderBeam, and mounting or tearing one down is not cheap:
-   * filtering the grid to Aprilia takes it from twenty-three cards to eight, and
-   * the fifteen teardowns blocked the main thread for 385ms in one task. Sixty-
-   * four of them churning on every marque click is the lag.
-   *
-   * The focus panel turns it on. There is exactly one card there, it is always
-   * the chosen one, and it is not going anywhere while the colours are read.
-   */
-  beam?: boolean;
-}
-
-/**
- * The beam, or nothing wearing its box.
- *
- * Both branches render the same wrapper classes, so a card is laid out
- * identically whether or not it is lit — the grid must not reflow because a
- * card gained a border.
- */
-function Dress({
-  beam,
-  selected,
-  children,
-}: {
-  beam: boolean;
-  selected: boolean;
-  children: ReactNode;
-}) {
-  if (!beam) return <div className="block h-full w-full">{children}</div>;
-  return (
-    <SelectionBeam selected={selected} className="block h-full w-full">
-      {children}
-    </SelectionBeam>
-  );
 }
 
 export function VehicleCard({
@@ -109,7 +71,6 @@ export function VehicleCard({
   onSelect,
   tilt = true,
   compact,
-  beam = false,
 }: VehicleCardProps) {
   const cls = vehicleCardClasses(compact);
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
@@ -146,79 +107,71 @@ export function VehicleCard({
           tilt ? { rotateX, rotateY, transformPerspective: 900 } : undefined
         }
       >
-        {/* Beamed only where it is asked for — the focus panel. See the `beam`
-            prop: in the grid this is a plain box, because mounting and tearing
-            down sixty-four BorderBeams as the marque filter changes is the lag
-            it was causing. */}
-        <Dress beam={beam} selected={selected}>
-          <motion.button
-            type="button"
-            onClick={onSelect}
-            role="radio"
-            aria-checked={selected}
-            /* Not transition-all: the tilt writes to transform on this same element,
+        <motion.button
+          type="button"
+          onClick={onSelect}
+          role="radio"
+          aria-checked={selected}
+          /* Not transition-all: the tilt writes to transform on this same element,
          and a CSS transition on transform fights the frame-by-frame value
          framer is setting there. */
-            className={`group relative w-full text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
-              selected
-                ? "selected-glow bg-[#7A44E0]/[0.07]"
-                : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
-            }`}
-          >
-            {/* Cursor-follow highlight */}
-            {tilt && (
-              <motion.div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ background: glowBackground }}
-              />
-            )}
+          className={`group relative w-full text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
+            selected
+              ? "selected-glow bg-[#7A44E0]/[0.07]"
+              : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
+          }`}
+        >
+          {/* Cursor-follow highlight */}
+          {tilt && (
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ background: glowBackground }}
+            />
+          )}
 
-            <div className="relative aspect-[4/3] overflow-hidden">
-              {/* A machine with no render at all takes the paint of its first
+          <div className="relative aspect-[4/3] overflow-hidden">
+            {/* A machine with no render at all takes the paint of its first
             colourway. It is the one the cover would have been shot in — the
             covers on this page are all the first colour's file — so the grid
             keeps the ordering it would have had. */}
-              {vehicle.pending ? (
-                <PendingRender
-                  swatch={vehicle.colors[0]?.swatch ?? "#6E7378"}
-                />
-              ) : (
-                <motion.img
-                  src={vehicle.image}
-                  alt={vehicle.name}
-                  /* Sixty-four of these render at once and every one of them used to
+            {vehicle.pending ? (
+              <PendingRender swatch={vehicle.colors[0]?.swatch ?? "#6E7378"} />
+            ) : (
+              <motion.img
+                src={vehicle.image}
+                alt={vehicle.name}
+                /* Sixty-four of these render at once and every one of them used to
                be fetched on mount — about 5MB of covers before a visitor had
                scrolled past the first row. The browser is better placed than we
                are to decide which are about to be seen. */
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover"
-                  animate={{ scale: selected ? 1.06 : 1 }}
-                  whileHover={tilt ? { scale: 1.08, y: -4 } : undefined}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
-            </div>
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover"
+                animate={{ scale: selected ? 1.06 : 1 }}
+                whileHover={tilt ? { scale: 1.08, y: -4 } : undefined}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
+          </div>
 
-            {/* These stay two-up on a phone where the project cards drop to one:
+          {/* These stay two-up on a phone where the project cards drop to one:
           the caption is a marque and a model name, not a sentence, so it still
           reads in a ~156px column. It does need the smaller step of the scale
           to do it — at text-xl in that width the longer names broke to three
           lines. */}
-            <motion.div
-              className={cls.cap}
-              animate={{ y: selected ? -2 : 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {vehicle.manufacturer && (
-                <p className={cls.marque}>{vehicle.manufacturer}</p>
-              )}
-              <h4 className={`${cls.name} text-[#F5F7FA]`}>{vehicle.name}</h4>
-            </motion.div>
-          </motion.button>
-        </Dress>
+          <motion.div
+            className={cls.cap}
+            animate={{ y: selected ? -2 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {vehicle.manufacturer && (
+              <p className={cls.marque}>{vehicle.manufacturer}</p>
+            )}
+            <h4 className={`${cls.name} text-[#F5F7FA]`}>{vehicle.name}</h4>
+          </motion.div>
+        </motion.button>
       </motion.div>
     </motion.div>
   );
