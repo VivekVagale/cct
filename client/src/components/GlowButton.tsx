@@ -1,5 +1,6 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { BorderBeam } from "border-beam";
+import { BEAM_LIT, BEAM_REST } from "./beamMotion";
 import "./GlowButton.css";
 
 interface GlowButtonProps {
@@ -132,19 +133,11 @@ export function GlowButton({
     <BorderBeam
       size="md"
       colorVariant="colorful"
-      /* Saturation, not brightness. `brightness` multiplies the whole glow, so
-         pushing it drives every channel up together and the colour washes out
-         toward white. `saturation` pulls it away from grey instead, which is
-         what reads as "more" without bleaching it. Brightness holds at its
-         default; only the opacity moves alongside. */
-      strength={lit ? 1 : 0.7}
+      /* Speed, colour and opacity all come from one place, shared with
+         VehicleSearch — see beamMotion. Brightness is left at its default in
+         both states on purpose; the lift is saturation, not bleach. */
+      {...(lit ? BEAM_LIT : BEAM_REST)}
       brightness={1.3}
-      saturation={lit ? 2.8 : 1.2}
-      /* Seconds for one pass, so smaller is faster. At rest it sits at `md`'s own
-         1.96 and idles; hovering roughly doubles it. Both numbers are a shade
-         quicker than the bar's because this ring travels four sides in the time
-         the bar's line covers one, so the same seconds read as slower here. */
-      duration={lit ? 1 : 1.96}
       className={wrapperClassName ?? "inline-block"}
     >
       {face}

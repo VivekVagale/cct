@@ -1,6 +1,7 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { Search, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
+import { BEAM_LIT, BEAM_REST } from "./beamMotion";
 import "./GlowButton.css";
 
 interface VehicleSearchProps {
@@ -150,23 +151,11 @@ export function VehicleSearch({
         <BorderBeam
           size="line"
           colorVariant="colorful"
-          /* Saturation, not brightness.
-             `brightness` multiplies the whole glow, so pushing it drives every
-             channel up together and the colour washes out toward white — the
-             beam gets louder and less itself at the same time. `saturation`
-             pulls the colour away from grey instead, which is the thing that
-             reads as "more" here. Brightness stays at its default both states
-             and only `strength`, the opacity, moves alongside.
-             Matched to GlowButton so the two do not light differently on the
-             same screen. */
-          strength={lit ? 1 : 0.7}
+          /* Speed, colour and opacity all come from one place, shared with
+             GlowButton — see beamMotion. Brightness is left at its default in
+             both states on purpose; the lift is saturation, not bleach. */
+          {...(lit ? BEAM_LIT : BEAM_REST)}
           brightness={1.3}
-          saturation={lit ? 2.8 : 1.2}
-          /* Seconds for one pass, so smaller is faster. At rest it sits at the
-             preset's own 2.4 and idles; hovering roughly doubles it. The pair
-             is what sells the interaction — colour alone reads as a lamp being
-             turned up, colour and pace together read as the thing waking. */
-          duration={lit ? 1.2 : 2.4}
           className={SHELL}
         >
           {field}
