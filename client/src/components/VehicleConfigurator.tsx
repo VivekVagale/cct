@@ -350,6 +350,10 @@ export function VehicleConfigurator({
             options={marques}
             value={marque}
             onChange={setMarque}
+            /* Only here. The other three chip rows are questions inside a form,
+               where a row lighting as the pointer crosses it reads as loading
+               rather than answerable. */
+            beam
           />
         </div>
       )}

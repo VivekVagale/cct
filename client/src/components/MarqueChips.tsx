@@ -1,10 +1,129 @@
+import { useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { BorderBeam } from "border-beam";
+import { BEAM_LIT, BEAM_REST } from "./beamMotion";
 
 export interface MarqueChip {
   id: string;
   label: string;
   /** The second line, where the label alone leaves the choice ambiguous. */
   hint?: string;
+}
+
+interface ChipLabelProps {
+  option: MarqueChip;
+  name: string;
+  selected: boolean;
+  onChange: (id: string) => void;
+  reduceMotion: boolean | null;
+}
+
+/**
+ * The chip itself, identical whether or not it is wearing a beam.
+ *
+ * One component rather than one copy per branch: the two differ only in what is
+ * wrapped around them, and a chip that drifted between them is a bug nobody sees
+ * until the `beam` prop is turned on somewhere new.
+ */
+function ChipLabel({
+  option,
+  name,
+  selected,
+  onChange,
+  reduceMotion,
+}: ChipLabelProps) {
+  return (
+    <motion.label
+      whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+      className={`group relative cursor-pointer select-none rounded-full border px-5 py-3 text-left transition-colors duration-300 ${
+        selected
+          ? "selected-glow border-transparent bg-[#7A44E0]/[0.10]"
+          : "border-white/[0.14] bg-white/[0.02] hover:border-white/30"
+      }`}
+    >
+      {/* The real control. Visually hidden rather than `display: none`,
+          which would take it out of the tab order and off the keyboard
+          entirely. */}
+      <input
+        type="radio"
+        name={name}
+        value={option.id}
+        checked={selected}
+        onChange={() => onChange(option.id)}
+        className="sr-only peer"
+      />
+      {/* The ring only when the keyboard put focus here, so a pointer
+          user never sees two selection treatments at once. */}
+      <span className="pointer-events-none absolute inset-0 rounded-full peer-focus-visible:ring-2 peer-focus-visible:ring-[#9F6EF2] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#05070A]" />
+      <span
+        className={`block text-[11px] tracking-[0.16em] uppercase transition-colors duration-300 ${
+          selected ? "text-[#F5F7FA]" : "text-[#B8C4D6]"
+        }`}
+      >
+        {option.label}
+      </span>
+      {option.hint && (
+        <span className="mt-1 block text-[10px] normal-case tracking-normal text-[#B8C4D6]/70">
+          {option.hint}
+        </span>
+      )}
+    </motion.label>
+  );
+}
+
+/**
+ * A chip that lights under the pointer.
+ *
+ * Its own component because it holds state, and state cannot be held inside a
+ * `map` callback.
+ *
+ * Invisible at rest rather than unmounted. `strength: 0` hides the beam and
+ * `active: false` stops the animation, so an untouched chip costs a wrapper and
+ * nothing else — where mounting the beam on hover would change the DOM under the
+ * pointer and risk the chip moving as it appeared. Ten of these idling the way
+ * the search bar does would be sixty animated layers over the starfield, which
+ * is the reason this one waits to be asked.
+ *
+ * No phase carrying here, unlike the bar and the button. Those change speed
+ * while visible, so the jump shows; this one is invisible until the moment it
+ * starts, and there is no earlier position to keep.
+ *
+ * Nothing extra on the selected chip. It already wears `selected-glow`, and a
+ * beam on top is one control with two light sources that disagree — the same
+ * reason the search bar gave up its ring rather than wearing both. That class is
+ * also the point of this component: "chosen" is meant to look identical here and
+ * on the vehicle and colour cards, and only one of those can grow a beam.
+ */
+function BeamChip({ children }: { children: ReactNode }) {
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const lit = hovered || focused;
+
+  return (
+    <BorderBeam
+      size="md"
+      colorVariant="colorful"
+      brightness={1.3}
+      duration={lit ? BEAM_LIT.duration : BEAM_REST.duration}
+      saturation={lit ? BEAM_LIT.saturation : BEAM_REST.saturation}
+      strength={lit ? BEAM_LIT.strength : 0}
+      active={lit}
+      className="inline-block"
+    >
+      {/* On a wrapper inside the beam rather than on the beam, which does not
+          spread unrecognised props onto its root. `onFocus`/`onBlur` are
+          focusin/focusout in React, so the hidden radio inside the label is
+          caught without a ref — which is what lights the chip for a keyboard. */}
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+      >
+        {children}
+      </div>
+    </BorderBeam>
+  );
 }
 
 /**
@@ -28,12 +147,22 @@ export function MarqueChips({
   value,
   onChange,
   label,
+  beam = false,
 }: {
   name: string;
   options: MarqueChip[];
   value: string;
   onChange: (id: string) => void;
   label: string;
+  /**
+   * Light each chip under the pointer.
+   *
+   * Off by default, and asked for only by the marque filter. The other three
+   * users of this component — stickers, OEM and usage — are questions inside a
+   * form, where a row that lights as the pointer crosses it reads as something
+   * loading rather than something answerable.
+   */
+  beam?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -43,43 +172,20 @@ export function MarqueChips({
       <div className="flex flex-wrap justify-center gap-2.5">
         {options.map((option) => {
           const selected = option.id === value;
-          return (
-            <motion.label
-              key={option.id}
-              whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-              className={`group relative cursor-pointer select-none rounded-full border px-5 py-3 text-left transition-colors duration-300 ${
-                selected
-                  ? "selected-glow border-transparent bg-[#7A44E0]/[0.10]"
-                  : "border-white/[0.14] bg-white/[0.02] hover:border-white/30"
-              }`}
-            >
-              {/* The real control. Visually hidden rather than `display: none`,
-                  which would take it out of the tab order and off the keyboard
-                  entirely. */}
-              <input
-                type="radio"
-                name={name}
-                value={option.id}
-                checked={selected}
-                onChange={() => onChange(option.id)}
-                className="sr-only peer"
-              />
-              {/* The ring only when the keyboard put focus here, so a pointer
-                  user never sees two selection treatments at once. */}
-              <span className="pointer-events-none absolute inset-0 rounded-full peer-focus-visible:ring-2 peer-focus-visible:ring-[#9F6EF2] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#05070A]" />
-              <span
-                className={`block text-[11px] tracking-[0.16em] uppercase transition-colors duration-300 ${
-                  selected ? "text-[#F5F7FA]" : "text-[#B8C4D6]"
-                }`}
-              >
-                {option.label}
-              </span>
-              {option.hint && (
-                <span className="mt-1 block text-[10px] normal-case tracking-normal text-[#B8C4D6]/70">
-                  {option.hint}
-                </span>
-              )}
-            </motion.label>
+          /* Built once so the two branches cannot be handed different chips. */
+          const chipProps: ChipLabelProps = {
+            option,
+            name,
+            selected,
+            onChange,
+            reduceMotion,
+          };
+          return beam ? (
+            <BeamChip key={option.id}>
+              <ChipLabel {...chipProps} />
+            </BeamChip>
+          ) : (
+            <ChipLabel key={option.id} {...chipProps} />
           );
         })}
       </div>
