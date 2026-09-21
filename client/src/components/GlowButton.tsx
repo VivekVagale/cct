@@ -1,6 +1,6 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { BorderBeam } from "border-beam";
-import { BEAM_LIT, BEAM_REST } from "./beamMotion";
+import { BEAM_LIT, BEAM_REST, useBeamPhase } from "./beamMotion";
 import "./GlowButton.css";
 
 interface GlowButtonProps {
@@ -85,6 +85,10 @@ export function GlowButton({
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const lit = hovered || focused;
+  /* Speed changes on hover, and a CSS animation reinterprets its elapsed time
+     against the new duration rather than keeping its place. `capture` reads
+     where the beam is before the state change; the hook puts it back after. */
+  const beam = useBeamPhase(lit);
 
   /* Built once and dressed by whichever branch is live, so the two cannot drift
      — a face that differs between them is a bug nobody sees until the switch is
@@ -98,10 +102,10 @@ export function GlowButton({
          root — handlers passed there never fire. The anchor is the interactive
          element and the thing a pointer is actually over, so it is the right
          place regardless. */
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      onMouseEnter={() => { beam.capture(); setHovered(true); }}
+      onMouseLeave={() => { beam.capture(); setHovered(false); }}
+      onFocus={() => { beam.capture(); setFocused(true); }}
+      onBlur={() => { beam.capture(); setFocused(false); }}
       className={`glow-button__face ${className ?? ""}`}
       /* Inline rather than a class: `.glow-button__face` sets its background at
          one class of specificity and so would a Tailwind utility, leaving the
@@ -131,6 +135,7 @@ export function GlowButton({
 
   return (
     <BorderBeam
+      ref={beam.ref}
       size="md"
       colorVariant="colorful"
       /* Speed, colour and opacity all come from one place, shared with

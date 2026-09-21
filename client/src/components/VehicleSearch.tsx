@@ -1,7 +1,7 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { Search, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
-import { BEAM_LIT, BEAM_REST } from "./beamMotion";
+import { BEAM_LIT, BEAM_REST, useBeamPhase } from "./beamMotion";
 import "./GlowButton.css";
 
 interface VehicleSearchProps {
@@ -59,9 +59,6 @@ export function VehicleSearch({
   resultCount,
   className,
 }: VehicleSearchProps) {
-  /* Built once and dressed by whichever branch is live, so the two cannot drift
-     — a field that differs between them is a bug nobody sees until the switch
-     is thrown. */
   /*
    * Hover and focus both light it, and focus is the one that matters here.
    *
@@ -79,14 +76,21 @@ export function VehicleSearch({
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const lit = hovered || focused;
+  /* Speed changes on hover, and a CSS animation reinterprets its elapsed time
+     against the new duration rather than keeping its place. `capture` reads
+     where the beam is before the state change; the hook puts it back after. */
+  const beam = useBeamPhase(lit);
 
+  /* Built once and dressed by whichever branch is live, so the two cannot drift
+     — a field that differs between them is a bug nobody sees until the switch
+     is thrown. */
   const field: ReactNode = (
     <div
       className="glow-button__field px-4 py-2.5 sm:px-5 sm:py-3"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      onMouseEnter={() => { beam.capture(); setHovered(true); }}
+      onMouseLeave={() => { beam.capture(); setHovered(false); }}
+      onFocus={() => { beam.capture(); setFocused(true); }}
+      onBlur={() => { beam.capture(); setFocused(false); }}
       /* Inline rather than a class, and that part matters. `.glow-button__field`
          sets `background-color: #000` at one class of specificity, and so does a
          Tailwind utility — which of them wins would come down to the order the
@@ -149,6 +153,7 @@ export function VehicleSearch({
     <div className={className}>
       {BEAM ? (
         <BorderBeam
+          ref={beam.ref}
           size="line"
           colorVariant="colorful"
           /* Speed, colour and opacity all come from one place, shared with
