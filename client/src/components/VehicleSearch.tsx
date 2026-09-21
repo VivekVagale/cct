@@ -129,6 +129,10 @@ export function VehicleSearch({
           size="line"
           colorVariant="colorful"
           strength={0.7}
+          /* Seconds for one pass, so smaller is faster. `line` defaults to 2.4,
+             which at this width crawls — the glow spends most of its time off
+             under the rounded ends where there is nothing to light. */
+          duration={1.7}
           className={SHELL}
         >
           {field}
