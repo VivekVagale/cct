@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { CARD_FLIGHT } from "./cardFlight";
 import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import type { Vehicle } from "@/data/vehicles";
@@ -246,9 +247,9 @@ export function VehicleFocus({
              Without a layoutId the panel simply fades up, which is both what a
              phone sheet should do and free. */
             layoutId={
-              reduceMotion || isPhone
-                ? undefined
-                : `vehicle-focus-${vehicle.id}`
+              CARD_FLIGHT && !(reduceMotion || isPhone)
+                ? `vehicle-focus-${vehicle.id}`
+                : undefined
             }
             initial={reduceMotion ? { opacity: 0 } : false}
             animate={reduceMotion ? { opacity: 1 } : undefined}

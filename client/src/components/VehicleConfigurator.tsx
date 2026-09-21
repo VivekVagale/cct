@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { CARD_FLIGHT } from "./cardFlight";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
 import { VehicleCard, vehicleCardClasses } from "@/components/VehicleCard";
@@ -447,7 +448,11 @@ export function VehicleConfigurator({
                      the same reason it is dropped there: see VehicleFocus. Both
                      halves have to go together, or framer holds a measurement
                      open for a partner that never arrives. */
-                layoutId={compact ? undefined : `vehicle-focus-${vehicle.id}`}
+                layoutId={
+                  CARD_FLIGHT && !compact
+                    ? `vehicle-focus-${vehicle.id}`
+                    : undefined
+                }
                 className="absolute inset-0"
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
