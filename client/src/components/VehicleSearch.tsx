@@ -75,10 +75,13 @@ export function VehicleSearch({
           ? ({
               "--glow-radius": "999px",
               "--glow-ring": "0px",
-              /* Enough black to keep the placeholder legible with a starfield
-                 behind it, not so much that the beam has nothing to bleed
-                 through. */
-              backgroundColor: "rgba(0, 0, 0, 0.55)",
+              /* Grey rather than black, at a lower alpha than a black veil needs.
+                 A light tint over a near-black page reads as a lit surface the
+                 beam is passing over; black only ever reads as a hole cut in it.
+                 Kept off #B8C4D6 — the muted text colour — so the bar is a
+                 dimmer of something already in the palette rather than a new
+                 grey nothing else uses. */
+              backgroundColor: "rgba(184, 196, 214, 0.12)",
             } as CSSProperties)
           : undefined
       }
