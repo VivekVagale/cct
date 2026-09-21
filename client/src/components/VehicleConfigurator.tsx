@@ -103,12 +103,20 @@ function OtherMachineCard({
           <div
             aria-hidden
             className="absolute inset-0 flex items-center justify-center bg-[#0B0E13]"
+            /* A container, so the glyph is sized against the card rather than
+               the viewport. `vw` was the wrong unit: this grid is two columns at
+               one width and four at another, so one `vw` value is a different
+               share of a card at every breakpoint — 28% of the thumbnail at
+               816px and smaller again once the cards go four-up. */
+            style={{ containerType: "inline-size" }}
           >
             <DepthText
               text="?"
-              fontSize={
-                compact ? "clamp(2rem, 9vw, 3rem)" : "clamp(3rem, 7vw, 5rem)"
-              }
+              /* Just under half the card's width. The thumbnail is 4:3 and this
+                 glyph draws about 0.82 of its font size tall, so 45cqw puts it
+                 at roughly half the thumbnail's height — the same proportion
+                 two-up, four-up, or three-up on a phone. */
+              fontSize="45cqw"
               fontWeight={400}
               faceColor="#F5F7FA"
               depthColor="#9F6EF2"
