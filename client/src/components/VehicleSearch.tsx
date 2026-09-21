@@ -54,9 +54,22 @@ export function VehicleSearch({
   const field: ReactNode = (
     <div
       className="glow-button__field px-4 py-2.5 sm:px-5 sm:py-3"
+      /* Inline rather than a class, and that part matters. `.glow-button__field`
+         sets `background-color: #000` at one class of specificity, and so does a
+         Tailwind utility — which of them wins would come down to the order the
+         two stylesheets happen to land in, and that is not something to leave to
+         chance for the thing that decides whether the bar is black or glass. An
+         inline style outranks both. */
       style={
         BEAM
-          ? ({ "--glow-radius": "999px", "--glow-ring": "0px" } as CSSProperties)
+          ? ({
+              "--glow-radius": "999px",
+              "--glow-ring": "0px",
+              /* Enough black to keep the placeholder legible with a starfield
+                 behind it, not so much that the beam has nothing to bleed
+                 through. */
+              backgroundColor: "rgba(0, 0, 0, 0.55)",
+            } as CSSProperties)
           : undefined
       }
     >
