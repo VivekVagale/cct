@@ -35,8 +35,27 @@ import { useEffect, useState } from "react";
  * Returns null where there is no visualViewport to ask — the caller falls back
  * to a CSS height, which is the behaviour that was there before.
  */
+export interface AppShellViewport {
+  /** Height of what is actually visible, keyboard subtracted. */
+  height: number;
+  /**
+   * How far the visible region has been pushed down the layout viewport.
+   *
+   * The missing half of the story, and the one that put a black band under the
+   * footer. iOS does not only shrink the visual viewport when the keyboard
+   * opens — it scrolls it, so the focused field clears the keys. A `position:
+   * fixed` shell is pinned to the *layout* viewport and does not move with it,
+   * so it ends up drawn above the region the reader can see, with the body
+   * showing through underneath.
+   *
+   * Almost always 0. It is not while a field near the bottom of a form has
+   * focus, which is exactly when this shell is being typed into.
+   */
+  offsetTop: number;
+}
+
 export function useAppShellViewport() {
-  const [height, setHeight] = useState<number | null>(null);
+  const [viewport, setViewport] = useState<AppShellViewport | null>(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -64,7 +83,14 @@ export function useAppShellViewport() {
 
     const vv = window.visualViewport;
     const sync = () => {
-      if (vv) setHeight(vv.height);
+      if (!vv) return;
+      setViewport(previous =>
+        previous &&
+        previous.height === vv.height &&
+        previous.offsetTop === vv.offsetTop
+          ? previous
+          : { height: vv.height, offsetTop: vv.offsetTop }
+      );
     };
     sync();
     /* Three triggers, because no one of them is fired by every engine for every
@@ -78,7 +104,9 @@ export function useAppShellViewport() {
        shell stayed at 812 against a 500px viewport with only the first two
        bound.
 
-       React bails out of a set to the same number, so the overlap is free. */
+       React bails out of a set to the same number, but this now sets an object,
+       which is never equal to the last one — so the overlap would re-render on
+       every event without the guard in `sync`. */
     vv?.addEventListener("resize", sync);
     vv?.addEventListener("scroll", sync);
     window.addEventListener("resize", sync);
@@ -99,5 +127,5 @@ export function useAppShellViewport() {
     };
   }, []);
 
-  return height;
+  return viewport;
 }

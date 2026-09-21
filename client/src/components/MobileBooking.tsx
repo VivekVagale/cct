@@ -22,7 +22,7 @@ export function MobileBooking({ onSeeTheWork }: { onSeeTheWork: () => void }) {
   /* Holds the document still and reports how much of it the keyboard has left.
      Most of this site's phone traffic comes through Instagram's in-app browser,
      which is a WKWebView — see the hook for why that needs the older lock. */
-  const shellHeight = useAppShellViewport();
+  const shell = useAppShellViewport();
 
   /*
    * Black all the way out to the edges of the browser.
@@ -79,11 +79,27 @@ export function MobileBooking({ onSeeTheWork }: { onSeeTheWork: () => void }) {
      * this never becomes a scroll container itself.
      */
     <div
-      className="relative z-10 flex h-screen flex-col overflow-clip"
+      className="relative z-10 flex flex-col overflow-clip"
       /* The visual viewport where it can be measured, a CSS height where it
          cannot. dvh answers the browser's own chrome and says nothing about the
-         keyboard, which is the one that hides the submit button. */
-      style={shellHeight !== null ? { height: shellHeight } : { height: "100dvh" }}
+         keyboard, which is the one that hides the submit button.
+
+         `translateY` as well as height. iOS scrolls the visual viewport when the
+         keyboard opens so the focused field clears the keys, and a fixed shell
+         does not move with it — sized right but drawn too high, with the body
+         showing through beneath the footer. Following `offsetTop` puts it back
+         over the part of the screen the reader can actually see.
+
+         `h-screen` is gone from the class: it set the height a second time, in
+         `vh`, which is the unit that knows nothing about any of this. */
+      style={
+        shell
+          ? {
+              height: shell.height,
+              transform: `translateY(${shell.offsetTop}px)`,
+            }
+          : { height: "100dvh" }
+      }
     >
       {/* Not the full Navigation. That bar carries four section anchors and a
           panel that opens over the viewport, and none of those sections are
