@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CARD_FLIGHT } from "./cardFlight";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
@@ -257,10 +257,28 @@ export function VehicleConfigurator({
      an empty colour list. */
   const focusedVehicle = vehicles.find(v => v.id === focusedId) ?? null;
 
-  const handleSelectVehicle = (id: string) => {
-    onSelectVehicle(id);
-    setFocusedId(id);
-  };
+  /* Stable, because every card is handed it and VehicleCard is memoised — a new
+     function here each render would defeat that entirely. */
+  const handleSelectVehicle = useCallback(
+    (id: string) => {
+      onSelectVehicle(id);
+      setFocusedId(id);
+    },
+    [onSelectVehicle]
+  );
+
+  /*
+   * Everything once, with the filtered-out cells hidden.
+   *
+   * `shown` still decides what is visible and in what order; the rest are
+   * appended behind it so a card never has to be created or destroyed to change
+   * a filter.
+   */
+  const shownIds = useMemo(() => new Set(shown.map(v => v.id)), [shown]);
+  const rendered = useMemo(
+    () => [...shown, ...vehicles.filter(v => !shownIds.has(v.id))],
+    [shown, shownIds]
+  );
 
   return (
     /* Compact carries no gutter of its own.
@@ -421,8 +439,19 @@ export function VehicleConfigurator({
             : "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
         }
       >
-        {shown.map(vehicle => (
-          <div key={vehicle.id} className="relative">
+        {rendered.map(vehicle => (
+          <div
+            key={vehicle.id}
+            /* `hidden` rather than absent.
+               Filtering used to render only what matched, so going back to ALL
+               created forty-four cards in one synchronous commit — about 150ms,
+               roughly 3ms a card, each building four framer components and seven
+               framer objects in useTilt before anything is drawn. Every card is
+               built once now and filtering is a class change.
+               The full set is mounted at rest anyway: ALL is the default, so
+               this is weight the page already carried. */
+            className={shownIds.has(vehicle.id) ? "relative" : "hidden"}
+          >
             {/* Holds the cell open while the card is away at centre stage.
                   Without it the grid reflows the moment the card leaves and
                   reflows back as it returns, so the card flies home to a slot
@@ -459,7 +488,7 @@ export function VehicleConfigurator({
                 <VehicleCard
                   vehicle={vehicle}
                   selected={vehicle.id === selectedVehicleId}
-                  onSelect={() => handleSelectVehicle(vehicle.id)}
+                  onSelect={handleSelectVehicle}
                   compact={compact}
                 />
               </motion.div>

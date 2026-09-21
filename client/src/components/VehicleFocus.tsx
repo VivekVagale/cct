@@ -32,6 +32,10 @@ interface VehicleFocusProps {
  * layoutId still pairs across the portal, because a portal moves the DOM node
  * without moving the React tree.
  */
+/* Module scope, so the memoised card is not handed a new function on every
+   render of the panel. */
+const NOOP = () => {};
+
 export function VehicleFocus({
   vehicle,
   selectedColorId,
@@ -258,7 +262,7 @@ export function VehicleFocus({
             <VehicleCard
               vehicle={vehicle}
               selected
-              onSelect={() => {}}
+              onSelect={NOOP}
               tilt={false}
             />
           </motion.div>

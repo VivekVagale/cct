@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { PendingRender } from "@/components/PendingRender";
 import type { Vehicle } from "@/data/vehicles";
@@ -52,7 +53,15 @@ export function vehicleCardClasses(compact?: boolean) {
 interface VehicleCardProps {
   vehicle: Vehicle;
   selected: boolean;
-  onSelect: () => void;
+  /**
+   * Takes the id rather than closing over it.
+   *
+   * This is what makes `memo` below worth anything. The call site used to pass
+   * `() => handleSelectVehicle(vehicle.id)` — a fresh function per card per
+   * render, so every card's props differed every time and nothing could be
+   * skipped.
+   */
+  onSelect: (id: string) => void;
   /**
    * Off while the card is held at centre stage.
    *
@@ -65,7 +74,7 @@ interface VehicleCardProps {
   compact?: boolean;
 }
 
-export function VehicleCard({
+function VehicleCardImpl({
   vehicle,
   selected,
   onSelect,
@@ -109,7 +118,7 @@ export function VehicleCard({
       >
         <motion.button
           type="button"
-          onClick={onSelect}
+          onClick={() => onSelect(vehicle.id)}
           role="radio"
           aria-checked={selected}
           /* Not transition-all: the tilt writes to transform on this same element,
@@ -176,3 +185,14 @@ export function VehicleCard({
     </motion.div>
   );
 }
+
+/**
+ * Memoised, with props shaped so that it takes.
+ *
+ * Every card stays mounted now and filtering is a class on the cell around it,
+ * so without this all seventy-one would re-render on each marque change for a
+ * result that differs for at most two of them. `vehicle` is a stable object from
+ * the data module, `onSelect` is one callback rather than seventy-one closures,
+ * and `selected` moves for the two cards that actually changed.
+ */
+export const VehicleCard = memo(VehicleCardImpl);
