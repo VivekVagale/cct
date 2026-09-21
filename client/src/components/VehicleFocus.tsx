@@ -255,8 +255,26 @@ export function VehicleFocus({
                 ? `vehicle-focus-${vehicle.id}`
                 : undefined
             }
-            initial={reduceMotion ? { opacity: 0 } : false}
-            animate={reduceMotion ? { opacity: 1 } : undefined}
+            /*
+             * Fades, now that it no longer flies.
+             *
+             * With a layoutId this element had no exit of its own and did not
+             * need one: projection carried it back to its slot in the grid while
+             * the scrim faded. Without one it had no exit at all, so choosing a
+             * colour left the big card sitting there for the scrim's full 200ms
+             * before the tree unmounted — the lag was the card doing nothing
+             * rather than the card doing something slow.
+             *
+             * Out faster than in, and a touch quicker than the scrim, so it is
+             * gone before the page behind it is sharp again — the same rule the
+             * colour list already follows.
+             */
+            initial={CARD_FLIGHT && !reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{
+              opacity: 0,
+              transition: { duration: isPhone ? 0.08 : 0.13, ease: "linear" },
+            }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
             <VehicleCard
