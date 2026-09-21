@@ -18,22 +18,22 @@ const CAN_HOVER =
   window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
 /**
- * The one line that puts the tilt back.
+ * The one line that takes the tilt back out.
  *
- * Off while we see how the desktop feels without it. Navigation was heavy, and
- * this is the remaining thing doing work on every pointer move: two springs per
- * card, each writing a transform frame by frame, across a grid of sixty-four —
+ * It was off for a spell while the desktop's navigation lag was being chased,
+ * and it turned out not to be the cause: clicking a marque cost one 385ms task
+ * on the main thread, and that was sixty-four BorderBeams being torn down as the
+ * grid filtered, not these springs. The grid stopped carrying beams and the task
+ * went to nothing, so the tilt came back.
+ *
+ * `false` disables it without touching anything else: the springs, the handlers
+ * and the components reading them stay as they are, and the motion values simply
+ * never receive a value. Worth reaching for if a low-end machine struggles —
+ * this is still two springs per card writing a transform on every pointer move,
  * plus a radial-gradient string rebuilt per move for the cursor-follow sheen.
- *
- * `true` restores all of it. Nothing else has to change: the springs, the
- * handlers and the components that read them are untouched, and with this off
- * the motion values simply never receive a value.
- *
- * What survives either way is the sheen's own `group-hover` opacity, which is
- * CSS. With the tracking off it sits centred on the card instead of following
- * the cursor — a plain highlight on hover rather than none at all.
+ * It is just no longer the expensive thing.
  */
-const TILT_ENABLED = false;
+const TILT_ENABLED = true;
 
 /**
  * Shared 3D cursor-tilt behavior: continuous rotation from pointer
