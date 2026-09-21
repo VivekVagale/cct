@@ -131,6 +131,16 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
       e.preventDefault();
       return;
     }
+    /* Step 06 is the one step `next` never checks, because there is no Next to
+       press on it — and the form carries `noValidate`, so nothing else does
+       either. Without this line every `required` on the contact step is inert
+       on the phone: name, email and handle could all be empty and the row went
+       in anyway. Same call the other five steps get, so the browser reports the
+       first empty field on the step the reader is already looking at. */
+    if (!stepValid()) {
+      e.preventDefault();
+      return;
+    }
     void form.handleSubmit(e);
   }
 

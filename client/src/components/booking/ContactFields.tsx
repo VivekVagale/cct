@@ -31,8 +31,13 @@ export function ContactFields() {
       </label>
       <label className="flex flex-col gap-2 text-xs tracking-[0.14em] uppercase text-[#B8C4D6]">
         Your Instagram @handle
+        {/* Required. The studio answers and delivers over Instagram, so a
+            request with no handle is one nobody can reply to. WhatsApp below
+            stays optional — it is a second way to reach the same person, not
+            the first. */}
         <input
           name="instagram"
+          required
           placeholder="@yourhandle"
           className={`${fieldClass} placeholder:text-[#B8C4D6]/40`}
         />
