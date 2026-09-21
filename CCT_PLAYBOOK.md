@@ -1,8 +1,32 @@
 # cct website — playbook
 
-Read this before changing the booking flow, the vehicle configurator, or anything
-that animates. The code comments explain *why* line by line; this is the map and
-the traps.
+**Read the box below and stop. The rest is reference — open a section only when
+working in it.** Reading this whole file at the start of a session costs more
+context than it returns.
+
+```
+pnpm, not npm.                  An npm install leaves a lockfile fighting pnpm's.
+Routes lock at first paint.     Resizing never switches desktop <-> phone. Reload.
+CARD_FLIGHT = false             ON PURPOSE. On = the 140ms marque lag returns.
+TILT_ENABLED = true             Card tilt. Turn off if a weak machine struggles.
+Beam = 3 places only.           Search bar, Start a Project, marque chips. No cards.
+Phone shell is a fixed document. Only the inner scroller scrolls.
+Test pane is often hidden.      rAF and long-task readings are then worthless.
+Expected typecheck errors:      Lanyard.tsx(347), const.ts(1). Pre-existing.
+```
+
+| If you are touching | Read |
+|---|---|
+| marque filter, card grid, anything slow | §2 performance flags |
+| adding a beam anywhere | §3 the beam |
+| the phone wizard, keyboard, scrolling | §4 phone shell |
+| the booking form or its validation | §5 forms |
+| measuring anything in the browser | §6 testing notes |
+
+---
+
+The code comments explain *why* line by line; the sections below are the map and
+the traps that span more than one file.
 
 Stack: React 19, Vite 7, Tailwind 4, framer-motion 12, **pnpm** (not npm — an
 `npm install` here leaves a `package-lock.json` fighting `pnpm-lock.yaml`).
