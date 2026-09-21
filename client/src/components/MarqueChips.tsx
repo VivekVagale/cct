@@ -116,10 +116,30 @@ function ChipLabel({
  * also the point of this component: "chosen" is meant to look identical here and
  * on the vehicle and colour cards, and only one of those can grow a beam.
  */
-function BeamChip({ render }: { render: (h: ChipLabelProps["handlers"]) => ReactNode }) {
+function BeamChip({
+  selected,
+  render,
+}: {
+  selected: boolean;
+  render: (h: ChipLabelProps["handlers"]) => ReactNode;
+}) {
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
+  /* The lift: quicker and more saturated, for the chip under the pointer. */
   const lit = hovered || focused;
+  /*
+   * Whether there is a beam at all.
+   *
+   * The chosen chip keeps one, idling. Without this, clicking a chip lit it —
+   * the click focuses the hidden radio — and then clicking anywhere else blurred
+   * it and the beam died, while that chip was still the active filter. A beam
+   * that appears on selection and then abandons it reads as broken, which is
+   * what it was.
+   *
+   * One chip at a time, so this is not the ten-idling-beams problem that kept
+   * the row dark in the first place.
+   */
+  const shown = lit || selected;
 
   /*
    * The corner radius, measured rather than detected.
@@ -171,9 +191,12 @@ function BeamChip({ render }: { render: (h: ChipLabelProps["handlers"]) => React
       brightness={1.3}
       duration={lit ? BEAM_LIT.duration : BEAM_REST.duration}
       saturation={lit ? BEAM_LIT.saturation : BEAM_REST.saturation}
-      /* Nothing to show until the radius is known — see the note above. */
-      strength={lit && radius !== null ? BEAM_LIT.strength : 0}
-      active={lit && radius !== null}
+      /* Nothing to show until the radius is known — see the note above. The
+         chosen chip idles at rest strength; the pointer takes it to full. */
+      strength={
+        radius === null ? 0 : lit ? BEAM_LIT.strength : shown ? BEAM_REST.strength : 0
+      }
+      active={shown && radius !== null}
       {...(radius !== null ? { borderRadius: radius } : {})}
       className="inline-block"
     >
@@ -239,6 +262,7 @@ export function MarqueChips({
           return beam ? (
             <BeamChip
               key={option.id}
+              selected={selected}
               render={(handlers) => <ChipLabel {...chipProps} handlers={handlers} />}
             />
           ) : (
