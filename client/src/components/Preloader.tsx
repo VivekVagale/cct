@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { HERO_SEQUENCE, HERO_SEQUENCE_MOBILE } from "@/data/heroSequence";
+import "./PreloaderRing.css";
 
 /**
  * Must stay identical to the Hero's own `PORTRAIT_QUERY`. Preloading the
@@ -176,29 +177,32 @@ export function Preloader({ onDone }: { onDone: () => void }) {
                 }
           }
           aria-live="polite"
-          aria-label={`Loading, ${pct} percent`}
         >
-          <div className="w-full max-w-[420px]">
-            <div className="flex items-baseline justify-between mb-5">
-              <span className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#B8C4D6]/70">
-                Cold Chain Theory
-              </span>
-              <span className="font-display text-3xl sm:text-5xl text-[#F5F7FA] [font-variant-numeric:tabular-nums]">
-                {pct}
-              </span>
-            </div>
+          {/* The count sits inside the ring rather than beside it, so there is
+              one thing to look at while waiting instead of two.
 
-            {/* One hairline, filling. The brand violet, because this is the
-                first thing anyone sees and it should be the site's colour and
-                not a default blue. */}
-            <div className="h-px w-full bg-white/10 overflow-hidden">
-              <motion.div
-                className="h-full origin-left bg-[var(--brand,#7A44E0)]"
-                style={{ scaleX: progress }}
-                transition={{ duration: 0.2, ease: "linear" }}
-              />
-            </div>
+              Split into characters because the stagger is per glyph — each one
+              is a `:nth-child` in the stylesheet, so "7" pulses alone, "42"
+              pulses in two beats and "100" in three, and the `%` always trails
+              the number it belongs to. A single text node would animate as one
+              block and lose that entirely.
+
+              Keyed by index and not by value, deliberately: at 41 to 42 only the
+              last glyph changes, and keying by character would remount the digit
+              that moved and restart its delay, so one glyph would fall out of
+              step with its neighbours every time the number ticked. */}
+          <div className="pl-ring" role="img" aria-label={`Loading, ${pct} percent`}>
+            <span className="pl-ring__halo" aria-hidden />
+            {`${pct}%`.split("").map((char, i) => (
+              <span className="pl-ring__char" key={i} aria-hidden>
+                {char}
+              </span>
+            ))}
           </div>
+
+          <span className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-[#B8C4D6]/70">
+            Cold Chain Theory
+          </span>
         </motion.div>
       )}
     </AnimatePresence>

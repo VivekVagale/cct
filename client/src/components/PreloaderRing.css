@@ -1,0 +1,138 @@
+/*
+ * The curtain's ring, from Uiverse.io by dexter-st.
+ *
+ * Renamed on the way in. The class it ships under is `.loader`, and this project
+ * already has a `.loader` — the word-through-a-lens one in Loader.css that the
+ * thank-you card uses. Two rules for one selector, loaded together, and whichever
+ * stylesheet lands second wins: the thank-you card would have grown a spinning
+ * ring, or this would have lost its glow, depending on import order. Prefixed
+ * instead, so neither can reach the other.
+ *
+ * The values are the original's. Only the names and the font binding changed.
+ */
+
+.pl-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 180px;
+  /* The token rather than a literal "Inter". The family is already loaded for
+     the site at the weights this needs, and binding to the variable means the
+     curtain cannot end up in a different typeface from the page behind it. */
+  font-family: var(--font-sans, "Inter", sans-serif);
+  font-size: 1.2em;
+  font-weight: 300;
+  color: white;
+  border-radius: 50%;
+  background-color: transparent;
+  user-select: none;
+  /* Tabular figures, because this counts. Proportional digits change width as
+     the number climbs, so the percentage would jitter left and right inside a
+     ring that is perfectly still — most visibly at 1 to 2 digits and again at 2
+     to 3. */
+  font-variant-numeric: tabular-nums;
+}
+
+.pl-ring__halo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background-color: transparent;
+  animation: pl-ring-rotate 2s linear infinite;
+  z-index: 0;
+}
+
+@keyframes pl-ring-rotate {
+  0% {
+    transform: rotate(90deg);
+    box-shadow:
+      0 10px 20px 0 #fff inset,
+      0 20px 30px 0 #ad5fff inset,
+      0 60px 60px 0 #471eec inset;
+  }
+  50% {
+    transform: rotate(270deg);
+    box-shadow:
+      0 10px 20px 0 #fff inset,
+      0 20px 10px 0 #d60a47 inset,
+      0 40px 60px 0 #311e80 inset;
+  }
+  100% {
+    transform: rotate(450deg);
+    box-shadow:
+      0 10px 20px 0 #fff inset,
+      0 20px 30px 0 #ad5fff inset,
+      0 60px 60px 0 #471eec inset;
+  }
+}
+
+.pl-ring__char {
+  display: inline-block;
+  opacity: 0.4;
+  transform: translateY(0);
+  animation: pl-ring-char 2s infinite;
+  z-index: 1;
+  border-radius: 50ch;
+  border: none;
+}
+
+.pl-ring__char:nth-child(1) {
+  animation-delay: 0s;
+}
+.pl-ring__char:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.pl-ring__char:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.pl-ring__char:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.pl-ring__char:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pl-ring-char {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  40% {
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * Reduced motion gets the ring, not the spin.
+ *
+ * This is the first thing anyone sees, and for someone who has asked their
+ * system to stop things moving it is a rotating glow and four pulsing glyphs
+ * with nowhere to look away to. The glow stays as a still gradient so the shape
+ * still reads, and the digits hold at full opacity so the number is the thing
+ * doing the work.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .pl-ring__halo {
+    animation: none;
+    box-shadow:
+      0 10px 20px 0 #fff inset,
+      0 20px 30px 0 #ad5fff inset,
+      0 60px 60px 0 #471eec inset;
+  }
+
+  .pl-ring__char {
+    animation: none;
+    opacity: 1;
+  }
+}
