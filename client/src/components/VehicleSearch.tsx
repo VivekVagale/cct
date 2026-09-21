@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { Search, X } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import "./GlowButton.css";
@@ -61,9 +61,31 @@ export function VehicleSearch({
   /* Built once and dressed by whichever branch is live, so the two cannot drift
      — a field that differs between them is a bug nobody sees until the switch
      is thrown. */
+  /*
+   * Hover and focus both light it, and focus is the one that matters here.
+   *
+   * GlowButton.css put focus on the bloom for this control specifically: a text
+   * input that dims the moment you start typing into it reads as having lost
+   * focus. The beam ran at one brightness whatever you did to it, which took
+   * that back.
+   *
+   * The handlers sit on the field rather than on the BorderBeam — its props type
+   * extends HTMLAttributes but it does not spread the unrecognised ones onto its
+   * root, so handlers passed there never fire. React's onFocus/onBlur are
+   * focusin/focusout, so the field catches the input and the clear button inside
+   * it without either needing a ref.
+   */
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const lit = hovered || focused;
+
   const field: ReactNode = (
     <div
       className="glow-button__field px-4 py-2.5 sm:px-5 sm:py-3"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       /* Inline rather than a class, and that part matters. `.glow-button__field`
          sets `background-color: #000` at one class of specificity, and so does a
          Tailwind utility — which of them wins would come down to the order the
@@ -128,7 +150,12 @@ export function VehicleSearch({
         <BorderBeam
           size="line"
           colorVariant="colorful"
-          strength={0.7}
+          /* `strength` is the beam, glow and bloom's opacity and tops out at 1;
+             `brightness` is a multiplier on the glow and is where the rest of
+             the lift comes from. Matched to GlowButton so the two do not light
+             to different levels on the same screen. */
+          strength={lit ? 1 : 0.7}
+          brightness={lit ? 2.8 : 1.3}
           /* Seconds for one pass, so smaller is faster. `line` defaults to 2.4,
              which at this width crawls — the glow spends most of its time off
              under the rounded ends where there is nothing to light. */

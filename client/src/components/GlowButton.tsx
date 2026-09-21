@@ -137,7 +137,7 @@ export function GlowButton({
          rather than just turning up the same dim thing. React's onFocus/onBlur
          are focusin/focusout, so they catch the anchor inside without a ref. */
       strength={lit ? 1 : 0.7}
-      brightness={lit ? 1.9 : 1.3}
+      brightness={lit ? 2.8 : 1.3}
       /* Seconds for one pass, so smaller is faster. Matched to the search bar so
          the two are not visibly running at different speeds on the same screen. */
       duration={1.7}
