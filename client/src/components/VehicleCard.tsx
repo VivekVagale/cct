@@ -1,3 +1,4 @@
+import { SelectionBeam } from "./SelectionBeam";
 import { motion } from "framer-motion";
 import { PendingRender } from "@/components/PendingRender";
 import type { Vehicle } from "@/data/vehicles";
@@ -76,7 +77,16 @@ export function VehicleCard({
     useTilt<HTMLButtonElement>();
 
   return (
-    <motion.button
+    /* The beam that marks a chosen card, the same one the chips and the colour
+       cards wear — see SelectionBeam. Inside this component rather than at each
+       call site, so the grid and the focus panel cannot end up with different
+       ideas of what a chosen machine looks like.
+
+       `block h-full w-full`: the card is dropped into an `absolute inset-0`
+       wrapper by the configurator, and a shrink-wrapped beam there would leave
+       the card its own size inside a box it no longer fills. */
+    <SelectionBeam selected={selected} className="block h-full w-full">
+      <motion.button
       ref={ref}
       type="button"
       onClick={onSelect}
@@ -150,6 +160,7 @@ export function VehicleCard({
         )}
         <h4 className={`${cls.name} text-[#F5F7FA]`}>{vehicle.name}</h4>
       </motion.div>
-    </motion.button>
+      </motion.button>
+    </SelectionBeam>
   );
 }

@@ -1,3 +1,4 @@
+import { SelectionBeam } from "./SelectionBeam";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { PendingRender } from "@/components/PendingRender";
@@ -11,7 +12,13 @@ interface ColorCardProps {
 
 export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
   return (
-    <motion.button
+    /* The beam that marks a chosen colour — the same one the machine card and
+       the marque chips wear, so a colour is as chosen as the machine it belongs
+       to. `block h-full` because these are grid items: a shrink-wrapped beam
+       would let a two-line caption make its card shorter than the one beside
+       it. */
+    <SelectionBeam selected={selected} className="block h-full">
+      <motion.button
       type="button"
       onClick={onSelect}
       /* Variants rather than a fixed initial/animate pair, so the parent owns
@@ -126,6 +133,7 @@ export function ColorCard({ color, selected, onSelect }: ColorCardProps) {
         </motion.div>
       )}
       </div>
-    </motion.button>
+      </motion.button>
+    </SelectionBeam>
   );
 }
