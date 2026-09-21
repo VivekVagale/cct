@@ -21,10 +21,21 @@ import { BEAM_LIT, BEAM_REST } from "./beamMotion";
  */
 export function SelectionBeam({
   selected,
+  interactive = true,
   className,
   children,
 }: {
   selected: boolean;
+  /**
+   * Whether the pointer should lift it.
+   *
+   * `false` for anything that only reports a choice rather than offering one —
+   * the booking form's summary of the chosen machine is a receipt, and a panel
+   * that brightens under the cursor claims to be clickable when it is not.
+   * It still carries the idling beam, because it is still showing a chosen
+   * thing.
+   */
+  interactive?: boolean;
   /** Layout classes for the wrapper, which becomes the element in the grid. */
   className?: string;
   children: ReactNode;
@@ -49,7 +60,7 @@ export function SelectionBeam({
    */
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || !interactive) return;
     const on = () => setHovered(true);
     const off = () => setHovered(false);
     const fin = () => setFocused(true);
@@ -64,7 +75,7 @@ export function SelectionBeam({
       el.removeEventListener("focusin", fin);
       el.removeEventListener("focusout", fout);
     };
-  }, []);
+  }, [interactive]);
 
   /*
    * The corner radius, measured and clamped.
