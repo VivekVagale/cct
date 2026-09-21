@@ -58,10 +58,10 @@ function OtherMachineCard({
   const cls = vehicleCardClasses(compact);
 
   return (
-    /* Beamed like every other card in this grid. The note above is the whole
-       reason: a card here that does not glow like its fifty-seven neighbours
-       reads as broken rather than as different. */
-    <SelectionBeam selected={selected} className="block h-full w-full">
+    /* No beam, like every other card in this grid — see VehicleCard's `beam`
+       prop. A card here that glowed while its fifty-seven neighbours could not
+       would read as broken rather than as different. */
+    <div className="block h-full w-full">
       <motion.button
         ref={ref}
         type="button"
@@ -115,7 +115,7 @@ function OtherMachineCard({
           </h4>
         </motion.div>
       </motion.button>
-    </SelectionBeam>
+    </div>
   );
 }
 

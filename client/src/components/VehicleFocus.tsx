@@ -249,7 +249,7 @@ export function VehicleFocus({
           animate={reduceMotion ? { opacity: 1 } : undefined}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
-          <VehicleCard vehicle={vehicle} selected onSelect={() => {}} tilt={false} />
+          <VehicleCard vehicle={vehicle} selected onSelect={() => {}} tilt={false} beam />
         </motion.div>
 
         {/* The colours stagger in behind the card and leave all at once.

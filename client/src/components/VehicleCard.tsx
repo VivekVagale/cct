@@ -1,4 +1,5 @@
 import { SelectionBeam } from "./SelectionBeam";
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { PendingRender } from "@/components/PendingRender";
 import type { Vehicle } from "@/data/vehicles";
@@ -63,6 +64,43 @@ interface VehicleCardProps {
   tilt?: boolean;
   /** Three-up on a phone rather than two. See vehicleCardClasses. */
   compact?: boolean;
+  /**
+   * Wear the chosen-card beam.
+   *
+   * Off in the grid, and that is a performance decision rather than a taste one.
+   * Every beam is a BorderBeam, and mounting or tearing one down is not cheap:
+   * filtering the grid to Aprilia takes it from twenty-three cards to eight, and
+   * the fifteen teardowns blocked the main thread for 385ms in one task. Sixty-
+   * four of them churning on every marque click is the lag.
+   *
+   * The focus panel turns it on. There is exactly one card there, it is always
+   * the chosen one, and it is not going anywhere while the colours are read.
+   */
+  beam?: boolean;
+}
+
+/**
+ * The beam, or nothing wearing its box.
+ *
+ * Both branches render the same wrapper classes, so a card is laid out
+ * identically whether or not it is lit — the grid must not reflow because a
+ * card gained a border.
+ */
+function Dress({
+  beam,
+  selected,
+  children,
+}: {
+  beam: boolean;
+  selected: boolean;
+  children: ReactNode;
+}) {
+  if (!beam) return <div className="block h-full w-full">{children}</div>;
+  return (
+    <SelectionBeam selected={selected} className="block h-full w-full">
+      {children}
+    </SelectionBeam>
+  );
 }
 
 export function VehicleCard({
@@ -71,6 +109,7 @@ export function VehicleCard({
   onSelect,
   tilt = true,
   compact,
+  beam = false,
 }: VehicleCardProps) {
   const cls = vehicleCardClasses(compact);
   const { ref, rotateX, rotateY, glowBackground, onMouseMove, onMouseLeave } =
@@ -107,11 +146,11 @@ export function VehicleCard({
           tilt ? { rotateX, rotateY, transformPerspective: 900 } : undefined
         }
       >
-        {/* The beam that marks a chosen card, the same one the chips and the
-            colour cards wear — see SelectionBeam. Inside this component rather
-            than at each call site, so the grid and the focus panel cannot end up
-            with different ideas of what a chosen machine looks like. */}
-        <SelectionBeam selected={selected} className="block h-full w-full">
+        {/* Beamed only where it is asked for — the focus panel. See the `beam`
+            prop: in the grid this is a plain box, because mounting and tearing
+            down sixty-four BorderBeams as the marque filter changes is the lag
+            it was causing. */}
+        <Dress beam={beam} selected={selected}>
           <motion.button
             type="button"
             onClick={onSelect}
@@ -179,7 +218,7 @@ export function VehicleCard({
               <h4 className={`${cls.name} text-[#F5F7FA]`}>{vehicle.name}</h4>
             </motion.div>
           </motion.button>
-        </SelectionBeam>
+        </Dress>
       </motion.div>
     </motion.div>
   );
