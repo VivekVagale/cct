@@ -162,10 +162,11 @@ export function VehicleSearch({
           strength={lit ? 1 : 0.7}
           brightness={1.3}
           saturation={lit ? 2.8 : 1.2}
-          /* Seconds for one pass, so smaller is faster. `line` defaults to 2.4,
-             which at this width crawls — the glow spends most of its time off
-             under the rounded ends where there is nothing to light. */
-          duration={1.7}
+          /* Seconds for one pass, so smaller is faster. At rest it sits at the
+             preset's own 2.4 and idles; hovering roughly doubles it. The pair
+             is what sells the interaction — colour alone reads as a lamp being
+             turned up, colour and pace together read as the thing waking. */
+          duration={lit ? 1.2 : 2.4}
           className={SHELL}
         >
           {field}

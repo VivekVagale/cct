@@ -140,9 +140,11 @@ export function GlowButton({
       strength={lit ? 1 : 0.7}
       brightness={1.3}
       saturation={lit ? 2.8 : 1.2}
-      /* Seconds for one pass, so smaller is faster. Matched to the search bar so
-         the two are not visibly running at different speeds on the same screen. */
-      duration={1.7}
+      /* Seconds for one pass, so smaller is faster. At rest it sits at `md`'s own
+         1.96 and idles; hovering roughly doubles it. Both numbers are a shade
+         quicker than the bar's because this ring travels four sides in the time
+         the bar's line covers one, so the same seconds read as slower here. */
+      duration={lit ? 1 : 1.96}
       className={wrapperClassName ?? "inline-block"}
     >
       {face}
