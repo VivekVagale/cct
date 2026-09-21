@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CARD_FLIGHT } from "./cardFlight";
 import { AnimatePresence, motion } from "framer-motion";
+import DepthText from "./DepthText";
 import { vehicles, type Vehicle } from "@/data/vehicles";
 import { VehicleCard, vehicleCardClasses } from "@/components/VehicleCard";
 import { MarqueChips } from "@/components/MarqueChips";
@@ -85,12 +86,40 @@ function OtherMachineCard({
         />
 
         <div className="relative aspect-[4/3] overflow-hidden">
-          {/* Not a photograph and not pretending to be one, which is the same
-            reasoning a machine with no render yet gets — and the same
-            component. The badge is what separates the two claims. The swatch is
-            the neutral this page falls back to when there is no paint to show,
-            because there is no machine here to have any. */}
-          <PendingRender swatch="#6E7378" label="Not listed" />
+          {/* A question mark rather than a swatch, in the section heading's own
+              treatment — the same face and depth colours "Pick your machine."
+              is extruded in, so the card answers the heading instead of
+              borrowing a placeholder built for a paint that has no render yet.
+              There is no machine here to have a colour, which is what the grey
+              swatch was always straining to say.
+
+              Still, deliberately, not a photograph: the reasoning that keeps
+              PendingRender off the other cards holds here too.
+
+              Static. No pointer tracking and no orbit — each layer is another
+              draw of the same glyph, this sits in a grid beside seventy others,
+              and the whole configurator has just been taken off per-frame work.
+              Seven layers for the same reason the phone gets seven. */}
+          <div
+            aria-hidden
+            className="absolute inset-0 flex items-center justify-center bg-[#0B0E13]"
+          >
+            <DepthText
+              text="?"
+              fontSize={
+                compact ? "clamp(2rem, 9vw, 3rem)" : "clamp(3rem, 7vw, 5rem)"
+              }
+              fontWeight={400}
+              faceColor="#F5F7FA"
+              depthColor="#9F6EF2"
+              layers={7}
+              depth={5}
+              tilt={9}
+              pointerTracking={false}
+              autoOrbit={false}
+              className="font-display"
+            />
+          </div>
           {/* Outside the picture, as on every other card. Left off, this card's
             bottom edge is visibly lighter than its row. */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
