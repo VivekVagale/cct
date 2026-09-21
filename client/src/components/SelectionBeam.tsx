@@ -81,13 +81,17 @@ export function SelectionBeam({
     const child = el?.firstElementChild;
     if (!el || !child) return;
     const measure = () => {
-      const box = child.getBoundingClientRect();
-      if (box.height <= 0) return;
+      /* `offsetHeight`, not a bounding rect. Machine cards sit inside a box that
+         rotates in 3D under the pointer, and a rect is transform-aware — it
+         would report the tilted card as taller and hand the beam a radius that
+         changes as the cursor moves. The layout height does not move. */
+      const height = (child as HTMLElement).offsetHeight;
+      if (height <= 0) return;
       const declared = parseFloat(
         getComputedStyle(child).borderTopLeftRadius || "0",
       );
       const safe = Number.isFinite(declared) ? declared : 0;
-      setRadius(Math.min(safe, box.height / 2));
+      setRadius(Math.min(safe, height / 2));
     };
     measure();
     /* Cards reflow and rows rewrap; a stale radius brings the artefact back. */

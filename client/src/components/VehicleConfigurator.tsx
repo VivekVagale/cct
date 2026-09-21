@@ -1,3 +1,4 @@
+import { SelectionBeam } from "./SelectionBeam";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { vehicles, type Vehicle } from "@/data/vehicles";
@@ -57,59 +58,64 @@ function OtherMachineCard({
   const cls = vehicleCardClasses(compact);
 
   return (
-    <motion.button
-      ref={ref}
-      type="button"
-      onClick={onSelect}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      whileTap={{ scale: 0.97 }}
-      style={{ rotateX, rotateY, transformPerspective: 900 }}
-      role="radio"
-      aria-checked={selected}
-      className={`group relative w-full text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
-        selected
-          ? "selected-glow bg-[#7A44E0]/[0.07]"
-          : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
-      }`}
-    >
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ background: glowBackground }}
-      />
+    /* Beamed like every other card in this grid. The note above is the whole
+       reason: a card here that does not glow like its fifty-seven neighbours
+       reads as broken rather than as different. */
+    <SelectionBeam selected={selected} className="block h-full w-full">
+      <motion.button
+        ref={ref}
+        type="button"
+        onClick={onSelect}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
+        whileTap={{ scale: 0.97 }}
+        style={{ rotateX, rotateY, transformPerspective: 900 }}
+        role="radio"
+        aria-checked={selected}
+        className={`group relative w-full text-left overflow-hidden rounded-sm border transition-[border-color,background-color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white ${
+          selected
+            ? "selected-glow bg-[#7A44E0]/[0.07]"
+            : "border-white/[0.1] bg-white/[0.02] hover:border-white/30"
+        }`}
+      >
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ background: glowBackground }}
+        />
 
-      <div className="relative aspect-[4/3] overflow-hidden">
-        {/* Not a photograph and not pretending to be one, which is the same
+        <div className="relative aspect-[4/3] overflow-hidden">
+          {/* Not a photograph and not pretending to be one, which is the same
             reasoning a machine with no render yet gets — and the same
             component. The badge is what separates the two claims. The swatch is
             the neutral this page falls back to when there is no paint to show,
             because there is no machine here to have any. */}
-        <PendingRender swatch="#6E7378" label="Not listed" />
-        {/* Outside the picture, as on every other card. Left off, this card's
+          <PendingRender swatch="#6E7378" label="Not listed" />
+          {/* Outside the picture, as on every other card. Left off, this card's
             bottom edge is visibly lighter than its row. */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
-      </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#05070A]/70 via-transparent to-transparent" />
+        </div>
 
-      <motion.div
-        className={cls.cap}
-        animate={{ y: selected ? -2 : 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {/* The eyebrow is load-bearing, not decoration. Every cell in this grid
+        <motion.div
+          className={cls.cap}
+          animate={{ y: selected ? -2 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* The eyebrow is load-bearing, not decoration. Every cell in this grid
             is sized by an invisible copy of a card that prints a marque line
             unconditionally; a card with no eyebrow sits a line short of its
             row and puts its name where its neighbours put their marque. */}
-        <p className={cls.marque}>{OTHER_MACHINE_EYEBROW}</p>
-        <h4 className={`${cls.name} text-[#F5F7FA]`}>
-          {OTHER_MACHINE_NAME}
-          {/* Appended rather than substituted: an aria-label here would replace
+          <p className={cls.marque}>{OTHER_MACHINE_EYEBROW}</p>
+          <h4 className={`${cls.name} text-[#F5F7FA]`}>
+            {OTHER_MACHINE_NAME}
+            {/* Appended rather than substituted: an aria-label here would replace
               the visible text instead of extending it, and the accessible name
               has to contain what the eye reads. */}
-          <span className="sr-only"> — describe it in step 03</span>
-        </h4>
-      </motion.div>
-    </motion.button>
+            <span className="sr-only"> — describe it in step 03</span>
+          </h4>
+        </motion.div>
+      </motion.button>
+    </SelectionBeam>
   );
 }
 
@@ -154,13 +160,13 @@ export function VehicleConfigurator({
    * range until very recently.
    */
   const marques = useMemo(() => {
-    const names = [...new Set(vehicles.map((v) => v.manufacturer))].sort((a, b) =>
-      a.localeCompare(b),
+    const names = [...new Set(vehicles.map(v => v.manufacturer))].sort((a, b) =>
+      a.localeCompare(b)
     );
     if (names.length < 2) return [];
     return [
       { id: ALL_MARQUES, label: "All" },
-      ...names.map((name) => ({ id: name, label: name })),
+      ...names.map(name => ({ id: name, label: name })),
     ];
   }, []);
 
@@ -193,8 +199,9 @@ export function VehicleConfigurator({
     const el = sentinelRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
-      ([entry]) => setPinned(!entry.isIntersecting && entry.boundingClientRect.top < 0),
-      { rootMargin: "-64px 0px 0px 0px", threshold: 0 },
+      ([entry]) =>
+        setPinned(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { rootMargin: "-64px 0px 0px 0px", threshold: 0 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -222,7 +229,8 @@ export function VehicleConfigurator({
     const inMarque = (v: Vehicle) =>
       marque === ALL_MARQUES || v.manufacturer === marque;
     const matches = (v: Vehicle) =>
-      inMarque(v) && (!q || `${v.manufacturer} ${v.name}`.toLowerCase().includes(q));
+      inMarque(v) &&
+      (!q || `${v.manufacturer} ${v.name}`.toLowerCase().includes(q));
     const matched = vehicles.filter(matches);
     /*
      * The pin survives a query, not a marque.
@@ -237,7 +245,7 @@ export function VehicleConfigurator({
      * summary above the form goes on naming it whatever the grid is showing.
      */
     const pinned = vehicles.filter(
-      (v) => v.id === selectedVehicleId && inMarque(v) && !matches(v),
+      v => v.id === selectedVehicleId && inMarque(v) && !matches(v)
     );
     return { matched, shown: [...matched, ...pinned] };
   }, [query, marque, selectedVehicleId]);
@@ -247,7 +255,7 @@ export function VehicleConfigurator({
      handleSelectVehicle this resolves to null and the colour dialog never
      mounts — which is why VehicleFocus needs no guard against a vehicle with
      an empty colour list. */
-  const focusedVehicle = vehicles.find((v) => v.id === focusedId) ?? null;
+  const focusedVehicle = vehicles.find(v => v.id === focusedId) ?? null;
 
   const handleSelectVehicle = (id: string) => {
     onSelectVehicle(id);
@@ -266,11 +274,7 @@ export function VehicleConfigurator({
 
        Also no max-width. A 1600px cap cannot bind at this size, and leaving it
        on only invites the same mistake back. */
-    <div
-      className={
-        compact ? "-mx-4" : "max-w-[1600px] mx-auto px-6 sm:px-10"
-      }
-    >
+    <div className={compact ? "-mx-4" : "max-w-[1600px] mx-auto px-6 sm:px-10"}>
       {/*
         The search stays on screen for as long as the grid it filters.
 
@@ -308,12 +312,12 @@ export function VehicleConfigurator({
       <div
         className={
           compact
-            /* No plate behind it. The field carries its own opaque black and a
+            ? /* No plate behind it. The field carries its own opaque black and a
                shadow (see .glow-button__field), so it stays readable with cards
                passing behind the strip — and a tinted, blurred band pinned
                across the top of a phone is the same furniture the bottom dock
                was. Only the field floats. */
-            ? "sticky top-0 z-20 mb-4 px-4 py-3"
+              "sticky top-0 z-20 mb-4 px-4 py-3"
             : "sticky top-16 sm:top-20 z-20 -mx-6 sm:-mx-10 mb-8 sm:mb-10 px-6 py-3 sm:px-10 lg:static lg:mx-0 lg:px-0 lg:py-0"
         }
       >
@@ -363,7 +367,13 @@ export function VehicleConfigurator({
           resets both — the reader wants the list back, not an audit of which
           control they last touched. */}
       {matched.length === 0 && (
-        <p className={compact ? "mb-6 px-4 text-sm text-[#B8C4D6]" : "mb-8 text-sm text-[#B8C4D6]"}>
+        <p
+          className={
+            compact
+              ? "mb-6 px-4 text-sm text-[#B8C4D6]"
+              : "mb-8 text-sm text-[#B8C4D6]"
+          }
+        >
           {query.trim() && marque !== ALL_MARQUES
             ? `No ${marque} machines match “${query.trim()}”. `
             : query.trim()
@@ -411,46 +421,49 @@ export function VehicleConfigurator({
             : "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
         }
       >
-          {shown.map((vehicle) => (
-            <div key={vehicle.id} className="relative">
-              {/* Holds the cell open while the card is away at centre stage.
+        {shown.map(vehicle => (
+          <div key={vehicle.id} className="relative">
+            {/* Holds the cell open while the card is away at centre stage.
                   Without it the grid reflows the moment the card leaves and
                   reflows back as it returns, so the card flies home to a slot
                   that is still moving. `invisible` also takes its buttons out
                   of the tab order, which a copy of a real card must not keep. */}
-              <div aria-hidden className="invisible rounded-sm border border-transparent">
-                <div className="aspect-[4/3]" />
-                {/* Same metrics the real caption uses, from the same helper —
+            <div
+              aria-hidden
+              className="invisible rounded-sm border border-transparent"
+            >
+              <div className="aspect-[4/3]" />
+              {/* Same metrics the real caption uses, from the same helper —
                     this box is what actually sizes the grid cell, so it has to
                     follow the density the cards are drawn at. */}
-                <div className={cardClasses.cap}>
-                  <p className={cardClasses.marque}>{vehicle.manufacturer}</p>
-                  <h4 className={cardClasses.name}>{vehicle.name}</h4>
-                </div>
+              <div className={cardClasses.cap}>
+                <p className={cardClasses.marque}>{vehicle.manufacturer}</p>
+                <h4 className={cardClasses.name}>{vehicle.name}</h4>
               </div>
+            </div>
 
-              {focusedId !== vehicle.id && (
-                <motion.div
-                  /* Paired with the panel's copy — and dropped in compact for
+            {focusedId !== vehicle.id && (
+              <motion.div
+                /* Paired with the panel's copy — and dropped in compact for
                      the same reason it is dropped there: see VehicleFocus. Both
                      halves have to go together, or framer holds a measurement
                      open for a partner that never arrives. */
-                  layoutId={compact ? undefined : `vehicle-focus-${vehicle.id}`}
-                  className="absolute inset-0"
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <VehicleCard
-                    vehicle={vehicle}
-                    selected={vehicle.id === selectedVehicleId}
-                    onSelect={() => handleSelectVehicle(vehicle.id)}
-                    compact={compact}
-                  />
-                </motion.div>
-              )}
-            </div>
-          ))}
+                layoutId={compact ? undefined : `vehicle-focus-${vehicle.id}`}
+                className="absolute inset-0"
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <VehicleCard
+                  vehicle={vehicle}
+                  selected={vehicle.id === selectedVehicleId}
+                  onSelect={() => handleSelectVehicle(vehicle.id)}
+                  compact={compact}
+                />
+              </motion.div>
+            )}
+          </div>
+        ))}
 
-          {/* Last, and outside the map, because it is not a vehicle. Keeping it
+        {/* Last, and outside the map, because it is not a vehicle. Keeping it
               out of `matched` and `shown` is what lets those two stay Vehicle[]
               and lets the result count go on meaning machines.
 
@@ -464,30 +477,30 @@ export function VehicleConfigurator({
               construction rather than by two pieces of markup that happen to
               measure alike. No layoutId — this card is never promoted to centre
               stage, so there is nothing for one to pair with. */}
-          <div className="relative">
-            <div
-              aria-hidden
-              className="invisible rounded-sm border border-transparent"
-            >
-              <div className="aspect-[4/3]" />
-              <div className={cardClasses.cap}>
-                <p className={cardClasses.marque}>{OTHER_MACHINE_EYEBROW}</p>
-                <h4 className={cardClasses.name}>{OTHER_MACHINE_NAME}</h4>
-              </div>
-            </div>
-
-            <div className="absolute inset-0">
-              <OtherMachineCard
-                compact={compact}
-                selected={selectedVehicleId === OTHER_VEHICLE_ID}
-                /* Straight to the parent, deliberately not through
-                   handleSelectVehicle: that one also sets focusedId, which is
-                   what opens the colour dialog. There are no colours here. */
-                onSelect={() => onSelectVehicle(OTHER_VEHICLE_ID)}
-              />
+        <div className="relative">
+          <div
+            aria-hidden
+            className="invisible rounded-sm border border-transparent"
+          >
+            <div className="aspect-[4/3]" />
+            <div className={cardClasses.cap}>
+              <p className={cardClasses.marque}>{OTHER_MACHINE_EYEBROW}</p>
+              <h4 className={cardClasses.name}>{OTHER_MACHINE_NAME}</h4>
             </div>
           </div>
+
+          <div className="absolute inset-0">
+            <OtherMachineCard
+              compact={compact}
+              selected={selectedVehicleId === OTHER_VEHICLE_ID}
+              /* Straight to the parent, deliberately not through
+                   handleSelectVehicle: that one also sets focusedId, which is
+                   what opens the colour dialog. There are no colours here. */
+              onSelect={() => onSelectVehicle(OTHER_VEHICLE_ID)}
+            />
+          </div>
         </div>
+      </div>
 
       <AnimatePresence>
         {focusedVehicle && (
@@ -495,7 +508,7 @@ export function VehicleConfigurator({
             key={focusedVehicle.id}
             vehicle={focusedVehicle}
             selectedColorId={selectedColorId}
-            onSelectColor={(colorId) => {
+            onSelectColor={colorId => {
               onSelectColor(colorId);
               /*
                * Closes after the choice has been seen, not with it.
