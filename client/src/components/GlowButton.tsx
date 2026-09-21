@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { BorderBeam } from "border-beam";
 import "./GlowButton.css";
 
@@ -68,6 +68,23 @@ export function GlowButton({
   wrapperClassName,
   onClick,
 }: GlowButtonProps) {
+  /*
+   * Hover and focus both light it, which is the behaviour the ring had and the
+   * swap dropped.
+   *
+   * Focus is not decoration here. GlowButton.css records that the button
+   * previously had no focus indicator at all, and that lighting the bloom on
+   * `:focus-within` was what gave a keyboard visitor the same signal a mouse
+   * visitor gets — so hover alone would quietly take that back.
+   *
+   * Two flags rather than one, because they can overlap: tabbing to the button
+   * and then moving the mouse off it should not put the light out while it is
+   * still focused.
+   */
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const lit = hovered || focused;
+
   /* Built once and dressed by whichever branch is live, so the two cannot drift
      — a face that differs between them is a bug nobody sees until the switch is
      thrown. */
@@ -75,6 +92,15 @@ export function GlowButton({
     <a
       href={href}
       onClick={onClick}
+      /* On the anchor, not on the BorderBeam. Its props type extends
+         HTMLAttributes, but it does not spread the unrecognised ones onto its
+         root — handlers passed there never fire. The anchor is the interactive
+         element and the thing a pointer is actually over, so it is the right
+         place regardless. */
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       className={`glow-button__face ${className ?? ""}`}
       /* Inline rather than a class: `.glow-button__face` sets its background at
          one class of specificity and so would a Tailwind utility, leaving the
@@ -106,7 +132,12 @@ export function GlowButton({
     <BorderBeam
       size="md"
       colorVariant="colorful"
-      strength={0.7}
+      /* `strength` is the beam, glow and bloom's opacity; `brightness` a
+         multiplier on the glow. Both lift together, so the light gains presence
+         rather than just turning up the same dim thing. React's onFocus/onBlur
+         are focusin/focusout, so they catch the anchor inside without a ref. */
+      strength={lit ? 1 : 0.7}
+      brightness={lit ? 1.9 : 1.3}
       /* Seconds for one pass, so smaller is faster. Matched to the search bar so
          the two are not visibly running at different speeds on the same screen. */
       duration={1.7}
