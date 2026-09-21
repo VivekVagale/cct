@@ -1,79 +1,43 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { BorderBeam } from "border-beam";
-import { BEAM_LIT, BEAM_REST, type BeamMotion } from "./beamMotion";
+import { BEAM_REST, type BeamMotion } from "./beamMotion";
 
 /**
- * Whether there is a pointer that can rest on something without committing.
- *
- * The same question `useTilt` asks, for the same reason it asks it. A tap emits
- * compatibility mouse events — `mouseover`, `mousemove`, `mouseup` — with no
- * `mouseleave` behind them, so the lift fires on touch and then never unfires.
- * Measured on a phone viewport: tapping a card took it to full strength and it
- * was still there afterwards, on a card the visitor had already moved past.
- *
- * Focus goes with it. A tap focuses the button it lands on and leaves it
- * focused, so `focusin` sticks in exactly the same way — and every control here
- * already carries its own `focus-visible` ring, which is the part a keyboard
- * actually needs.
- *
- * What remains on touch is the chosen thing's own beam, which is the half that
- * was never about the pointer.
- *
- * Read once at module scope: a grid renders sixty-four of these and a phone does
- * not grow a mouse mid-session.
- */
-const CAN_HOVER =
-  typeof window === "undefined" ||
-  window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-/**
- * The beam every selectable control wears, so "chosen" looks the same everywhere.
+ * The beam a chosen control wears, so "chosen" looks the same everywhere.
  *
  * `selected-glow` was already doing that job — one violet ring and bloom shared
  * by the chips, the machine cards, the colour cards and the build cards, put in
  * one place precisely because each surface had been drawing its own. This is the
- * same idea for the beam: four copies of the state, the measuring and the props
- * would not stay equal, and the drift would show as one card lighting differently
- * from the one beside it.
+ * same idea for the beam.
  *
- * Three states, matching the search bar and the primary button:
+ * Two states, not three. It lights when the thing is chosen, and it is dark
+ * otherwise.
  *
- *   plain        no beam, no animation, nothing running
- *   chosen       a beam idling at rest speed
- *   under the    the lift — quicker and more saturated
- *   pointer
+ * It used to lift under the pointer as well, and that came out because it made
+ * the desktop feel heavy to move around. The cost was never the beam that was
+ * lit — it was the eighty-odd that were not. Every wrapper carried `mouseenter`,
+ * `mouseleave`, `focusin` and `focusout`, so sweeping a pointer across a
+ * sixty-four card grid meant a React state change and three to six fresh
+ * animations for each card the cursor happened to cross, on top of the tilt
+ * springs those cards already run. Almost none of it survived long enough to be
+ * seen.
+ *
+ * So there are no listeners here at all now, and nothing to attach on mount.
+ * A chosen thing lights, and choosing is a click.
  */
 export function SelectionBeam({
   selected,
-  interactive = true,
   rest = BEAM_REST,
   className,
   children,
 }: {
   selected: boolean;
   /**
-   * Whether the pointer should lift it.
+   * What the lit state looks like, for a control the default is wrong for.
    *
-   * `false` for anything that only reports a choice rather than offering one —
-   * the booking form's summary of the chosen machine is a receipt, and a panel
-   * that brightens under the cursor claims to be clickable when it is not.
-   * It still carries the idling beam, because it is still showing a chosen
-   * thing.
-   */
-  interactive?: boolean;
-  /**
-   * What idling looks like, for a control the default is wrong for.
-   *
-   * A beam's brightness is spread along a perimeter, so the same numbers give a
-   * small control far less light than a card. The marque chips pass
-   * `BEAM_REST_STRONG` for that reason — and because on a phone, where there is
-   * no hover, the chosen chip's idle is the only state that row ever shows.
+   * A beam's light is spread along a perimeter, so the same numbers give a small
+   * control far less of it than a card. The marque chips pass
+   * `BEAM_REST_STRONG` for that reason.
    */
   rest?: BeamMotion;
   /** Layout classes for the wrapper, which becomes the element in the grid. */
@@ -81,41 +45,6 @@ export function SelectionBeam({
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const lit = hovered || focused;
-  const shown = lit || selected;
-
-  /*
-   * Listeners attached rather than passed.
-   *
-   * BorderBeam's props type extends HTMLAttributes but it does not spread the
-   * unrecognised ones onto its root, so handlers given to it never fire — and a
-   * wrapper div inside it is worse, because it reads its corner radius off its
-   * first child and would measure the wrapper instead of the control. Attaching
-   * to the root through the ref avoids both.
-   *
-   * `focusin`/`focusout` rather than `focus`/`blur`: the native pair does not
-   * bubble, and the thing taking focus is a button or a hidden radio inside.
-   */
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !interactive || !CAN_HOVER) return;
-    const on = () => setHovered(true);
-    const off = () => setHovered(false);
-    const fin = () => setFocused(true);
-    const fout = () => setFocused(false);
-    el.addEventListener("mouseenter", on);
-    el.addEventListener("mouseleave", off);
-    el.addEventListener("focusin", fin);
-    el.addEventListener("focusout", fout);
-    return () => {
-      el.removeEventListener("mouseenter", on);
-      el.removeEventListener("mouseleave", off);
-      el.removeEventListener("focusin", fin);
-      el.removeEventListener("focusout", fout);
-    };
-  }, [interactive]);
 
   /*
    * The corner radius, measured and clamped.
@@ -139,7 +68,7 @@ export function SelectionBeam({
       const height = (child as HTMLElement).offsetHeight;
       if (height <= 0) return;
       const declared = parseFloat(
-        getComputedStyle(child).borderTopLeftRadius || "0"
+        getComputedStyle(child).borderTopLeftRadius || "0",
       );
       const safe = Number.isFinite(declared) ? declared : 0;
       setRadius(Math.min(safe, height / 2));
@@ -152,6 +81,7 @@ export function SelectionBeam({
   }, []);
 
   const ready = radius !== null;
+  const lit = selected && ready;
 
   return (
     <BorderBeam
@@ -159,14 +89,12 @@ export function SelectionBeam({
       size="md"
       colorVariant="colorful"
       brightness={1.3}
-      duration={lit ? BEAM_LIT.duration : rest.duration}
-      saturation={lit ? BEAM_LIT.saturation : rest.saturation}
+      duration={rest.duration}
+      saturation={rest.saturation}
       /* Nothing shown before the radius is known, so the artefact never gets a
          frame to appear in. */
-      strength={
-        !ready ? 0 : lit ? BEAM_LIT.strength : shown ? rest.strength : 0
-      }
-      active={shown && ready}
+      strength={lit ? rest.strength : 0}
+      active={lit}
       {...(ready ? { borderRadius: radius } : {})}
       className={className}
     >

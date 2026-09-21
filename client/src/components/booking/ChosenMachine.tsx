@@ -46,10 +46,9 @@ export function ChosenMachine({
      visitor back to step 01 to redo the thing they just did. */
   if (other) {
     return (
-      /* Beamed like everything else marked chosen, but `interactive={false}`:
-         this panel reports a choice, it does not offer one, and a receipt that
-         brightens under the cursor claims to be clickable. */
-      <SelectionBeam selected interactive={false} className="block">
+      /* Beamed like everything else marked chosen. Nothing lifts under the
+         pointer anywhere any more, so this needs no special case. */
+      <SelectionBeam selected className="block">
         <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
           <div className="h-14 w-20 shrink-0 overflow-hidden rounded-sm sm:h-16 sm:w-24">
             <PendingRender swatch="#6E7378" label="No render" />
@@ -101,7 +100,7 @@ export function ChosenMachine({
 
   return (
     /* Same, and for the same reason — see the note in the branch above. */
-    <SelectionBeam selected interactive={false} className="block">
+    <SelectionBeam selected className="block">
       <div className="selected-glow flex items-center gap-4 rounded-sm border bg-[#7A44E0]/[0.07] p-3 sm:p-4">
         {/* 80px wide, so the full "Render in progress" cannot sit on one line and
           wraps to three. The echo is captioned by the marque, the model and the
