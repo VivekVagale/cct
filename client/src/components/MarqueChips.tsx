@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { BEAM_LIT, BEAM_REST } from "./beamMotion";
@@ -16,6 +16,21 @@ interface ChipLabelProps {
   selected: boolean;
   onChange: (id: string) => void;
   reduceMotion: boolean | null;
+  /**
+   * Pointer and focus handlers, when a beam is listening for them.
+   *
+   * On the label rather than on a wrapper inside the beam, and that is not a
+   * tidiness point: BorderBeam reads its corner radius off its *first child*, so
+   * anything in between is what gets measured. A plain div there reported square
+   * corners and the beam drew a 9999px ring around a box it thought was
+   * rectangular — two crescents either side of every chip.
+   */
+  handlers?: {
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    onFocus: () => void;
+    onBlur: () => void;
+  };
 }
 
 /**
@@ -31,11 +46,18 @@ function ChipLabel({
   selected,
   onChange,
   reduceMotion,
+  handlers,
 }: ChipLabelProps) {
   return (
     <motion.label
+      {...handlers}
       whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-      className={`group relative cursor-pointer select-none rounded-full border px-5 py-3 text-left transition-colors duration-300 ${
+      /* `inline-block` matters only inside a beam. In the plain row the label is
+         a flex item and the container blockifies it; wrapped in BorderBeam it is
+         an ordinary inline box, and an inline box does not take vertical padding
+         — the chip collapsed to 54x85 where it should be 122x61. Harmless in the
+         flex row, which overrides display anyway. */
+      className={`group relative inline-block cursor-pointer select-none rounded-full border px-5 py-3 text-left transition-colors duration-300 ${
         selected
           ? "selected-glow border-transparent bg-[#7A44E0]/[0.10]"
           : "border-white/[0.14] bg-white/[0.02] hover:border-white/30"
@@ -94,34 +116,68 @@ function ChipLabel({
  * also the point of this component: "chosen" is meant to look identical here and
  * on the vehicle and colour cards, and only one of those can grow a beam.
  */
-function BeamChip({ children }: { children: ReactNode }) {
+function BeamChip({ render }: { render: (h: ChipLabelProps["handlers"]) => ReactNode }) {
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const lit = hovered || focused;
 
+  /*
+   * The corner radius, measured rather than detected.
+   *
+   * BorderBeam reads the radius off its first child when none is given, and the
+   * chip's is Tailwind's `rounded-full` — which in v4 is `calc(infinity * 1px)`
+   * and computes to 24,403,200px. Handed that, the beam drew its ring at a
+   * radius tens of thousands of times the chip's size: two crescents either side
+   * of every chip and no pill anywhere.
+   *
+   * A pill's real radius is half its height, so that is what gets passed. `null`
+   * until measured, which keeps the beam hidden for the frame before the number
+   * exists rather than showing the artefact and correcting it.
+   */
+  const ref = useRef<HTMLDivElement>(null);
+  const [radius, setRadius] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      const h = el.getBoundingClientRect().height;
+      if (h > 0) setRadius(h / 2);
+    };
+    measure();
+    /* Chips reflow — the row wraps at narrow widths and the font can settle
+       late — and a stale radius would show the artefact again on resize. */
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  /* Handed down to the label rather than applied to a wrapper here. Nothing may
+     sit between the beam and the pill — see the note on ChipLabelProps.handlers.
+     `onFocus`/`onBlur` are focusin/focusout in React, so the hidden radio inside
+     the label is caught without a ref, which is what lights a chip reached by
+     keyboard. */
+  const handlers = {
+    onMouseEnter: () => setHovered(true),
+    onMouseLeave: () => setHovered(false),
+    onFocus: () => setFocused(true),
+    onBlur: () => setFocused(false),
+  };
+
   return (
     <BorderBeam
+      ref={ref}
       size="md"
       colorVariant="colorful"
       brightness={1.3}
       duration={lit ? BEAM_LIT.duration : BEAM_REST.duration}
       saturation={lit ? BEAM_LIT.saturation : BEAM_REST.saturation}
-      strength={lit ? BEAM_LIT.strength : 0}
-      active={lit}
+      /* Nothing to show until the radius is known — see the note above. */
+      strength={lit && radius !== null ? BEAM_LIT.strength : 0}
+      active={lit && radius !== null}
+      {...(radius !== null ? { borderRadius: radius } : {})}
       className="inline-block"
     >
-      {/* On a wrapper inside the beam rather than on the beam, which does not
-          spread unrecognised props onto its root. `onFocus`/`onBlur` are
-          focusin/focusout in React, so the hidden radio inside the label is
-          caught without a ref — which is what lights the chip for a keyboard. */}
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-      >
-        {children}
-      </div>
+      {render(handlers)}
     </BorderBeam>
   );
 }
@@ -181,9 +237,10 @@ export function MarqueChips({
             reduceMotion,
           };
           return beam ? (
-            <BeamChip key={option.id}>
-              <ChipLabel {...chipProps} />
-            </BeamChip>
+            <BeamChip
+              key={option.id}
+              render={(handlers) => <ChipLabel {...chipProps} handlers={handlers} />}
+            />
           ) : (
             <ChipLabel key={option.id} {...chipProps} />
           );
