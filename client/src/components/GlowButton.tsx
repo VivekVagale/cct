@@ -132,12 +132,14 @@ export function GlowButton({
     <BorderBeam
       size="md"
       colorVariant="colorful"
-      /* `strength` is the beam, glow and bloom's opacity; `brightness` a
-         multiplier on the glow. Both lift together, so the light gains presence
-         rather than just turning up the same dim thing. React's onFocus/onBlur
-         are focusin/focusout, so they catch the anchor inside without a ref. */
+      /* Saturation, not brightness. `brightness` multiplies the whole glow, so
+         pushing it drives every channel up together and the colour washes out
+         toward white. `saturation` pulls it away from grey instead, which is
+         what reads as "more" without bleaching it. Brightness holds at its
+         default; only the opacity moves alongside. */
       strength={lit ? 1 : 0.7}
-      brightness={lit ? 2.8 : 1.3}
+      brightness={1.3}
+      saturation={lit ? 2.8 : 1.2}
       /* Seconds for one pass, so smaller is faster. Matched to the search bar so
          the two are not visibly running at different speeds on the same screen. */
       duration={1.7}

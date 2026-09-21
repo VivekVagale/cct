@@ -150,12 +150,18 @@ export function VehicleSearch({
         <BorderBeam
           size="line"
           colorVariant="colorful"
-          /* `strength` is the beam, glow and bloom's opacity and tops out at 1;
-             `brightness` is a multiplier on the glow and is where the rest of
-             the lift comes from. Matched to GlowButton so the two do not light
-             to different levels on the same screen. */
+          /* Saturation, not brightness.
+             `brightness` multiplies the whole glow, so pushing it drives every
+             channel up together and the colour washes out toward white — the
+             beam gets louder and less itself at the same time. `saturation`
+             pulls the colour away from grey instead, which is the thing that
+             reads as "more" here. Brightness stays at its default both states
+             and only `strength`, the opacity, moves alongside.
+             Matched to GlowButton so the two do not light differently on the
+             same screen. */
           strength={lit ? 1 : 0.7}
-          brightness={lit ? 2.8 : 1.3}
+          brightness={1.3}
+          saturation={lit ? 2.8 : 1.2}
           /* Seconds for one pass, so smaller is faster. `line` defaults to 2.4,
              which at this width crawls — the glow spends most of its time off
              under the rounded ends where there is nothing to light. */
