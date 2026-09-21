@@ -18,6 +18,24 @@ const CAN_HOVER =
   window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
 /**
+ * The one line that puts the tilt back.
+ *
+ * Off while we see how the desktop feels without it. Navigation was heavy, and
+ * this is the remaining thing doing work on every pointer move: two springs per
+ * card, each writing a transform frame by frame, across a grid of sixty-four —
+ * plus a radial-gradient string rebuilt per move for the cursor-follow sheen.
+ *
+ * `true` restores all of it. Nothing else has to change: the springs, the
+ * handlers and the components that read them are untouched, and with this off
+ * the motion values simply never receive a value.
+ *
+ * What survives either way is the sheen's own `group-hover` opacity, which is
+ * CSS. With the tracking off it sits centred on the card instead of following
+ * the cursor — a plain highlight on hover rather than none at all.
+ */
+const TILT_ENABLED = false;
+
+/**
  * Shared 3D cursor-tilt behavior: continuous rotation from pointer
  * position (±12° on both axes, spring-eased) plus a cursor-follow
  * radial highlight. Used by any card that should feel like a
@@ -61,7 +79,7 @@ export function useTilt<T extends HTMLElement>() {
   });
 
   const onMouseMove = (e: MouseEvent<T>) => {
-    if (!CAN_HOVER) return;
+    if (!TILT_ENABLED || !CAN_HOVER) return;
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -70,6 +88,7 @@ export function useTilt<T extends HTMLElement>() {
   };
 
   const onMouseLeave = () => {
+    if (!TILT_ENABLED) return;
     mvX.set(0.5);
     mvY.set(0.5);
   };
