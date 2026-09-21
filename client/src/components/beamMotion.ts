@@ -29,11 +29,17 @@ export interface BeamMotion {
   saturation: number;
 }
 
-/** Idling: slow, and desaturated enough to sit behind the content. */
+/**
+ * Idling: slow, but present.
+ *
+ * Was 0.7 and 0.9 — desaturated below neutral, which on a near-black page with a
+ * starfield behind it read as almost nothing. The chosen thing is supposed to be
+ * legible as chosen; the pointer still has somewhere to go from here.
+ */
 export const BEAM_REST: BeamMotion = {
-  strength: 0.7,
+  strength: 0.9,
   duration: 3,
-  saturation: 0.9,
+  saturation: 1.6,
 };
 
 /** Hovered or focused: quicker and richer, both at once. */

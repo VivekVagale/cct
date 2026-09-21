@@ -3,6 +3,30 @@ import { BorderBeam } from "border-beam";
 import { BEAM_LIT, BEAM_REST } from "./beamMotion";
 
 /**
+ * Whether there is a pointer that can rest on something without committing.
+ *
+ * The same question `useTilt` asks, for the same reason it asks it. A tap emits
+ * compatibility mouse events — `mouseover`, `mousemove`, `mouseup` — with no
+ * `mouseleave` behind them, so the lift fires on touch and then never unfires.
+ * Measured on a phone viewport: tapping a card took it to full strength and it
+ * was still there afterwards, on a card the visitor had already moved past.
+ *
+ * Focus goes with it. A tap focuses the button it lands on and leaves it
+ * focused, so `focusin` sticks in exactly the same way — and every control here
+ * already carries its own `focus-visible` ring, which is the part a keyboard
+ * actually needs.
+ *
+ * What remains on touch is the chosen thing's own beam, which is the half that
+ * was never about the pointer.
+ *
+ * Read once at module scope: a grid renders sixty-four of these and a phone does
+ * not grow a mouse mid-session.
+ */
+const CAN_HOVER =
+  typeof window === "undefined" ||
+  window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+/**
  * The beam every selectable control wears, so "chosen" looks the same everywhere.
  *
  * `selected-glow` was already doing that job — one violet ring and bloom shared
@@ -60,7 +84,7 @@ export function SelectionBeam({
    */
   useEffect(() => {
     const el = ref.current;
-    if (!el || !interactive) return;
+    if (!el || !interactive || !CAN_HOVER) return;
     const on = () => setHovered(true);
     const off = () => setHovered(false);
     const fin = () => setFocused(true);
