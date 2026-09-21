@@ -1,4 +1,11 @@
-import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+  type TouchEvent,
+} from "react";
 import { AnimatePresence } from "framer-motion";
 import { VehicleConfigurator } from "@/components/VehicleConfigurator";
 import { BuildBriefDialog } from "@/components/BuildBriefDialog";
@@ -11,7 +18,10 @@ import { Step } from "@/components/booking/Step";
 import { ChosenMachine } from "@/components/booking/ChosenMachine";
 import { BuildGrid } from "@/components/booking/BuildGrid";
 import { PriceBlock } from "@/components/booking/PriceBlock";
-import { MachineNotes, machineNotesHint } from "@/components/booking/MachineNotes";
+import {
+  MachineNotes,
+  machineNotesHint,
+} from "@/components/booking/MachineNotes";
 import { UsageChips } from "@/components/booking/UsageChips";
 import { ContactFields } from "@/components/booking/ContactFields";
 import { DesktopNudgeBar } from "@/components/booking/DesktopNudge";
@@ -57,6 +67,59 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
   const [gate, setGate] = useState<string | null>(null);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * A drag on the footer scrolls the step behind it.
+   *
+   * The document is fixed — see useAppShellViewport — so nothing scrolls except
+   * the step's own box, and that box stops above the footer. The bottom strip of
+   * the screen is where a thumb naturally rests, so a swipe starting there moved
+   * nothing and the whole wizard read as scrolling only sometimes.
+   *
+   * Forwarded rather than restyled: the footer is pinned on purpose, and the
+   * button inside it has to keep working.
+   *
+   * `dragging` is what protects the tap. It only arms past a few pixels of
+   * vertical travel, so a press that stays put is still a press and the button
+   * fires normally — and once it is armed the move is consumed, so a drag that
+   * happens to start on the button scrolls instead of pressing it.
+   */
+  const dragFrom = useRef<number | null>(null);
+  const dragging = useRef(false);
+
+  function onFooterTouchStart(e: TouchEvent<HTMLDivElement>) {
+    dragFrom.current = e.touches[0].clientY;
+    dragging.current = false;
+  }
+
+  function onFooterTouchMove(e: TouchEvent<HTMLDivElement>) {
+    const start = dragFrom.current;
+    const scroller = scrollerRef.current;
+    if (start === null || !scroller) return;
+    const y = e.touches[0].clientY;
+    const travelled = start - y;
+    if (!dragging.current && Math.abs(travelled) < 6) return;
+    dragging.current = true;
+    /* One to one with the finger, and no momentum. A flick would have to be
+       simulated, and a scroll that keeps moving after the thumb has left the
+       glass is worse than one that stops where it was put. */
+    scroller.scrollTop += travelled;
+    dragFrom.current = y;
+  }
+
+  function onFooterTouchEnd() {
+    dragFrom.current = null;
+  }
+
+  function onFooterClickCapture(e: MouseEvent<HTMLDivElement>) {
+    /* The tail of a drag is not a tap. Without this the finger lifting after a
+       scroll lands as a click on whatever is underneath, which here is Next. */
+    if (dragging.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragging.current = false;
+    }
+  }
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
   const step = BOOKING_STEPS[index];
@@ -80,7 +143,9 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
    */
   function stepValid() {
     if (step.id === "machine" && !form.vehicleId) {
-      setGate("Pick a machine before you carry on — the studio quotes for one.");
+      setGate(
+        "Pick a machine before you carry on — the studio quotes for one."
+      );
       return false;
     }
 
@@ -105,13 +170,13 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
     if (!stepValid()) return;
     setGate(null);
     form.clearError();
-    setIndex((i) => Math.min(i + 1, TOTAL - 1));
+    setIndex(i => Math.min(i + 1, TOTAL - 1));
   }
 
   function back() {
     setGate(null);
     form.clearError();
-    setIndex((i) => Math.max(i - 1, 0));
+    setIndex(i => Math.max(i - 1, 0));
   }
 
   /**
@@ -254,7 +319,9 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
           <div className="flex min-h-full flex-col justify-center px-4 pb-8 pt-4">
             {/* ── 01 · Machine ──────────────────────────────────────────── */}
             <section
-              ref={(el) => { stepRefs.current[0] = el; }}
+              ref={el => {
+                stepRefs.current[0] = el;
+              }}
               hidden={index !== 0}
             >
               <Step step={BOOKING_STEPS[0]} of={TOTAL} />
@@ -272,7 +339,9 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
             {/* ── 02 · Build ────────────────────────────────────────────── */}
             <section
-              ref={(el) => { stepRefs.current[1] = el; }}
+              ref={el => {
+                stepRefs.current[1] = el;
+              }}
               hidden={index !== 1}
             >
               <Step step={BOOKING_STEPS[1]} of={TOTAL} />
@@ -301,17 +370,25 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
             {/* ── 03 · Price ────────────────────────────────────────────── */}
             <section
-              ref={(el) => { stepRefs.current[2] = el; }}
+              ref={el => {
+                stepRefs.current[2] = el;
+              }}
               hidden={index !== 2}
               className="flex flex-col items-center text-center"
             >
-              <Step step={BOOKING_STEPS[2]} of={TOTAL} className="self-start text-left" />
+              <Step
+                step={BOOKING_STEPS[2]}
+                of={TOTAL}
+                className="self-start text-left"
+              />
               <PriceBlock price={form.selectedPrice} />
             </section>
 
             {/* ── 04 · Description ──────────────────────────────────────── */}
             <section
-              ref={(el) => { stepRefs.current[3] = el; }}
+              ref={el => {
+                stepRefs.current[3] = el;
+              }}
               hidden={index !== 3}
             >
               <Step
@@ -332,7 +409,9 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
             {/* ── 05 · Usage ────────────────────────────────────────────── */}
             <section
-              ref={(el) => { stepRefs.current[4] = el; }}
+              ref={el => {
+                stepRefs.current[4] = el;
+              }}
               hidden={index !== 4}
             >
               <Step step={BOOKING_STEPS[4]} of={TOTAL} />
@@ -341,7 +420,9 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
             {/* ── 06 · Contact ──────────────────────────────────────────── */}
             <section
-              ref={(el) => { stepRefs.current[5] = el; }}
+              ref={el => {
+                stepRefs.current[5] = el;
+              }}
               hidden={index !== 5}
             >
               <Step step={BOOKING_STEPS[5]} of={TOTAL} />
@@ -410,7 +491,6 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
                   one by one. Anything between those is uncounted.
                 </p>
               </div>
-
             </section>
           </div>
         </div>
@@ -436,7 +516,14 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
         )}
         <div
           className="flex shrink-0 justify-center px-4 pt-1"
-          style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+          onTouchStart={onFooterTouchStart}
+          onTouchMove={onFooterTouchMove}
+          onTouchEnd={onFooterTouchEnd}
+          onTouchCancel={onFooterTouchEnd}
+          onClickCapture={onFooterClickCapture}
+          style={{
+            paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
+          }}
         >
           {/* Two buttons, and the keys are what make them two.
 
