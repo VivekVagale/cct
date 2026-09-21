@@ -42,6 +42,23 @@ export const BEAM_REST: BeamMotion = {
   saturation: 1.6,
 };
 
+/**
+ * Idling, for something small enough that the ordinary rest values vanish on it.
+ *
+ * The marque chips are the case. A beam around a 95x42 pill has a fraction of
+ * the perimeter a card does, so the same numbers give it far less light — and on
+ * a phone there is no hover at all, so the chosen chip's idle is the *only*
+ * state that row ever shows. Quiet there means invisible.
+ *
+ * Strength is at its ceiling and the lift comes from pace and colour instead,
+ * which is what keeps a hovered chip distinguishable from the chosen one.
+ */
+export const BEAM_REST_STRONG: BeamMotion = {
+  strength: 1,
+  duration: 3,
+  saturation: 2.2,
+};
+
 /** Hovered or focused: quicker and richer, both at once. */
 export const BEAM_LIT: BeamMotion = {
   strength: 1,

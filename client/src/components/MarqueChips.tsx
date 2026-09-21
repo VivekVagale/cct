@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { SelectionBeam } from "./SelectionBeam";
+import { BEAM_REST_STRONG } from "./beamMotion";
 
 export interface MarqueChip {
   id: string;
@@ -119,7 +120,7 @@ export function MarqueChips({
     <fieldset className="w-full">
       <legend className="sr-only">{label}</legend>
       <div className="flex flex-wrap justify-center gap-2.5">
-        {options.map((option) => {
+        {options.map(option => {
           const selected = option.id === value;
           /* Built once so the two branches cannot be handed different chips. */
           const chipProps: ChipLabelProps = {
@@ -133,6 +134,10 @@ export function MarqueChips({
             <SelectionBeam
               key={option.id}
               selected={selected}
+              /* A chip has a fraction of a card's perimeter, so the default idle
+                 all but disappears on one — and on a phone, with no hover, the
+                 chosen chip's idle is the only state this row ever shows. */
+              rest={BEAM_REST_STRONG}
               className="inline-block"
             >
               <ChipLabel {...chipProps} />

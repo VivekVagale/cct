@@ -1,6 +1,12 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { BorderBeam } from "border-beam";
-import { BEAM_LIT, BEAM_REST } from "./beamMotion";
+import { BEAM_LIT, BEAM_REST, type BeamMotion } from "./beamMotion";
 
 /**
  * Whether there is a pointer that can rest on something without committing.
@@ -46,6 +52,7 @@ const CAN_HOVER =
 export function SelectionBeam({
   selected,
   interactive = true,
+  rest = BEAM_REST,
   className,
   children,
 }: {
@@ -60,6 +67,15 @@ export function SelectionBeam({
    * thing.
    */
   interactive?: boolean;
+  /**
+   * What idling looks like, for a control the default is wrong for.
+   *
+   * A beam's brightness is spread along a perimeter, so the same numbers give a
+   * small control far less light than a card. The marque chips pass
+   * `BEAM_REST_STRONG` for that reason — and because on a phone, where there is
+   * no hover, the chosen chip's idle is the only state that row ever shows.
+   */
+  rest?: BeamMotion;
   /** Layout classes for the wrapper, which becomes the element in the grid. */
   className?: string;
   children: ReactNode;
@@ -123,7 +139,7 @@ export function SelectionBeam({
       const height = (child as HTMLElement).offsetHeight;
       if (height <= 0) return;
       const declared = parseFloat(
-        getComputedStyle(child).borderTopLeftRadius || "0",
+        getComputedStyle(child).borderTopLeftRadius || "0"
       );
       const safe = Number.isFinite(declared) ? declared : 0;
       setRadius(Math.min(safe, height / 2));
@@ -143,11 +159,13 @@ export function SelectionBeam({
       size="md"
       colorVariant="colorful"
       brightness={1.3}
-      duration={lit ? BEAM_LIT.duration : BEAM_REST.duration}
-      saturation={lit ? BEAM_LIT.saturation : BEAM_REST.saturation}
+      duration={lit ? BEAM_LIT.duration : rest.duration}
+      saturation={lit ? BEAM_LIT.saturation : rest.saturation}
       /* Nothing shown before the radius is known, so the artefact never gets a
          frame to appear in. */
-      strength={!ready ? 0 : lit ? BEAM_LIT.strength : shown ? BEAM_REST.strength : 0}
+      strength={
+        !ready ? 0 : lit ? BEAM_LIT.strength : shown ? rest.strength : 0
+      }
       active={shown && ready}
       {...(ready ? { borderRadius: radius } : {})}
       className={className}
