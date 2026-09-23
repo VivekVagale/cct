@@ -20,7 +20,17 @@ import { ContactFields } from "@/components/booking/ContactFields";
 import { DesktopNudgeBar } from "@/components/booking/DesktopNudge";
 import { useBookingForm } from "@/components/booking/useBookingForm";
 
-const TOTAL = BOOKING_STEPS.length;
+/* The phone runs five steps, not six: the price has no screen of its own here
+   and sits under the description instead (see PriceBlock's `compact`). The
+   desktop keeps all six, so the phone renumbers rather than editing the shared
+   list — "Step 03 of 05" has to count the screens this visitor actually sees. */
+const WIZARD_STEPS = BOOKING_STEPS.filter(s => s.id !== "price").map((s, i) => ({
+  ...s,
+  number: String(i + 1).padStart(2, "0"),
+  hint: s.hint?.replace("Six steps in all", "Five steps in all"),
+}));
+
+const TOTAL = WIZARD_STEPS.length;
 
 /**
  * The booking, one decision per screen.
@@ -29,7 +39,7 @@ const TOTAL = BOOKING_STEPS.length;
  * does not: the same form there is a four-thousand-pixel scroll through a
  * vehicle grid, a card grid, five headings and seven fields, with the submit
  * button somewhere past the end of it. Giving each step the screen turns that
- * into six short decisions with a visible end.
+ * into five short decisions with a visible end.
  *
  * Everything inside the steps is the component the desktop uses. What is local
  * to this file is the shell: which step is showing, how you get to the next one,
@@ -37,11 +47,11 @@ const TOTAL = BOOKING_STEPS.length;
  *
  * ── The one mechanical thing worth knowing ───────────────────────────────────
  *
- * All six steps stay mounted. They are hidden with the `hidden` attribute rather
+ * All five steps stay mounted. They are hidden with the `hidden` attribute rather
  * than being conditionally rendered, for two reasons that are really the same
  * reason:
  *
- * 1. `FormData` collects the whole form on submit. Unmount step 04 and the
+ * 1. `FormData` collects the whole form on submit. Unmount step 03 and the
  *    description is simply not in the row — silently, with no error anywhere.
  * 2. The fields are uncontrolled. Unmounting throws away what was typed, so
  *    going Back and forward again would clear the form a step at a time.
@@ -63,7 +73,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const step = BOOKING_STEPS[index];
+  const step = WIZARD_STEPS[index];
   const isLast = index === TOTAL - 1;
 
   /* Back to the top of the new step, before the browser paints it. The scroller
@@ -127,7 +137,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
    * stops the rest of them. A form submits for reasons that have nothing to do
    * with its buttons — Enter in a single-line field is the common one — and
    * every step of this wizard lives inside one form element, so any of them
-   * could reach a submit handler that assumes six steps of answers behind it.
+   * could reach a submit handler that assumes five steps of answers behind it.
    *
    * Nothing is reported when it fires. A submission the visitor did not ask for
    * should not produce an error they have to read; it should simply not happen.
@@ -137,11 +147,11 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
       e.preventDefault();
       return;
     }
-    /* Step 06 is the one step `next` never checks, because there is no Next to
+    /* Step 05 is the one step `next` never checks, because there is no Next to
        press on it — and the form carries `noValidate`, so nothing else does
        either. Without this line every `required` on the contact step is inert
        on the phone: name, email and handle could all be empty and the row went
-       in anyway. Same call the other five steps get, so the browser reports the
+       in anyway. Same call the other four steps get, so the browser reports the
        first empty field on the step the reader is already looking at. */
     if (!stepValid()) {
       e.preventDefault();
@@ -198,11 +208,11 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
         </span>
       </div>
 
-      {/* Six segments, one per step. A bar that fills continuously would say
+      {/* Five segments, one per step. A bar that fills continuously would say
           "68% done", which is a claim about effort this form cannot make — the
-          steps are not the same size. Segments say which of six, which is true. */}
+          steps are not the same size. Segments say which of five, which is true. */}
       <div className="flex shrink-0 gap-1 px-4 pt-2.5" aria-hidden>
-        {BOOKING_STEPS.map((s, i) => (
+        {WIZARD_STEPS.map((s, i) => (
           <span
             key={s.id}
             className={`h-0.5 flex-1 rounded-full transition-colors duration-300 ${
@@ -271,7 +281,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
               }}
               hidden={index !== 0}
             >
-              <Step step={BOOKING_STEPS[0]} of={TOTAL} />
+              <Step step={WIZARD_STEPS[0]} of={TOTAL} />
               {/* Three across and smaller, because this step owns the screen —
                   see the compact note in VehicleConfigurator. The search and the
                   marque chips inside it are what keep 64 machines short. */}
@@ -291,7 +301,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
               }}
               hidden={index !== 1}
             >
-              <Step step={BOOKING_STEPS[1]} of={TOTAL} />
+              <Step step={WIZARD_STEPS[1]} of={TOTAL} />
               {/* The machine, repeated. The step that named it is a screen back
                   by now, and picking a build for the wrong bike is the mistake
                   this costs nothing to prevent. */}
@@ -315,31 +325,15 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
               />
             </section>
 
-            {/* ── 03 · Price ────────────────────────────────────────────── */}
+            {/* ── 03 · Description, with the price at its foot ─────────── */}
             <section
               ref={el => {
                 stepRefs.current[2] = el;
               }}
               hidden={index !== 2}
-              className="flex flex-col items-center text-center"
             >
               <Step
-                step={BOOKING_STEPS[2]}
-                of={TOTAL}
-                className="self-start text-left"
-              />
-              <PriceBlock price={form.selectedPrice} />
-            </section>
-
-            {/* ── 04 · Description ──────────────────────────────────────── */}
-            <section
-              ref={el => {
-                stepRefs.current[3] = el;
-              }}
-              hidden={index !== 3}
-            >
-              <Step
-                step={BOOKING_STEPS[3]}
+                step={WIZARD_STEPS[2]}
                 of={TOTAL}
                 hint={machineNotesHint(form.isOther)}
               />
@@ -352,27 +346,30 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
                 />
               </div>
               <MachineNotes isOther={form.isOther} />
+              <div className="mt-6">
+                <PriceBlock price={form.selectedPrice} compact />
+              </div>
             </section>
 
-            {/* ── 05 · Usage ────────────────────────────────────────────── */}
+            {/* ── 04 · Usage ────────────────────────────────────────────── */}
+            <section
+              ref={el => {
+                stepRefs.current[3] = el;
+              }}
+              hidden={index !== 3}
+            >
+              <Step step={WIZARD_STEPS[3]} of={TOTAL} />
+              <UsageChips value={form.usage} onChange={form.setUsage} />
+            </section>
+
+            {/* ── 05 · Contact ──────────────────────────────────────────── */}
             <section
               ref={el => {
                 stepRefs.current[4] = el;
               }}
               hidden={index !== 4}
             >
-              <Step step={BOOKING_STEPS[4]} of={TOTAL} />
-              <UsageChips value={form.usage} onChange={form.setUsage} />
-            </section>
-
-            {/* ── 06 · Contact ──────────────────────────────────────────── */}
-            <section
-              ref={el => {
-                stepRefs.current[5] = el;
-              }}
-              hidden={index !== 5}
-            >
-              <Step step={BOOKING_STEPS[5]} of={TOTAL} />
+              <Step step={WIZARD_STEPS[4]} of={TOTAL} />
               <ContactFields />
 
               {/* The receipt. Five screens of decisions are not all visible any
@@ -489,7 +486,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
 
               Without them React sees the same component in the same slot and
               keeps the DOM node, changing only its attributes — so the tap that
-              moves from step 05 to 06 runs `next`, re-renders synchronously, and
+              moves from step 04 to 05 runs `next`, re-renders synchronously, and
               the browser then performs that same click's default action on an
               element which is, by the time it gets there, `type="submit"`.
               Arriving at the last step sent the form. With no name and no email
