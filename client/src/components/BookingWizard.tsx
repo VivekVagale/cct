@@ -10,7 +10,6 @@ import { vehicles } from "@/data/vehicles";
 import { Step } from "@/components/booking/Step";
 import { ChosenMachine } from "@/components/booking/ChosenMachine";
 import { BuildGrid } from "@/components/booking/BuildGrid";
-import { PriceBlock } from "@/components/booking/PriceBlock";
 import {
   MachineNotes,
   machineNotesHint,
@@ -20,10 +19,12 @@ import { ContactFields } from "@/components/booking/ContactFields";
 import { DesktopNudgeBar } from "@/components/booking/DesktopNudge";
 import { useBookingForm } from "@/components/booking/useBookingForm";
 
-/* The phone runs five steps, not six: the price has no screen of its own here
-   and sits under the description instead (see PriceBlock's `compact`). The
-   desktop keeps all six, so the phone renumbers rather than editing the shared
-   list — "Step 03 of 05" has to count the screens this visitor actually sees. */
+/* The phone runs five steps, not six: the price has no screen here. It is the
+   Estimate row in the receipt on the last step, and a whole screen — or a box
+   under the description — for a figure that is shown there anyway was one more
+   thing to press through. The desktop keeps all six, so the phone renumbers
+   rather than editing the shared list — "Step 03 of 05" has to count the
+   screens this visitor actually sees. */
 const WIZARD_STEPS = BOOKING_STEPS.filter(s => s.id !== "price").map((s, i) => ({
   ...s,
   number: String(i + 1).padStart(2, "0"),
@@ -325,7 +326,7 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
               />
             </section>
 
-            {/* ── 03 · Description, with the price at its foot ─────────── */}
+            {/* ── 03 · Description ──────────────────────────────────────── */}
             <section
               ref={el => {
                 stepRefs.current[2] = el;
@@ -346,9 +347,6 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
                 />
               </div>
               <MachineNotes isOther={form.isOther} />
-              <div className="mt-6">
-                <PriceBlock price={form.selectedPrice} compact />
-              </div>
             </section>
 
             {/* ── 04 · Usage ────────────────────────────────────────────── */}
@@ -402,6 +400,14 @@ export function BookingWizard({ onSeeTheWork }: { onSeeTheWork: () => void }) {
                   </div>
                 ))}
               </dl>
+              {/* The one sentence that came over from PriceBlock. This is the
+                  only place the phone shows a figure now, directly above Send,
+                  and a number there without it reads as a charge about to be
+                  taken. */}
+              <p className="mt-2 text-[11px] leading-relaxed text-[#B8C4D6]">
+                Nothing is charged here — we settle it with you on WhatsApp or
+                Instagram before work starts.
+              </p>
 
               {/* Proof, below the form and never above it.
                   Someone arriving cold from a bio link has no reason to trust a

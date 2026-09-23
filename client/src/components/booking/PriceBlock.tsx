@@ -15,46 +15,8 @@
  * It follows the build now instead of closing the form. The number is the thing
  * people came to find out, and it was at the bottom of the longest section on
  * the site, several screens below the choice it prices.
- *
- * `compact` is the phone's version. A whole wizard screen for one figure was a
- * step the visitor had to press through to learn a number, so on the phone the
- * price sits at the foot of the description step instead — a line of small
- * print under the field, not a headline. The two sentences stay: the figure
- * without "nothing is charged here" still reads as a charge.
  */
-export function PriceBlock({
-  price,
-  compact,
-}: {
-  price?: string;
-  compact?: boolean;
-}) {
-  if (compact) {
-    return (
-      <div className="rounded-sm border border-white/[0.1] bg-white/[0.02] p-4">
-        <div className="flex items-baseline justify-between gap-4">
-          <p className="text-[10px] tracking-[0.24em] uppercase text-[#B8C4D6]">
-            Cost estimate
-          </p>
-          <p
-            className={
-              price
-                ? "font-display text-2xl leading-none tracking-tight text-[#F5F7FA]"
-                : "font-display text-base text-[#F5F7FA]"
-            }
-          >
-            {price ?? "Quoted after we talk"}
-          </p>
-        </div>
-        <p className="mt-2 text-xs text-[#B8C4D6] leading-relaxed">
-          Nothing is charged here — we settle it with you on WhatsApp or
-          Instagram before work starts. Every job goes out as a collab post on
-          your handle.
-        </p>
-      </div>
-    );
-  }
-
+export function PriceBlock({ price }: { price?: string }) {
   return (
     <div className="max-w-md">
       {/* Labelled as an estimate, in the label rather than in a footnote. The

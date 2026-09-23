@@ -8,6 +8,41 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Cold Chain Theory — Cinematic Automotive CGI</title>
     <meta name="description" content="Cold Chain Theory is a premium automotive CGI studio turning machines into cinema." />
+    <!-- The link preview. Until these existed a shared link got no card on
+         Instagram at all, while WhatsApp showed one - WhatsApp falls back to
+         the apple-touch-icon below when a page has no og:image; Meta's crawler
+         (Instagram, Facebook, Messenger) does not fall back to anything and
+         drops the image.
+
+         Static tags in static HTML on purpose: no crawler runs the app, so a
+         tag written from React is a tag nobody reads.
+
+         The image is the studio's voxel portrait, whole - fitted to 1200x630
+         on its own black ground rather than cropped, with the hoodie's cut
+         edge feathered into the padding. Centred, so WhatsApp's square crop of
+         the middle still holds the whole figure. Kept under ~300KB, past which
+         WhatsApp silently drops the thumbnail.
+
+         URLs are absolute because Meta ignores relative ones, and the domain
+         is written out because this file cannot read it from anywhere. If the
+         site moves, these change with it. Meta caches a preview per URL: after
+         changing the image, rename the file (the -v1) and re-scrape in the
+         Sharing Debugger, or the old card keeps showing. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Cold Chain Theory" />
+    <meta property="og:url" content="https://coldchaintheory.vercel.app/" />
+    <meta property="og:title" content="Cold Chain Theory — Cinematic Automotive CGI" />
+    <meta property="og:description" content="Cold Chain Theory is a premium automotive CGI studio turning machines into cinema." />
+    <meta property="og:image" content="https://coldchaintheory.vercel.app/og-image-v1.jpg" />
+    <meta property="og:image:secure_url" content="https://coldchaintheory.vercel.app/og-image-v1.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A voxel rider in a mirrored-visor helmet, blue hoodie and glowing chain." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cold Chain Theory — Cinematic Automotive CGI" />
+    <meta name="twitter:description" content="Cold Chain Theory is a premium automotive CGI studio turning machines into cinema." />
+    <meta name="twitter:image" content="https://coldchaintheory.vercel.app/og-image-v1.jpg" />
     <!-- The mascot's helmet, cropped square out of the studio's own render.
          Full-bleed, no rounded plate: at 16px a corner radius eats pixels the
          mark needs, and the browser rounds it itself where it wants to.
