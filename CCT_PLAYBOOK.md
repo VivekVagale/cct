@@ -163,9 +163,10 @@ Forwarding those touches to the scroller by hand was tried first and was worse �
 a drag applied frame by frame cannot match a native scroll running directly above
 it. Don't retry it.
 
-**Still a dead zone:** the top ~159px — header, step text, pinned search. Same
-technique would work, but forwarding drags off a text input fights caret and
-selection.
+**Still a dead zone, and staying one:** the top ~159px — header, step text,
+pinned search. Same technique would work, but forwarding drags off a text input
+fights caret and selection. Nobody scrolls from there in practice, so it is
+accepted as-is. Don't fix it.
 
 ---
 
@@ -218,7 +219,42 @@ on a clean tree: `Lanyard.tsx(347)` and `const.ts(1)`.
 
 - Grid cards render without images at phone width for several machines. Noticed,
   not investigated, not caused by any change here.
-- `82bbeaf` (keyboard offsetTop) is reasoned from the `visualViewport` API, not
-  measured — no keyboard can be opened in the test pane. Needs one check on a
-  real phone.
-- The header's dead scroll zone, above.
+
+### To do next
+
+1. **Lose the Manus build plugins.** Leftovers from the Manus builder, doing
+   nothing for the live site:
+   - `vitePluginManusRuntime()` inlines a **~367 KB** `<script id="manus-runtime">`
+     into `dist/public/index.html` (built HTML is 371 KB, ~107 KB gzip). Inline
+     means uncacheable — every visitor pays for it on every load, before the app
+     script.
+   - `jsxLocPlugin()` stamps ~900 `data-loc` attributes into the production JS.
+   - `vitePluginStorageProxy()` (`/manus-storage` middleware) and the
+     `.manus*.computer` entries in `server.allowedHosts` go with them.
+   - Remove all of it from `vite.config.ts`, then
+     `pnpm remove vite-plugin-manus-runtime @builder.io/vite-plugin-jsx-loc`.
+   - Check: `grep -c manus-runtime dist/public/index.html` → 0, and
+     `grep -o data-loc dist/public/assets/*.js | wc -l` → 0. Built index.html
+     should drop to a few KB. Nothing visible should change.
+   - While in `index.html`: the analytics tag is
+     `src="%VITE_ANALYTICS_ENDPOINT%/umami"`. If that env var isn't set on
+     Vercel it ships literally and 404s. Either set it or remove the tag.
+
+2. **Add Open Graph / Twitter tags** to `client/index.html`. There are none, so
+   links shared on Instagram / WhatsApp show no preview. Add `og:title`,
+   `og:description`, `og:type` (website), `og:url`, `og:image` (+ width/height,
+   `og:image:alt`), `og:site_name`, and `twitter:card` = `summary_large_image`.
+   The image must be an **absolute URL** to a 1200×630 JPG/PNG of a real studio
+   render in `client/public/` (e.g. `/og.jpg`) — not webp (WhatsApp is
+   unreliable with it), keep it under ~300 KB. Reuse the existing title and
+   description text. Verify with a link-preview debugger after deploy.
+
+### Still open
+
+- Grid cards render without images at phone width for several machines. Noticed,
+  not investigated, not caused by any change here.
+
+### Settled
+
+- `82bbeaf` (keyboard offsetTop) — checked on a real phone, works.
+- The header's dead scroll zone (§4) — accepted, won't fix.
