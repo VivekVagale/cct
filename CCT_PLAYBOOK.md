@@ -10,6 +10,8 @@ Routes lock at first paint.     Resizing never switches desktop <-> phone. Reloa
 CARD_FLIGHT = false             ON PURPOSE. On = the 140ms marque lag returns.
 TILT_ENABLED = true             Card tilt. Turn off if a weak machine struggles.
 Beam = 3 places only.           Search bar, Start a Project, marque chips. No cards.
+Accent is violet, not blue.     #7A44E0 / #A274F5 / #C079F2. Marque chips too.
+Collab post is free, default.   Every job. Reverses the old "never say free" rule.
 Phone shell is a fixed document. Only the inner scroller scrolls.
 Test pane is often hidden.      rAF and long-task readings are then worthless.
 Expected typecheck errors:      Lanyard.tsx(347), const.ts(1). Pre-existing.
@@ -53,8 +55,9 @@ Consequence for testing: **resizing the window does not switch routes.** Reload.
 
 ## 2. The performance flags
 
-Two constants turn expensive behaviour on and off. Both are off, both cost
-something visual, and both were measured rather than guessed.
+Two constants turn expensive behaviour on and off. `CARD_FLIGHT` is off and
+`TILT_ENABLED` is on; turning either off costs something visual, and both were
+measured rather than guessed.
 
 | Flag | File | State | What it buys back |
 |---|---|---|---|
