@@ -49,55 +49,29 @@ export interface AudienceTotal extends AudienceShare {
   percentOfTotal: number;
 }
 
-/** The window these reels were exported over. Printed on the page. */
+/** The window the follower export covers. Printed on the page. */
 export const audienceWindow = {
-  label: "21 reels · measured to 3 Aug 2026, latest estimated",
-  reelCount: 21,
-  /** Share unaccounted for, below every reel's visible top five. */
-  untrackedShare: 2.1,
+  label: "Followers by country · 27 Jun – 25 Sep 2026",
+  /** Share below Instagram's visible top five: 100 minus the five below. */
+  untrackedShare: 4.5,
 };
 
 /**
- * MEASURED to 3 August 2026, then MODELLED forward for one reel.
+ * Instagram's "Follower insights" export, 27 Jun – 25 Sep 2026: the account's
+ * 4,002 followers by country, top five only, exactly as printed.
  *
- * The transcribed export covers twenty reels and ends on 3 August. The GT 650
- * reel that followed it did 8.1M views — comparable to everything before it put
- * together — and Instagram's country panel for it has not been transcribed, so
- * its split is not known.
- *
- * Rather than leave the map a year out of date or invent a split silently, the
- * numbers below are the twenty-reel means combined with one stated assumption,
- * weighted by views:
- *
- *   - the twenty-reel corpus is treated as 9.9M views, the account total to 3 Aug
- *   - the GT 650 is 8.1M views, and is assumed to have reached 85% India against
- *     the corpus's 95.7% — a reel that travels four times further than the
- *     studio's usual does so by leaving its home audience
- *   - the remainder is distributed pro rata across the countries already ranked,
- *     which assumes the shape of the international audience is unchanged and only
- *     its size moved
- *
- * India therefore falls from 95.66 to 90.86 and every other country rises by the
- * same factor. **This is a model, not a measurement**, and the page says so under
- * the map. Replace it the moment the GT 650's own panel is transcribed — the
- * assumption above is the only thing holding it up.
+ * Replaced the reel-views model on 26 Sep 2026 at the studio's request — the
+ * map now shows who follows, not where reels were watched. These are real
+ * shares of one population, not means across reels, so `percentOfTotal` below
+ * is the printed figure itself and is not renormalised: the five reach 95.5%
+ * and the remaining 4.5% is spread below the top five, unshown by Instagram.
  */
 export const audienceShares: AudienceShare[] = [
-  { country: "India", share: 90.86, reels: 21 },
-  { country: "Brazil", share: 2.49, reels: 16 },
-  { country: "Nepal", share: 1.91, reels: 21 },
-  { country: "United Arab Emirates", share: 0.68, reels: 13 },
-  { country: "Bangladesh", share: 0.4, reels: 10 },
-  { country: "Colombia", share: 0.34, reels: 4 },
-  { country: "Saudi Arabia", share: 0.31, reels: 6 },
-  { country: "United States of America", share: 0.25, reels: 4 },
-  { country: "Pakistan", share: 0.22, reels: 7 },
-  { country: "Argentina", share: 0.15, reels: 2 },
-  { country: "Indonesia", share: 0.15, reels: 3 },
-  { country: "Sri Lanka", share: 0.09, reels: 2 },
-  { country: "Morocco", share: 0.06, reels: 2 },
-  { country: "Kuwait", share: 0.03, reels: 2 },
-  { country: "Serbia", share: 0.03, reels: 2 },
+  { country: "India", share: 92.8, reels: 0 },
+  { country: "Brazil", share: 1.4, reels: 0 },
+  { country: "Colombia", share: 0.5, reels: 0 },
+  { country: "United Arab Emirates", share: 0.4, reels: 0 },
+  { country: "Morocco", share: 0.4, reels: 0 },
 ];
 
 /** What the transcribed averages add up to before they are normalised. */
@@ -112,7 +86,8 @@ export const trackedShareTotal = audienceShares.reduce(
  */
 export const audienceTotals: AudienceTotal[] = audienceShares.map((a) => ({
   ...a,
-  percentOfTotal: (a.share / trackedShareTotal) * 100,
+  /* Already a share of all followers; see the note above audienceShares. */
+  percentOfTotal: a.share,
 }));
 
 const byCountry = new Map(audienceTotals.map((a) => [a.country, a]));

@@ -8,14 +8,6 @@ import { ReelsBarChart, ReelsChartLegend } from "@/components/ReelsBarChart";
 import { AudienceMap } from "@/components/AudienceMap";
 import { headline, reachStats, reachWindow, topReels } from "@/data/reach";
 import { audienceTotals, audienceWindow } from "@/data/audience";
-import {
-  coreAgeShare,
-  followerAges,
-  followerCities,
-  followerCountries,
-  followerGender,
-  followerWindow,
-} from "@/data/followers";
 import { FoldHeading } from "@/components/FoldHeading";
 import { useScene } from "@/components/SceneDeck";
 
@@ -36,8 +28,6 @@ const WORDS = [
   "Ten",
 ];
 const spell = (n: number) => WORDS[n] ?? String(n);
-
-const maxAgeShare = Math.max(...followerAges.map((a) => a.share));
 
 const reelCount = spell(topReels.length).toLowerCase();
 const commissionedCount = spell(topReels.filter((reel) => reel.client).length);
@@ -305,94 +295,10 @@ export function About() {
             {/* Said out loud rather than left for someone to notice the
                 column does not reach 100. */}
             <p className="mt-6 text-xs sm:text-sm text-[#B8C4D6]/70 leading-relaxed">
-              Share of all tracked views across {audienceWindow.reelCount}{" "}
-              reels, measured to 3 August 2026. The latest reel’s country split
-              is estimated rather than measured. Instagram reports only each
-              reel’s top five countries, so roughly{" "}
-              {audienceWindow.untrackedShare}% of views sit below what it will
-              show and are not counted here.
-            </p>
-          </div>
-        </div>
-
-        {/* Who follows, as opposed to who watched. A different export from the
-            map above, so it gets its own heading and its own dates rather than
-            being read as the same audience. */}
-        <div className="mt-16 sm:mt-24 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 border-t border-white/[0.08] pt-12 sm:pt-16">
-          <div className="lg:col-span-4">
-            <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4">
-              {followerWindow.label}
-            </p>
-            <h3 className="font-display text-3xl sm:text-6xl text-[#F5F7FA] leading-[1.0] mb-8">
-              <FoldHeading text="Who follows." />
-            </h3>
-            <dl className="flex flex-wrap gap-x-10 gap-y-6">
-              <div>
-                <dd className="font-display text-4xl xl:text-5xl text-[#F5F7FA] leading-none mb-2 whitespace-nowrap [font-variant-numeric:tabular-nums]">
-                  {followerGender.men}%
-                </dd>
-                <dt className="text-[10px] sm:text-xs tracking-[0.18em] uppercase text-[#B8C4D6]">
-                  Men
-                </dt>
-              </div>
-              <div>
-                <dd className="font-display text-4xl xl:text-5xl text-[#F5F7FA] leading-none mb-2 whitespace-nowrap [font-variant-numeric:tabular-nums]">
-                  {coreAgeShare.toFixed(1)}%
-                </dd>
-                <dt className="text-[10px] sm:text-xs tracking-[0.18em] uppercase text-[#B8C4D6]">
-                  Aged 18–34
-                </dt>
-              </div>
-            </dl>
-          </div>
-
-          {/* Bars scaled to the largest bucket, not to 100, so 40% reads as a
-              full bar instead of a short one in an empty track. */}
-          <div className="lg:col-span-4 flex flex-col justify-end">
-            <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4">
-              Age
-            </p>
-            <ul className="space-y-3">
-              {followerAges.map((a) => (
-                <li key={a.range} className="grid grid-cols-[3.5rem_1fr_3rem] items-center gap-3">
-                  <span className="text-sm text-[#F5F7FA] [font-variant-numeric:tabular-nums]">
-                    {a.range}
-                  </span>
-                  <span className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                    <span
-                      className="block h-full rounded-full bg-[var(--brand)]"
-                      style={{ width: `${(a.share / maxAgeShare) * 100}%` }}
-                    />
-                  </span>
-                  <span className="text-sm text-[#B8C4D6] text-right [font-variant-numeric:tabular-nums]">
-                    {a.share}%
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-4 flex flex-col justify-end">
-            <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#B8C4D6] mb-4">
-              Top cities
-            </p>
-            <ul className="divide-y divide-white/[0.08] border-t border-white/[0.08]">
-              {followerCities.map((c) => (
-                <li
-                  key={c.city}
-                  className="py-3 flex items-baseline justify-between gap-4"
-                >
-                  <span className="text-sm text-[#F5F7FA]">{c.city}</span>
-                  <span className="shrink-0 text-sm text-[#B8C4D6] [font-variant-numeric:tabular-nums]">
-                    {c.share.toFixed(1)}%
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 text-xs sm:text-sm text-[#B8C4D6]/70 leading-relaxed">
-              {followerWindow.total.toLocaleString("en-IN")} followers,{" "}
-              {followerCountries[0].share}% of them in India. Instagram shows
-              only the top five cities.
+              Share of the account’s followers, as Instagram reported it for
+              27 June – 25 September 2026. It shows only the top five
+              countries, so the remaining {audienceWindow.untrackedShare}% of
+              followers are not placed on the map.
             </p>
           </div>
         </div>

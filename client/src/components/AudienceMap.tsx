@@ -157,7 +157,7 @@ export function AudienceMap({
       <ChoroplethTooltip
         getFeatureValue={(feature) => getShare(feature)}
         formatValue={(value) => `${value.toFixed(2)}%`}
-        valueLabel="Share of total views"
+        valueLabel="Share of followers"
       />
 
       <ListHoverBridge country={hoveredCountry} />
