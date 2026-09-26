@@ -298,7 +298,7 @@ export function About() {
               Share of the account’s followers, as Instagram reported it for
               January – 25 September 2026. It shows only the top five
               countries, so the remaining {audienceWindow.untrackedShare}% of
-              followers is spread across other countries as an estimate.
+              followers are not placed on the map.
             </p>
           </div>
         </div>
