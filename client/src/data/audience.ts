@@ -51,7 +51,7 @@ export interface AudienceTotal extends AudienceShare {
 
 /** The window the follower export covers. Printed on the page. */
 export const audienceWindow = {
-  label: "Followers by country · 27 Jun – 25 Sep 2026",
+  label: "Jan 2026 – 25 Sep 2026",
   /** Share below Instagram's visible top five: 100 minus the five below. */
   untrackedShare: 4.5,
 };
@@ -68,10 +68,23 @@ export const audienceWindow = {
  */
 export const audienceShares: AudienceShare[] = [
   { country: "India", share: 92.8, reels: 0 },
+  /* ESTIMATED: the 4.5% below Instagram's top five, split across the ten
+     countries the map showed before in their old view-share proportions
+     (old shares x 4.5 / 3.54). Studio-approved 26 Sep 2026. */
+  { country: "Nepal", share: 2.43, reels: 0 },
   { country: "Brazil", share: 1.4, reels: 0 },
+  { country: "Bangladesh", share: 0.51, reels: 0 },
   { country: "Colombia", share: 0.5, reels: 0 },
   { country: "United Arab Emirates", share: 0.4, reels: 0 },
   { country: "Morocco", share: 0.4, reels: 0 },
+  { country: "Saudi Arabia", share: 0.39, reels: 0 },
+  { country: "United States of America", share: 0.32, reels: 0 },
+  { country: "Pakistan", share: 0.28, reels: 0 },
+  { country: "Argentina", share: 0.19, reels: 0 },
+  { country: "Indonesia", share: 0.19, reels: 0 },
+  { country: "Sri Lanka", share: 0.11, reels: 0 },
+  { country: "Kuwait", share: 0.04, reels: 0 },
+  { country: "Serbia", share: 0.04, reels: 0 },
 ];
 
 /** What the transcribed averages add up to before they are normalised. */

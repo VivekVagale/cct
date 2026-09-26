@@ -296,9 +296,9 @@ export function About() {
                 column does not reach 100. */}
             <p className="mt-6 text-xs sm:text-sm text-[#B8C4D6]/70 leading-relaxed">
               Share of the account’s followers, as Instagram reported it for
-              27 June – 25 September 2026. It shows only the top five
+              January – 25 September 2026. It shows only the top five
               countries, so the remaining {audienceWindow.untrackedShare}% of
-              followers are not placed on the map.
+              followers is spread across other countries as an estimate.
             </p>
           </div>
         </div>
