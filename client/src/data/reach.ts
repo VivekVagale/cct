@@ -61,50 +61,53 @@ export interface ReelStat {
  */
 export const reachWindow = {
   label: "Jan 2026 – Sep 2026",
-  capturedAt: "2026-09-12",
+  capturedAt: "2026-09-26",
 };
 
-/** The ratio the section leads on — roughly 3,900 views for every follower. */
+/** The ratio the section leads on — roughly 4,000 views for every follower. */
 export const headline = {
-  /* 4,002 on the 25 Sep follower-insights export (see data/followers.ts),
-     up from 3.9K on 12 Sep and 3.6K before that. */
+  /* 4,002 on the 25 Sep follower-insights export, up from 3.9K on 12 Sep and
+     3.6K before that. */
   followers: "4K",
-  /* 15.4M: the 14.3M of the earlier account export plus 1.13M across the six
-     reels added below. Still includes the GT 650's 8.1M, which remains more
-     than half of everything the account has done. */
-  views: "15.4M",
+  /* 16M: the 14.3M of the earlier account export plus 1.127M across the six
+     reels added 12 Sep and 541K across the three added 26 Sep (15.968M).
+     Still includes the GT 650's 8.1M, about half of everything the account
+     has done. */
+  views: "16M",
 };
 
 /*
  * Read the note above `newReels` before refreshing these.
  *
  * These are a sum of two different kinds of measurement: an account-level
- * export covering Jan–Apr, plus six individually transcribed reels from
+ * export covering Jan–Apr, plus nine individually transcribed reels from
  * Aug–Sep. They are floors, not totals — anything posted between those two
  * periods is not counted here, because no export for it has been supplied.
  */
 export const reachStats: ReachStat[] = [
-  /* 1.523M + 93.8K across the six. */
-  { label: "Likes", value: "1.617M", amount: 1.617, suffix: "M" },
+  /* 1.523M + 93.8K across the first six + 49.1K across the next three. */
+  { label: "Likes", value: "1.666M", amount: 1.666, suffix: "M" },
   /* Down from the 138K previously on this page. The studio's current export
-     says 100K; where they disagree the newer figure wins. Plus 11.6K. */
-  { label: "Shares", value: "112K", amount: 112, suffix: "K" },
-  /* 52K + 5.3K. */
-  { label: "Saves", value: "57K", amount: 57, suffix: "K" },
-  /* 21K + 3.5K = 24.5K, which rounds down, not up. */
-  { label: "Reposts", value: "24K", amount: 24, suffix: "K" },
-  { label: "Reels", value: "43", amount: 43 },
+     says 100K; where they disagree the newer figure wins. Plus 11.6K, plus
+     4.1K. */
+  { label: "Shares", value: "116K", amount: 116, suffix: "K" },
+  /* 52K + 5.3K + 2.1K. */
+  { label: "Saves", value: "59K", amount: 59, suffix: "K" },
+  /* 21K + 3.5K + 1.7K = 26.2K. */
+  { label: "Reposts", value: "26K", amount: 26, suffix: "K" },
+  { label: "Reels", value: "46", amount: 46 },
 ];
 
 /**
- * The six reels added on 12 Sep 2026, transcribed from their insight exports.
+ * Reels added one at a time, transcribed from their insight exports: six on
+ * 12 Sep 2026, three more on 26 Sep 2026.
  *
  * Kept as data rather than folded silently into the totals above, so the next
  * person to refresh this file can see exactly what was added and to what.
  *
  * **Not in `topReels`, deliberately.** That list is what the chart plots, and
  * the chart is the studio's 1M+ work — the smallest column on it is 1M. The
- * best of these six is 357K, which would sit at roughly a third of the shortest
+ * best of these nine is 357K, which would sit at roughly a third of the shortest
  * existing bar and make the argument look weaker than it is. They count toward
  * the totals and stay off the graph.
  *
@@ -118,6 +121,10 @@ export const newReels = [
   { postedAt: "2026-08-30", title: "Bajaj Pulsar N 160", views: 142_000, likes: "10K", comments: 910, reposts: 388, shares: "1.1K", saves: "675" },
   { postedAt: "2026-09-01", title: "COOKED? · NS 400Z", views: 239_000, likes: "22K", comments: 229, reposts: 1_000, shares: "3.7K", saves: "1.5K" },
   { postedAt: "2026-09-03", title: "Duke 390", views: 15_000, likes: "1K", comments: 37, reposts: 28, shares: "136", saves: "41" },
+  /* Added 26 Sep 2026, exports downloaded that day. */
+  { postedAt: "2026-09-08", title: "Rate its beauty · Free Fall", views: 214_000, likes: "19K", comments: 420, reposts: 563, shares: "1.3K", saves: "968" },
+  { postedAt: "2026-09-14", title: "1/1 KTM RC390 · Free Fall", views: 281_000, likes: "27K", comments: 432, reposts: 1_100, shares: "2.6K", saves: "1K" },
+  { postedAt: "2026-09-21", title: "Harrier + Interceptor · Free Fall", views: 46_000, likes: "3.1K", comments: 77, reposts: 57, shares: "166", saves: "105" },
 ] as const;
 
 /**
