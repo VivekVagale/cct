@@ -66,8 +66,9 @@ export const reachWindow = {
 
 /** The ratio the section leads on — roughly 3,900 views for every follower. */
 export const headline = {
-  /* 3.9K on the 12 Sep exports, up from the 3.6K this said before. */
-  followers: "3.9K",
+  /* 4,002 on the 25 Sep follower-insights export (see data/followers.ts),
+     up from 3.9K on 12 Sep and 3.6K before that. */
+  followers: "4K",
   /* 15.4M: the 14.3M of the earlier account export plus 1.13M across the six
      reels added below. Still includes the GT 650's 8.1M, which remains more
      than half of everything the account has done. */
